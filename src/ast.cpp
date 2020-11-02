@@ -41,4 +41,8 @@ namespace mlang {
         }
         return last;
     }
+
+    llvm::Value *ExpressionStatement::codeGen(CodeGenContext &context) {
+        return expression->codeGen(context);
+    }
 }

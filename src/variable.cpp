@@ -15,5 +15,4 @@ namespace mlang {
         // TODO implement code generation
         return val;
     }
-
 }

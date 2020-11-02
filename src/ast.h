@@ -154,7 +154,12 @@ namespace mlang {
      */
     class Identifier : public Expression {
     public:
+        Identifier(const std::string &structName, const std::string &name, YYLTYPE location)
+                : name(name), structName(structName), location(location) {}
+
         Identifier(const std::string &name, YYLTYPE location) : name(name), location(location) {}
+
+        Identifier(const Identifier &id) : name(id.name), structName(id.structName), location(id.location) {}
 
         ~Identifier() override = default;
 
@@ -197,8 +202,25 @@ namespace mlang {
         void accept(Visitor &v) override { v.visitBlock(this); }
     };
 
+    /**
+     * Expression statement ast node representation
+     */
     class ExpressionStatement : public Statement {
+    public:
+        explicit ExpressionStatement(Expression *expression) : expression(expression) {}
 
+        ~ExpressionStatement() override { delete expression; }
+
+        llvm::Value *codeGen(CodeGenContext &context) override;
+
+        NodeType getType() override { return NodeType::EXPRESSION; }
+
+        std::string toString() override { return "expression statement"; }
+
+        void accept(Visitor &v) override { v.visitExpressionStatement(this); }
+
+    private:
+        Expression *expression{nullptr};
     };
 }
 
