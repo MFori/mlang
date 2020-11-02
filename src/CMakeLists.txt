@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.17)
+cmake_policy(SET CMP0091 NEW)
 project(mlang)
 
 macro(replace_flags flag newflag)
@@ -22,6 +23,8 @@ set(LLVM_ROOT "C:/Program Files/LLVM/11.0.0/llvm/build")
 set(LLVM_DIR "C:/Program Files/LLVM/11.0.0/llvm/build")
 set(LLVM_BUILD_TYPE Release)
 set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_CXX_FLAGS_RELEASE "/MT")
+set(CMAKE_C_FLAGS_RELEASE "/MT")
 find_package(LLVM PATHS "${LLVM_ROOT}/lib/cmake/llvm" "$ENV{ProgramFiles}/lib/cmake/llvm")
 
 if (LLVM_FOUND)
@@ -40,6 +43,9 @@ set(SOURCES_COMMON
         codegen.cpp
         ast.cpp
         variable.cpp
+        binaryop.cpp
+        return.cpp
+        assignment.cpp
         lexer.l
         parser.y
         )
@@ -49,6 +55,9 @@ set(HEADER_COMMON
         ast.h
         visitor.h
         variable.h
+        binaryop.h
+        return.h
+        assignment.h
         )
 
 if (MSVC)
@@ -81,6 +90,18 @@ elseif (MSVC)
     string(REPLACE "-D" ";" LLVM_DEFINITIONS ${LLVM_DEFINITIONS})
 endif ()
 
+set(CompilerFlags
+        CMAKE_CXX_FLAGS
+        CMAKE_CXX_FLAGS_DEBUG
+        CMAKE_CXX_FLAGS_RELEASE
+        CMAKE_C_FLAGS
+        CMAKE_C_FLAGS_DEBUG
+        CMAKE_C_FLAGS_RELEASE
+        )
+foreach(CompilerFlag ${CompilerFlags})
+    string(REPLACE "/MD" "/MT" ${CompilerFlag} "${${CompilerFlag}}")
+endforeach()
+
 target_compile_definitions(mlang PRIVATE $<$<CONFIG:Debug>:_DEBUG>)
 target_compile_definitions(mlang PRIVATE ${LLVM_DEFINITIONS})
 target_compile_definitions(mlang PRIVATE LLVM_NO_DUMP)
@@ -102,3 +123,7 @@ target_include_directories(mlang PRIVATE ${mlang_SOURCE_DIR} ${LLVM_INCLUDE_DIRS
 target_include_directories(mlang PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 target_compile_features(mlang PRIVATE cxx_std_17)
 target_link_libraries(mlang ${REQ_LLVM_LIBRARIES})
+
+
+set_property(TARGET mlang PROPERTY
+        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")

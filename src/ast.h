@@ -7,9 +7,14 @@
 #ifndef MLANG_AST_H
 #define MLANG_AST_H
 
+#pragma warning(push, 0)
+
 #include <llvm/IR/Value.h>
 #include <llvm/IR/Type.h>
 #include <llvm/IR/DerivedTypes.h>
+
+#pragma warning(pop)
+
 #include "visitor.h"
 
 /**
@@ -61,7 +66,7 @@ namespace mlang {
 
     };
 
-    class Statement : public Node {
+    class Statement : public Expression {
 
     };
 
