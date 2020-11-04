@@ -186,7 +186,6 @@ expr : ident '=' expr { $$ = new mlang::Assignment($<ident>1, $3, @$); }
      ;
 
 ident : TIDENTIFIER { $$ = new mlang::Identifier(*$1, @1); delete $1; }
-      | TIDENTIFIER '.' TIDENTIFIER { $$ = new mlang::Identifier(*$1,*$3, @$); delete $1; delete $3;}
       ;
 
 literals : TINTEGER { $$ = new mlang::Integer($1); }

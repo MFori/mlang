@@ -180,12 +180,9 @@ namespace mlang {
      */
     class Identifier : public Expression {
     public:
-        Identifier(const std::string &structName, const std::string &name, YYLTYPE location)
-                : name(name), structName(structName), location(location) {}
-
         Identifier(const std::string &name, YYLTYPE location) : name(name), location(location) {}
 
-        Identifier(const Identifier &id) : name(id.name), structName(id.structName), location(id.location) {}
+        Identifier(const Identifier &id) : name(id.name), location(id.location) {}
 
         ~Identifier() override = default;
 
@@ -199,11 +196,8 @@ namespace mlang {
 
         std::string getName() const { return name; }
 
-        std::string getStructName() const { return structName; }
-
     private:
         std::string name;
-        std::string structName;
         YYLTYPE location;
     };
 

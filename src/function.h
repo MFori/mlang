@@ -37,7 +37,6 @@ namespace mlang {
         ExpressionList *getArguments() { return args; }
 
     private:
-        std::string getTypeNameOfFirstArg(CodeGenContext& context);
 
         Identifier *id{nullptr};
         ExpressionList *args{nullptr};

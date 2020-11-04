@@ -6,11 +6,21 @@
  */
 #include <iostream>
 #include "llvm/ExecutionEngine/MCJIT.h"
+#include <llvm-c/Core.h>
 
 #include "codegen.h"
 #include "buildins.h"
 
+#define MAKE_LLVM_EXTERNAL_NAME(a) #a
+
 namespace mlang {
+
+    CodeGenContext::CodeGenContext(std::ostream &outs) : outs(outs) {
+        llvm::InitializeNativeTarget();
+        llvm::InitializeNativeTargetAsmParser();
+        llvm::InitializeNativeTargetAsmPrinter();
+        module = new llvm::Module("mlang", llvmContext);
+    }
 
     void CodeGenContext::newScope(llvm::BasicBlock *bb, ScopeType sc) {
         scopeType = sc;
@@ -27,11 +37,23 @@ namespace mlang {
         scopeType = ScopeType::CODE_BLOCK;
     }
 
-    CodeGenContext::CodeGenContext(std::ostream &outs) : outs(outs) {
-        llvm::InitializeNativeTarget();
-        llvm::InitializeNativeTargetAsmParser();
-        llvm::InitializeNativeTargetAsmPrinter();
-        module = new llvm::Module("mlang", llvmContext);
+    llvm::AllocaInst *CodeGenContext::findVariable(const std::string& name) {
+        if (scopeType == ScopeType::FUNCTION_DECL) {
+            auto &names = locals();
+            if (names.find(name) != names.end()) {
+                return names[name];
+            }
+            return nullptr;
+        }
+
+        for (auto &cb : codeBlocks) {
+            auto &names = cb->getValueNames();
+            if (names.find(name) != names.end()) {
+                return names[name];
+            }
+        }
+
+        return nullptr;
     }
 
     bool CodeGenContext::preProcessing(Block &root) {
@@ -39,8 +61,6 @@ namespace mlang {
         // TODO
         return true;
     }
-
-#define MAKE_LLVM_EXTERNAL_NAME(a) #a
 
     void CodeGenContext::setUpBuildIns() {
         intType = llvm::Type::getInt64Ty(getGlobalContext());
@@ -50,7 +70,8 @@ namespace mlang {
 
         std::vector<llvm::Type *> argTypesInt8Ptr(1, llvm::Type::getInt8PtrTy(getGlobalContext()));
         ft = llvm::FunctionType::get(llvm::Type::getVoidTy(getGlobalContext()), argTypesInt8Ptr, true);
-        llvm::Function *f = llvm::Function::Create(ft, llvm::Function::ExternalLinkage, MAKE_LLVM_EXTERNAL_NAME(print), getModule());
+        llvm::Function *f = llvm::Function::Create(ft, llvm::Function::ExternalLinkage, MAKE_LLVM_EXTERNAL_NAME(print),
+                                                   getModule());
         llvm::Function::arg_iterator i = f->arg_begin();
         if (i != f->arg_end()) {
             i->setName("format_str");
@@ -107,6 +128,9 @@ namespace mlang {
         ee->finalizeObject();
         std::vector<llvm::GenericValue> noargs;
         llvm::GenericValue v = ee->runFunction(mainFunction, noargs);
+
+        //printf("%s", LLVMPrintModuleToString((LLVMModuleRef)module));
+
         delete ee;
 
         return v;

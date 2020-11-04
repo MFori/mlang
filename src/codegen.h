@@ -89,6 +89,10 @@ namespace mlang {
 
         llvm::BasicBlock *currentBlock() { return codeBlocks.front()->currentBlock(); }
 
+        llvm::AllocaInst *findVariable(const std::string& name);
+
+        ValueNames &locals() { return codeBlocks.front()->getValueNames(); }
+
         void optimize();
 
         bool generateCode(class Block &root);
