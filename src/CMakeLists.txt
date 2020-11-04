@@ -46,6 +46,8 @@ set(SOURCES_COMMON
         binaryop.cpp
         return.cpp
         assignment.cpp
+        buildins.cpp
+        function.cpp
         lexer.l
         parser.y
         )
@@ -58,6 +60,8 @@ set(HEADER_COMMON
         binaryop.h
         return.h
         assignment.h
+        buildins.h
+        function.h
         )
 
 if (MSVC)

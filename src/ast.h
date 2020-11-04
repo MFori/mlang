@@ -15,6 +15,8 @@
 
 #pragma warning(pop)
 
+#include <iostream>
+
 #include "visitor.h"
 
 /**
@@ -60,10 +62,29 @@ namespace mlang {
         virtual void accept(Visitor &v) = 0;
 
         virtual std::string toString() { return "node"; }
+
+        static void printError(YYLTYPE location, const std::string &error) {
+            std::cerr
+                    << location.file_name
+                    << ": line "
+                    << location.first_line << " column "
+                    << location.first_column << "-"
+                    << location.last_column << ":"
+                    << error << std::endl;
+        }
+
+        static void printError(const std::string &error) {
+            std::cerr << error << std::endl;
+        }
     };
 
     class Expression : public Node {
+    public:
+        ~Expression() override = default;
 
+        std::string toString() override { return "expression"; }
+
+        void accept(Visitor &v) override { v.visitExpression(this); }
     };
 
     class Statement : public Expression {
@@ -175,6 +196,10 @@ namespace mlang {
         std::string toString() override { return "identifier"; }
 
         void accept(Visitor &v) override { v.visitIdentifier(this); }
+
+        std::string getName() const { return name; }
+
+        std::string getStructName() const { return structName; }
 
     private:
         std::string name;

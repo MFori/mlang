@@ -21,6 +21,7 @@ namespace mlang {
     class BinaryOp;
     class Return;
     class Assignment;
+    class FunctionCall;
 
     class Visitor {
     public:
@@ -49,6 +50,8 @@ namespace mlang {
         virtual void visitReturnStatement(Return* e) = 0;
 
         virtual void visitAssignment(Assignment* e) = 0;
+
+        virtual void visitFunctionCall(FunctionCall* e) = 0;
     };
 
 }
