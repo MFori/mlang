@@ -37,7 +37,7 @@ namespace mlang {
         scopeType = ScopeType::CODE_BLOCK;
     }
 
-    llvm::AllocaInst *CodeGenContext::findVariable(const std::string& name) {
+    llvm::AllocaInst *CodeGenContext::findVariable(const std::string &name) {
         if (scopeType == ScopeType::FUNCTION_DECL) {
             auto &names = locals();
             if (names.find(name) != names.end()) {
@@ -56,6 +56,18 @@ namespace mlang {
         return nullptr;
     }
 
+    llvm::Type *CodeGenContext::typeOf(const class Identifier &type) {
+        return typeOf(type.getName());
+    }
+
+    llvm::Type *CodeGenContext::typeOf(const std::string &name) {
+        if (llvmTypeMap.count(name) != 0) {
+            return llvmTypeMap[name];
+        }
+
+        return voidType;
+    }
+
     bool CodeGenContext::preProcessing(Block &root) {
 
         // TODO
@@ -64,6 +76,17 @@ namespace mlang {
 
     void CodeGenContext::setUpBuildIns() {
         intType = llvm::Type::getInt64Ty(getGlobalContext());
+        doubleType = llvm::Type::getDoubleTy(getGlobalContext());
+        stringType = llvm::Type::getInt8PtrTy(getGlobalContext());
+        boolType = llvm::Type::getInt1Ty(getGlobalContext());
+        voidType = llvm::Type::getVoidTy(getGlobalContext());
+        varType = llvm::StructType::create(getGlobalContext(), "var");
+        llvmTypeMap["int"] = intType;
+        llvmTypeMap["double"] = doubleType;
+        llvmTypeMap["string"] = stringType;
+        llvmTypeMap["boolean"] = boolType;
+        llvmTypeMap["void"] = voidType;
+        llvmTypeMap["var"] = varType;
 
         std::vector<llvm::Type *> argTypesOneInt(1, intType);
         llvm::FunctionType *ft = llvm::FunctionType::get(intType, argTypesOneInt, false);

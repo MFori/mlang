@@ -8,6 +8,7 @@
 #define MLANG_CODEGEN_H
 
 #include <list>
+#include <utility>
 
 #pragma warning(push, 0)
 
@@ -93,6 +94,12 @@ namespace mlang {
 
         ValueNames &locals() { return codeBlocks.front()->getValueNames(); }
 
+        llvm::Type* typeOf(const class Identifier& type);
+
+        llvm::Type* typeOf(const std::string &name);
+
+        void setVarType(std::string varTypeName, const std::string& varName) { codeBlocks.front()->getTypeMap()[varName] = std::move(varTypeName); }
+
         void optimize();
 
         bool generateCode(class Block &root);
@@ -122,6 +129,12 @@ namespace mlang {
         };
         std::vector<buildin_info_t> buildins;
         llvm::Type *intType{nullptr};
+        llvm::Type* doubleType {nullptr};
+        llvm::Type* stringType {nullptr};
+        llvm::Type* boolType {nullptr};
+        llvm::Type* voidType {nullptr};
+        llvm::Type* varType {nullptr};
+        std::map<std::string, llvm::Type*> llvmTypeMap;
     };
 }
 

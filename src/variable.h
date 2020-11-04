@@ -30,10 +30,13 @@ namespace mlang {
             delete type;
         }
 
-        llvm::Value* codeGen(CodeGenContext& context) override;
-        NodeType getType() override {return NodeType::VARIABLE;}
-        std::string toString() override {return "variable declaration";}
-        void accept(Visitor &v) override {v.visitVariableDeclaration(this);}
+        llvm::Value *codeGen(CodeGenContext &context) override;
+
+        NodeType getType() override { return NodeType::VARIABLE; }
+
+        std::string toString() override { return "variable declaration"; }
+
+        void accept(Visitor &v) override { v.visitVariableDeclaration(this); }
 
     protected:
         Identifier *type{nullptr};
