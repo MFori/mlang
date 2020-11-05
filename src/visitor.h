@@ -22,6 +22,7 @@ namespace mlang {
     class Return;
     class Assignment;
     class FunctionCall;
+    class FunctionDeclaration;
 
     class Visitor {
     public:
@@ -45,13 +46,15 @@ namespace mlang {
 
         virtual void visitVariableDeclaration(VariableDeclaration *e) = 0;
 
-        virtual void visitBinaryOp(BinaryOp* e) = 0;
+        virtual void visitBinaryOp(BinaryOp *e) = 0;
 
-        virtual void visitReturnStatement(Return* e) = 0;
+        virtual void visitReturnStatement(Return *e) = 0;
 
-        virtual void visitAssignment(Assignment* e) = 0;
+        virtual void visitAssignment(Assignment *e) = 0;
 
-        virtual void visitFunctionCall(FunctionCall* e) = 0;
+        virtual void visitFunctionCall(FunctionCall *e) = 0;
+
+        virtual void visitFunctionDeclaration(FunctionDeclaration *e) = 0;
     };
 
 }

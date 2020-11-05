@@ -12,6 +12,40 @@
 
 namespace mlang {
 
+    class FunctionDeclaration : public Statement {
+    public:
+        FunctionDeclaration(Identifier *type, Identifier *id, VariableList *args, Block *block, YYLTYPE location)
+                : type(type), id(id), arguments(args), block(block), location(location) {}
+
+        FunctionDeclaration(Identifier *id, VariableList *args, Block *block, YYLTYPE location)
+                : type(new Identifier("void", location)), id(id), arguments(args), block(block), location(location) {}
+
+        ~FunctionDeclaration() override {
+            for (auto arg : *arguments) {
+                delete arg;
+            }
+            delete type;
+            delete id;
+            delete arguments;
+            delete block;
+        }
+
+        llvm::Value *codeGen(CodeGenContext &context) override;
+
+        NodeType getType() override { return NodeType::FUNCTION; }
+
+        std::string toString() override { return "function declaration"; }
+
+        void accept(Visitor &v) override { v.visitFunctionDeclaration(this); }
+
+    private:
+        Identifier *type{nullptr};
+        Identifier *id{nullptr};
+        VariableList *arguments{nullptr};
+        Block *block{nullptr};
+        YYLTYPE location;
+    };
+
     class FunctionCall : public Statement {
     public:
         explicit FunctionCall(Identifier *id, ExpressionList *args, YYLTYPE location)

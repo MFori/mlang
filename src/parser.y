@@ -156,8 +156,8 @@ var_decl : ident ident { $$ = new mlang::VariableDeclaration($1, $2, @$); }
          | TVAR ident '=' expr { $$ = new mlang::VariableDeclaration($2, $4, @$); }
          ;
 
-func_decl : TDEF ident '(' func_decl_args ')' ':' ident block { /*$$ = new mlang::FunctionDeclaration($7, $2, $4, $8, @$);*/ }
-          | TDEF ident '(' func_decl_args ')' block { /*$$ = new mlang::FunctionDeclaration($2, $4, $6, @$);*/ }
+func_decl : TDEF ident '(' func_decl_args ')' ':' ident block { $$ = new mlang::FunctionDeclaration($7, $2, $4, $8, @$); }
+          | TDEF ident '(' func_decl_args ')' block { $$ = new mlang::FunctionDeclaration($2, $4, $6, @$); }
           ;
 
 func_decl_args : %empty  { $$ = new mlang::VariableList(); }

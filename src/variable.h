@@ -38,6 +38,10 @@ namespace mlang {
 
         void accept(Visitor &v) override { v.visitVariableDeclaration(this); }
 
+        Identifier *getVariableType() const { return type; }
+
+        std::string getVariableName() const { return id->getName(); }
+
     protected:
         Identifier *type{nullptr};
         Identifier *id{nullptr};

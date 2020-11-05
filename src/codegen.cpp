@@ -7,6 +7,7 @@
 #include <iostream>
 #include "llvm/ExecutionEngine/MCJIT.h"
 #include <llvm-c/Core.h>
+#include <llvm/IR/Verifier.h>
 
 #include "codegen.h"
 #include "buildins.h"
@@ -124,13 +125,21 @@ namespace mlang {
 
         newScope(bblock);
         root.codeGen(*this);
+        if (errors > 0) {
+            outs << "Compilation error(s). Abort.\n";
+            return false;
+        }
         // TODO
 
         if (currentBlock()->getTerminator() == nullptr) {
             llvm::ReturnInst::Create(getGlobalContext(), nullptr, currentBlock());
         }
-
         endScope();
+
+        if(llvm::verifyModule(*getModule())) {
+            outs << ": Error constructing fun!\n";
+            return false;
+        }
 
         //if(!debug) {
         //    optimize();
