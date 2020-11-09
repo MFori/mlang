@@ -26,7 +26,7 @@ int yyerror(char const * s )
 }
 
 std::string g_str;
-
+int first_time = 1 ;
 int parsing_error = 0;
 
 std::stack<std::string> fileNames;
@@ -56,14 +56,19 @@ num2    [-+]?{dig}*\.{dig}+([eE][-+]?{dig}+)?
 number  {num1}|{num2}
 
 %%
+                    if( first_time ) {
+                          first_time = 0;
+                          lineNo.push(yylineno);
+                          BEGIN normal;
+                    }
 
 import              BEGIN(incl);
 <incl>[ \t]*        /* eat the whitespace */
 <incl>[^ \t\n\r]+   { /* got the include file name */
                     std::string fileName = yytext;
-                    std::size_t pos = fileName.find(".liq");
+                    std::size_t pos = fileName.find(".mlang");
                     if( pos == std::string::npos ) {
-                        fileName += ".liq";
+                        fileName += ".mlang";
                     }
                     for( auto libpath : libPaths ) {
                         yyin = fopen( (libpath + fileName).c_str() , "r" );
@@ -75,6 +80,7 @@ import              BEGIN(incl);
                        parsing_error = 1;
                        yyterminate();
                     } else {
+                        printf("filenames push %s", yytext);
                        fileNames.push(yytext);
                        lineNo.push(yylineno);
                        yylineno = yycolumn = 1;
@@ -114,9 +120,12 @@ import              BEGIN(incl);
 <qstr>[^\\']+  g_str += std::string(yytext);
 
 
+<normal>"\n"     { yycolumn = 1; }
 <<EOF>>          {
+                    printf("eof!!\n");
                    if(lineNo.size() > 1 ) {
                        yypop_buffer_state();
+                       printf("filenames pop to %s", fileNames.top());
                        fileNames.pop();
                        yylineno = lineNo.top();
                        lineNo.pop();

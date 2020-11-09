@@ -156,8 +156,6 @@ namespace mlang {
             outs << "Compilation error(s). Abort.\n";
             return false;
         }
-        // TODO
-
         if (currentBlock()->getTerminator() == nullptr) {
             llvm::ReturnInst::Create(getGlobalContext(), nullptr, currentBlock());
         }
@@ -169,6 +167,7 @@ namespace mlang {
             return false;
         }
 
+        // TODO
         //if(!debug) {
         //   optimize();
         //}
