@@ -38,13 +38,15 @@ namespace mlang {
         scopeType = ScopeType::CODE_BLOCK;
     }
 
-    llvm::AllocaInst *CodeGenContext::findVariable(const std::string &name) {
+    Variable *CodeGenContext::findVariable(const std::string &name, bool onlyLocals) {
         if (scopeType == ScopeType::FUNCTION_DECL) {
             auto &names = locals();
             if (names.find(name) != names.end()) {
                 return names[name];
             }
-            return nullptr;
+            if (onlyLocals) {
+                return nullptr;
+            }
         }
 
         for (auto &cb : codeBlocks) {
@@ -57,6 +59,17 @@ namespace mlang {
         return nullptr;
     }
 
+    bool CodeGenContext::hasVariable(const std::string &name) {
+        for (auto &cb : codeBlocks) {
+            auto &names = cb->getValueNames();
+            if (names.find(name) != names.end()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     llvm::Type *CodeGenContext::typeOf(const class Identifier &type) {
         return typeOf(type.getName());
     }
@@ -66,8 +79,19 @@ namespace mlang {
             return llvmTypeMap[name];
         }
 
-        return voidType;
+        return nullptr;
     }
+
+    std::string CodeGenContext::getVarType(const std::string &varName) {
+        for (auto &cb : codeBlocks) {
+            auto &types = cb->getTypeMap();
+            if (types.find(varName) != types.end()) {
+                return types[varName];
+            }
+        }
+        return nullptr;
+    }
+
 
     bool CodeGenContext::preProcessing(Block &root) {
 
@@ -82,12 +106,14 @@ namespace mlang {
         boolType = llvm::Type::getInt1Ty(getGlobalContext());
         voidType = llvm::Type::getVoidTy(getGlobalContext());
         varType = llvm::StructType::create(getGlobalContext(), "var");
-        llvmTypeMap["int"] = intType;
-        llvmTypeMap["double"] = doubleType;
-        llvmTypeMap["string"] = stringType;
-        llvmTypeMap["boolean"] = boolType;
-        llvmTypeMap["void"] = voidType;
+        valType = llvm::StructType::create(getGlobalContext(), "val");
+        llvmTypeMap["Int"] = intType;
+        llvmTypeMap["Double"] = doubleType;
+        llvmTypeMap["String"] = stringType;
+        llvmTypeMap["Bool"] = boolType;
+        llvmTypeMap["Void"] = voidType;
         llvmTypeMap["var"] = varType;
+        llvmTypeMap["val"] = valType;
 
         std::vector<llvm::Type *> argTypesOneInt(1, intType);
         llvm::FunctionType *ft = llvm::FunctionType::get(intType, argTypesOneInt, false);
@@ -116,11 +142,12 @@ namespace mlang {
 
     bool CodeGenContext::generateCode(Block &root) {
         outs << "Generating code...\n";
-        // TODO
+
         std::vector<llvm::Type *> argTypes;
         llvm::FunctionType *ftype = llvm::FunctionType::get(llvm::Type::getVoidTy(getGlobalContext()), argTypes, false);
-        mainFunction = llvm::Function::Create(ftype, llvm::GlobalValue::InternalLinkage, "main", getModule());
-        llvm::BasicBlock *bblock = llvm::BasicBlock::Create(getGlobalContext(), "entry", mainFunction, 0);
+        initFunction = llvm::Function::Create(ftype, llvm::GlobalValue::InternalLinkage, "__mlang_init_fun",
+                                               getModule());
+        llvm::BasicBlock *bblock = llvm::BasicBlock::Create(getGlobalContext(), "entry", initFunction, 0);
         setUpBuildIns();
 
         newScope(bblock);
@@ -136,14 +163,17 @@ namespace mlang {
         }
         endScope();
 
-        if(llvm::verifyModule(*getModule())) {
-            outs << ": Error constructing fun!\n";
+        if (llvm::verifyModule(*getModule())) {
+            outs << ": Error constructing fun! \n";
+            printf("%s", LLVMPrintModuleToString((LLVMModuleRef) module));
             return false;
         }
 
         //if(!debug) {
-        //    optimize();
+        //   optimize();
         //}
+
+        printf("%s", LLVMPrintModuleToString((LLVMModuleRef) module));
 
         return true;
     }
@@ -159,7 +189,10 @@ namespace mlang {
 
         ee->finalizeObject();
         std::vector<llvm::GenericValue> noargs;
-        llvm::GenericValue v = ee->runFunction(mainFunction, noargs);
+        llvm::GenericValue v = ee->runFunction(initFunction, noargs);
+        if (mainFunction != nullptr) {
+            v = ee->runFunction(mainFunction, noargs);
+        }
 
         //printf("%s", LLVMPrintModuleToString((LLVMModuleRef)module));
 
@@ -181,4 +214,15 @@ namespace mlang {
         return std::string("");
     }
 
+    llvm::Type *Variable::getType() {
+        if (value == nullptr) {
+            return nullptr;
+        }
+
+        if (isLocal()) {
+            return ((llvm::AllocaInst *) value)->getType()->getElementType();
+        } else {
+            return ((llvm::GlobalVariable *) value)->getType()->getElementType();
+        }
+    }
 }

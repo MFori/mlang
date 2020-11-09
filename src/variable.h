@@ -18,11 +18,11 @@ namespace mlang {
         VariableDeclaration(Identifier *type, Identifier *id, YYLTYPE location)
                 : type(type), id(id), assignmentExpr(nullptr), location(location) {}
 
-        VariableDeclaration(Identifier *id, Expression *assignmentExpr, YYLTYPE location)
-                : type(new Identifier("var", location)), id(id), assignmentExpr(assignmentExpr), location(location) {}
+        VariableDeclaration(Identifier *id, const std::string &type, Expression *assignmentExpr, YYLTYPE location)
+                : type(new Identifier(type, location)), id(id), assignmentExpr(assignmentExpr), location(location) {}
 
-        VariableDeclaration(Identifier *id, YYLTYPE location)
-                : type(new Identifier("var", location)), id(id), assignmentExpr(nullptr), location(location) {}
+        VariableDeclaration(Identifier *id, const std::string &type, YYLTYPE location)
+                : type(new Identifier(type, location)), id(id), assignmentExpr(nullptr), location(location) {}
 
         ~VariableDeclaration() override {
             delete assignmentExpr;

@@ -12,21 +12,56 @@ namespace mlang {
 
     llvm::Value *Assignment::codeGen(CodeGenContext &context) {
         llvm::Value *value = rhs->codeGen(context);
+
         if (value == nullptr) {
             Node::printError(location, " Assignment expression results in nothing");
             context.addError();
             return nullptr;
         }
 
-        llvm::AllocaInst *var = context.findVariable(lhs->getName());
-        if (var == nullptr) {
-            /* In this case the type deductions takes place. This is an assignment with the var keyword. */
-            llvm::Type *ty = value->getType();
-            var = new llvm::AllocaInst(ty, 0, lhs->getName(), context.currentBlock());
-            context.locals()[lhs->getName()] = var;
+        if (!context.hasVariable(lhs->getName())) {
+            Node::printError(location, " Assignment to undefined variable '" + lhs->getName() + "'");
+            context.addError();
+            return nullptr;
         }
 
-        llvm::Type *varType = var->getType()->getElementType();
+        Variable *var = context.findVariable(lhs->getName(), false);
+        llvm::Type *varType;
+
+        if (var->getValue() == nullptr) {
+            /* In this case the type deductions takes place. This is an assignment with the var/val keyword. */
+            bool global = context.getScopeType() == ScopeType::CODE_BLOCK;
+            llvm::Type *ty = value->getType();
+
+            if (global) {
+                auto *gv = new llvm::GlobalVariable(*context.getModule(), ty, var->isConst(),
+                                                    llvm::GlobalValue::PrivateLinkage,
+                                                    (llvm::Constant *) value, lhs->getName());
+                gv->setAlignment(llvm::MaybeAlign(4));
+                var->setValue(gv);
+                //varType = var->getType();
+                return gv;
+            } else {
+                auto lv = new llvm::AllocaInst(ty, 0, lhs->getName(), context.currentBlock());
+                var->setValue(lv);
+                varType = var->getType();
+            }
+        } else {
+            varType = var->getType();
+            llvm::Type *ty = varType;
+
+            if (ty->isStructTy() && ty->getStructName() == "val") {
+                Node::printError(location, "Val cannot be reassignet first! " + lhs->getName() + "\n");
+                context.addError();
+            }
+
+            std::string typeName = context.getVarType(lhs->getName());
+            if (typeName == "val") {
+                Node::printError(location, "final val '" + lhs->getName() + "' cannot be reassignet!\n");
+                context.addError();
+                return nullptr;
+            }
+        }
 
         if (value->getType()->getTypeID() == varType->getTypeID()) {
             // same type but different bit size.
@@ -45,7 +80,7 @@ namespace mlang {
             return nullptr;
         }
 
-        return new llvm::StoreInst(value, var, false, context.currentBlock());
+        return new llvm::StoreInst(value, var->getValue(), false, context.currentBlock());
     }
 
 }

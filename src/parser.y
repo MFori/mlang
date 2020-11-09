@@ -6,15 +6,10 @@
 
 %{
     #include "ast.h"
-    //#include "FunctionDeclaration.h"
-    //#include "ClassDeclaration.h"
-    //#include "FunctionDeclaration.h"
-    //#include "ClassDeclaration.h"
     //#include "Conditional.h"
     //#include "UnaryOperator.h"
     //#include "BinaryOperator.h"
     //#include "CompareOperator.h"
-    //#include "Assignment.h"
     #include "variable.h"
     #include "binaryop.h"
     #include "return.h"
@@ -88,8 +83,8 @@
 %token <token> TPLUS TMINUS TMUL TDIV
 %token <token> TNOT TAND TOR
 %token <token> TIF TELSE TWHILE
-%token <token> TDEF TRETURN TVAR
-%token <token> INDENT UNINDENT
+%token <token> TFUNDEF TRETURN TVAR TVAL
+/*%token <token> INDENT UNINDENT*/
 
 /* Define the type of node our nonterminal symbols represent.
    The types refer to the %union declaration above. Ex: when
@@ -101,7 +96,7 @@
 %type <varvec> func_decl_args
 %type <exprvec> call_args array_elemets_expr
 %type <block> program stmts block
-%type <stmt> stmt var_decl func_decl conditional return while class_decl array_add_element
+%type <stmt> stmt var_decl func_decl func_arg_decl conditional return while array_add_element
 %type <token> comparison
 
 /* Operator precedence for mathematical operators */
@@ -130,7 +125,6 @@ stmts : stmt { $$ = new mlang::Block(); $$->statements.push_back($<stmt>1); }
 
 stmt : var_decl
      | func_decl
-     | class_decl
      | conditional
      | return
      | while
@@ -138,8 +132,8 @@ stmt : var_decl
      | expr { $$ = new mlang::ExpressionStatement($1); }
      ;
 
-block : INDENT stmts UNINDENT { $$ = $2; }
-      | INDENT UNINDENT { $$ = new mlang::Block(); }
+block : '{' stmts '}' { $$ = $2; }
+      | '{' '}' { $$ = new mlang::Block(); }
       ;
 
 conditional : TIF expr block TELSE block {/*$$ = new mlang::Conditional($2,$3,$5);*/}
@@ -150,23 +144,30 @@ while : TWHILE '(' expr ')' block TELSE block {/*$$ = new mlang::WhileLoop($3,$5
       | TWHILE '(' expr ')' block {/*$$ = new mlang::WhileLoop($3,$5);*/}
       ;
 
-var_decl : ident ident { $$ = new mlang::VariableDeclaration($1, $2, @$); }
+/*var_decl : ident ident { $$ = new mlang::VariableDeclaration($1, $2, @$); }
          | ident ident '=' expr { $$ = new mlang::VariableDeclaration($1, $2, $4, @$); }
-         | TVAR ident { $$ = new mlang::VariableDeclaration($2, @$); }
-         | TVAR ident '=' expr { $$ = new mlang::VariableDeclaration($2, $4, @$); }
+         | TVAR ident { $$ = new mlang::VariableDeclaration($2, "var", @$); }
+         | TVAR ident '=' expr { $$ = new mlang::VariableDeclaration($2, "var", $4, @$); }
+         | TVAL ident { $$ = new mlang::VariableDeclaration($2, "val", @$); }
+         | TVAL ident '=' expr { $$ = new mlang::VariableDeclaration($2, "val", $4, @$); }
+         ;*/
+
+var_decl : TVAR ident '=' expr { $$ = new mlang::VariableDeclaration($2, "var", $4, @$); }
+         | TVAL ident '=' expr { $$ = new mlang::VariableDeclaration($2, "val", $4, @$); }
          ;
 
-func_decl : TDEF ident '(' func_decl_args ')' ':' ident block { $$ = new mlang::FunctionDeclaration($7, $2, $4, $8, @$); }
-          | TDEF ident '(' func_decl_args ')' block { $$ = new mlang::FunctionDeclaration($2, $4, $6, @$); }
+func_decl : TFUNDEF ident '(' func_decl_args ')' ':' ident block { $$ = new mlang::FunctionDeclaration($7, $2, $4, $8, @$); }
+          | TFUNDEF ident '(' func_decl_args ')' block { $$ = new mlang::FunctionDeclaration($2, $4, $6, @$); }
           ;
 
 func_decl_args : %empty  { $$ = new mlang::VariableList(); }
-          | var_decl { $$ = new mlang::VariableList(); $$->push_back($<var_decl>1); }
-          | func_decl_args ',' var_decl { $1->push_back($<var_decl>3); }
+          | func_arg_decl { $$ = new mlang::VariableList(); $$->push_back($<var_decl>1); }
+          | func_decl_args ',' func_arg_decl { $1->push_back($<var_decl>3); }
           ;
 
-class_decl: TDEF ident block {/*$$ = new mlang::ClassDeclaration($2, $3);*/}
-          ;
+func_arg_decl : ident ident { $$ = new mlang::VariableDeclaration($1, $2, @$); }
+            | ident ident '=' expr { $$ = new mlang::VariableDeclaration($1, $2, $4, @$); }
+            ;
 
 return : TRETURN { $$ = new mlang::Return(@$); }
        | TRETURN expr { $$ = new mlang::Return(@$, $2); }

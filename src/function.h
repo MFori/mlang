@@ -18,7 +18,7 @@ namespace mlang {
                 : type(type), id(id), arguments(args), block(block), location(location) {}
 
         FunctionDeclaration(Identifier *id, VariableList *args, Block *block, YYLTYPE location)
-                : type(new Identifier("void", location)), id(id), arguments(args), block(block), location(location) {}
+                : type(new Identifier("Void", location)), id(id), arguments(args), block(block), location(location) {}
 
         ~FunctionDeclaration() override {
             for (auto arg : *arguments) {

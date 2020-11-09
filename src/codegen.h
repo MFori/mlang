@@ -50,9 +50,46 @@ namespace mlang {
         CODE_BLOCK
     };
 
-    using ValueNames = std::map<std::string, llvm::AllocaInst *>;
-    using VariableTypeMap = std::map<std::string, std::string>;
+    enum class VariableScope {
+        GLOBAL,
+        LOCAL
+    };
 
+    class Variable {
+    public:
+        Variable(llvm::Value *value, VariableScope type, bool constant) : value(value), type(type),
+                                                                          constant(constant) {}
+
+        static Variable *newLocal(llvm::AllocaInst *allocaInst, bool constant = false) {
+            return new Variable(allocaInst, VariableScope::LOCAL, constant);
+        }
+
+        static Variable *newGlobal(llvm::GlobalVariable *global, bool constant = false) {
+            return new Variable(global, VariableScope::GLOBAL, constant);
+        }
+
+        llvm::Value *getValue() { return value; }
+
+        void setValue(llvm::Value *val) { value = val; }
+
+        llvm::Type *getType();
+
+        VariableScope getVariableScope() { return type; }
+
+        bool isLocal() { return type == VariableScope::LOCAL; }
+
+        bool isGlobal() { return type == VariableScope::GLOBAL; }
+
+        bool isConst() const { return constant; }
+
+    private:
+        llvm::Value *value{nullptr};
+        VariableScope type{VariableScope::LOCAL};
+        bool constant{false};
+    };
+
+    using ValueNames = std::map<std::string, Variable *>;
+    using VariableTypeMap = std::map<std::string, std::string>;
 
     class CodeGenBlock {
     public:
@@ -90,15 +127,21 @@ namespace mlang {
 
         llvm::BasicBlock *currentBlock() { return codeBlocks.front()->currentBlock(); }
 
-        llvm::AllocaInst *findVariable(const std::string& name);
+        Variable *findVariable(const std::string &name, bool onlyLocals = true);
+
+        bool hasVariable(const std::string &name);
 
         ValueNames &locals() { return codeBlocks.front()->getValueNames(); }
 
-        llvm::Type* typeOf(const class Identifier& type);
+        llvm::Type *typeOf(const class Identifier &type);
 
-        llvm::Type* typeOf(const std::string &name);
+        llvm::Type *typeOf(const std::string &name);
 
-        void setVarType(std::string varTypeName, const std::string& varName) { codeBlocks.front()->getTypeMap()[varName] = std::move(varTypeName); }
+        void setVarType(std::string varTypeName, const std::string &varName) {
+            codeBlocks.front()->getTypeMap()[varName] = std::move(varTypeName);
+        }
+
+        std::string getVarType(const std::string &varName);
 
         void optimize();
 
@@ -114,8 +157,11 @@ namespace mlang {
 
         void addError() { ++errors; }
 
+        void setMainFunction(llvm::Function *function) { this->mainFunction = function; }
+
     private:
         std::list<CodeGenBlock *> codeBlocks;
+        llvm::Function *initFunction{nullptr};
         llvm::Function *mainFunction{nullptr};
         llvm::Module *module{nullptr};
         llvm::LLVMContext llvmContext;
@@ -129,12 +175,13 @@ namespace mlang {
         };
         std::vector<buildin_info_t> buildins;
         llvm::Type *intType{nullptr};
-        llvm::Type* doubleType {nullptr};
-        llvm::Type* stringType {nullptr};
-        llvm::Type* boolType {nullptr};
-        llvm::Type* voidType {nullptr};
-        llvm::Type* varType {nullptr};
-        std::map<std::string, llvm::Type*> llvmTypeMap;
+        llvm::Type *doubleType{nullptr};
+        llvm::Type *stringType{nullptr};
+        llvm::Type *boolType{nullptr};
+        llvm::Type *voidType{nullptr};
+        llvm::Type *varType{nullptr};
+        llvm::Type *valType{nullptr};
+        std::map<std::string, llvm::Type *> llvmTypeMap;
     };
 }
 

@@ -11,9 +11,21 @@ namespace mlang {
 
     llvm::Value *FunctionDeclaration::codeGen(CodeGenContext &context) {
         std::cout << "Code gen fun decl 1 \n";
+
+        if (context.getScopeType() == ScopeType::FUNCTION_DECL) {
+            Node::printError(location, " cannot declare function inside another\n");
+            context.addError();
+            return nullptr;
+        }
+
         std::vector<llvm::Type *> argTypes;
         for (auto varDecl : *arguments) {
             llvm::Type *ty = context.typeOf(*(varDecl->getVariableType()));
+            if (ty == nullptr) {
+                Node::printError(location, " undefined data type: '" + varDecl->getVariableType()->getName() + "'\n");
+                context.addError();
+                return nullptr;
+            }
             if (ty->isStructTy()) {
                 ty = llvm::PointerType::get(ty, 0);
             }
@@ -21,9 +33,15 @@ namespace mlang {
         }
 
         std::cout << "Code gen fun decl 2 \n" << type->getName() << "\n";
-        llvm::Type* t = context.typeOf(*type);
+        llvm::Type *t = context.typeOf(*type);
         std::cout << "Code gen fun decl 2.0.1 \n";
-        std::cout << "Code gen fun decl 2.0.2 " << argTypes.size() << "\n" ;
+        if (t == nullptr) {
+            Node::printError(location, " undefined data type: '" + type->getName() + "'\n");
+            context.addError();
+            return nullptr;
+        }
+
+        std::cout << "Code gen fun decl 2.0.2 " << argTypes.size() << "\n";
         // TODO check return type if it is a structure type !!! May be it should be a ptr to the structure!
         llvm::FunctionType *ftype = llvm::FunctionType::get(t, argTypes, false);
         std::cout << "Code gen fun decl 2.1 \n";
@@ -61,14 +79,19 @@ namespace mlang {
         auto retTy = blockValue->getType();
 
         if (context.currentBlock()->getTerminator() == nullptr) {
-            if (type->getName() == "void" && retTy->isVoidTy()) {
+            if (type->getName() == "Void" && retTy->isVoidTy()) {
                 llvm::ReturnInst::Create(context.getGlobalContext(), nullptr, context.currentBlock());
             } else {
                 llvm::ReturnInst::Create(context.getGlobalContext(), blockValue, context.currentBlock());
             }
         }
 
+        if (fname == "main") {
+            context.setMainFunction(fun);
+        }
+
         context.endScope();
+        std::cout << "Code gen fun decl 4 " + fname + "\n";
         return fun;
     }
 

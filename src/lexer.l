@@ -27,12 +27,6 @@ int yyerror(char const * s )
 
 std::string g_str;
 
-/* globals to track current indentation */
-int current_line_indent = 0;   /* indentation of the current line */
-int indent_level = 0;          /* indentation level passed to the parser */
-std::stack<int> curr_indents;
-int first_time = 1 ;
-
 int parsing_error = 0;
 
 std::stack<std::string> fileNames;
@@ -51,7 +45,6 @@ std::vector<std::string> libPaths;
 
 %option yylineno
 
-%x indent
 %s normal
 %x str qstr
 %x comment
@@ -63,14 +56,6 @@ num2    [-+]?{dig}*\.{dig}+([eE][-+]?{dig}+)?
 number  {num1}|{num2}
 
 %%
-
-            if( first_time ) {
-                first_time = 0;
-                curr_indents.push(0);
-                lineNo.push(yylineno);
-                BEGIN indent;
-            }
-
 
 import              BEGIN(incl);
 <incl>[ \t]*        /* eat the whitespace */
@@ -100,8 +85,8 @@ import              BEGIN(incl);
                     }
 
 
-\@\{                BEGIN(comment);
-<comment>\@\}.*     BEGIN(normal);
+\/\*                BEGIN(comment);
+<comment>\*\/       BEGIN(normal);
 <comment>.*         ;/* eat everything */
 <comment>\n         ;/* eat everything */
 
@@ -128,30 +113,8 @@ import              BEGIN(incl);
 <str>[^\\\"]+  g_str += std::string(yytext);
 <qstr>[^\\']+  g_str += std::string(yytext);
 
-<indent>" "      { current_line_indent++; }
-<indent>"\t"     { current_line_indent = (current_line_indent + 8) & ~7; }
-<indent>"\n"     { current_line_indent = 0; yycolumn = 1;/*ignoring blank line */ }
-<indent>"\r"     { current_line_indent = 0; yycolumn = 1;/*ignoring blank line */ }
-<indent>.        {
-                   unput(*yytext);
-                   yycolumn--;
-                   if (current_line_indent > curr_indents.top()) {
-                       curr_indents.push(current_line_indent);
-                       return TOKEN(INDENT);
-                   } else if (current_line_indent < curr_indents.top()) {
-                       curr_indents.pop();
-                       return TOKEN(UNINDENT);
-                   } else {
-                       BEGIN(normal);
-                   }
-                 }
 
-<normal>"\n"     { current_line_indent = 0; BEGIN( indent); yycolumn = 1; }
 <<EOF>>          {
-                   if( curr_indents.size() > 1 ) {
-                        curr_indents.pop();
-                        return TOKEN(UNINDENT);
-                   }
                    if(lineNo.size() > 1 ) {
                        yypop_buffer_state();
                        fileNames.pop();
@@ -170,8 +133,9 @@ import              BEGIN(incl);
 "not"                   return TOKEN(TNOT);
 "and"                   return TOKEN(TAND);
 "or"                    return TOKEN(TOR);
-"def"                   return TOKEN(TDEF);
+"func"                  return TOKEN(TFUNDEF);
 "var"                   return TOKEN(TVAR);
+"val"                   return TOKEN(TVAL);
 "while"                 return TOKEN(TWHILE);
 "true"                  SAVE_BOOLEAN; return TBOOL;
 "false"                 SAVE_BOOLEAN; return TBOOL;
@@ -190,6 +154,8 @@ import              BEGIN(incl);
 "<="                    return TOKEN(TCLE);
 ">"                     return TOKEN(TCGT);
 ">="                    return TOKEN(TCGE);
+"{"                     return '{';
+"}"                     return '}';
 "("                     return '(';
 ")"                     return ')';
 "."                     return '.';
