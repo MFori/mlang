@@ -19,6 +19,7 @@ namespace mlang {
     class ExpressionStatement;
     class VariableDeclaration;
     class BinaryOp;
+    class UnaryOp;
     class Return;
     class Assignment;
     class FunctionCall;
@@ -47,6 +48,8 @@ namespace mlang {
         virtual void visitVariableDeclaration(VariableDeclaration *e) = 0;
 
         virtual void visitBinaryOp(BinaryOp *e) = 0;
+
+        virtual void visitUnaryOp(UnaryOp *e) = 0;
 
         virtual void visitReturnStatement(Return *e) = 0;
 

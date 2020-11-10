@@ -147,7 +147,7 @@ import              BEGIN(incl);
 "false"                 SAVE_BOOLEAN; return TBOOL;
 \/\/.*                     /* comments one line til nl */
 [ \t\n]                 /* ignore */;
-[a-zA-Z_][a-zA-Z0-9_&%\$\?\-]*  SAVE_TOKEN; return TIDENTIFIER;
+[a-zA-Z_][a-zA-Z0-9_]*  SAVE_TOKEN; return TIDENTIFIER;
 -?[0-9]+                SAVE_INTEGER; return TINTEGER;
 {number}                SAVE_NUMBER; return TDOUBLE;
 "->"                    return TOKEN(TRANGE);
@@ -170,6 +170,8 @@ import              BEGIN(incl);
 "-"                     return TOKEN(TMINUS);
 "*"                     return TOKEN(TMUL);
 "/"                     return TOKEN(TDIV);
+"++"                    return TOKEN(TINC);
+"--"                    return TOKEN(TDEC);
 ":"                     return ':';
 "["                     return '[';
 "]"                     return ']';

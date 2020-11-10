@@ -7,10 +7,10 @@
 %{
     #include "ast.h"
     //#include "Conditional.h"
-    //#include "UnaryOperator.h"
     //#include "CompareOperator.h"
     #include "variable.h"
     #include "binaryop.h"
+    #include "unaryop.h"
     #include "return.h"
     #include "assignment.h"
     #include "function.h"
@@ -81,6 +81,7 @@
 %token <token> TRANGE
 %token <token> TPLUS TMINUS TMUL TDIV
 %token <token> TNOT TAND TOR
+%token <token> TINC TDEC
 %token <token> TIF TELSE TWHILE
 %token <token> TFUNDEF TRETURN TVAR TVAL
 /*%token <token> INDENT UNINDENT*/
@@ -102,6 +103,7 @@
 %left TPLUS TMINUS
 %left TMUL TDIV
 %left TAND TNOT
+%right TINC TDEC
 
 %start program
 %debug
@@ -203,7 +205,11 @@ binop_expr : expr TAND expr { $$ = new mlang::BinaryOp($1, $2, $3, @$); }
            | expr TDIV expr { $$ = new mlang::BinaryOp($1, $2, $3, @$); }
            ;
 
-unaryop_expr : TNOT expr { /*$$ = new mlang::UnaryOperator($1, $2);*/ }
+unaryop_expr : TNOT expr { $$ = new mlang::UnaryOp($1, $2, @$); }
+             | TMINUS expr { $$ = new mlang::UnaryOp($1, $2, @$); }
+             | TPLUS expr { $$ = new mlang::UnaryOp($1, $2, @$); }
+             | expr TINC { $$ = new mlang::UnaryOp($2, $1, @$); }
+             | expr TDEC { $$ = new mlang::UnaryOp($2, $1, @$); }
              ;
 
 boolean_expr : expr comparison expr { /*$$ = new mlang::CompOperator($1, $2, $3);*/ }
