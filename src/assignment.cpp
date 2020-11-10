@@ -12,7 +12,7 @@ namespace mlang {
 
     llvm::Value *Assignment::codeGen(CodeGenContext &context) {
         llvm::Value *value = rhs->codeGen(context);
-
+        
         if (value == nullptr) {
             Node::printError(location, " Assignment expression results in nothing");
             context.addError();
@@ -80,7 +80,9 @@ namespace mlang {
             return nullptr;
         }
 
-        return new llvm::StoreInst(value, var->getValue(), false, context.currentBlock());
+        new llvm::StoreInst(value, var->getValue(), false, context.currentBlock());
+        return value;
+        //return new llvm::StoreInst(value, var->getValue(), false, context.currentBlock());
     }
 
 }
