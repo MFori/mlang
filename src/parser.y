@@ -6,7 +6,6 @@
 
 %{
     #include "ast.h"
-    //#include "Conditional.h"
     //#include "CompareOperator.h"
     #include "variable.h"
     #include "binaryop.h"
@@ -14,6 +13,7 @@
     #include "return.h"
     #include "assignment.h"
     #include "function.h"
+    #include "conditional.h"
     //#include "WhileLoop.h"
     //#include "Array.h"
     //#include "Range.h"
@@ -137,8 +137,8 @@ block : '{' stmts '}' { $$ = $2; }
       | '{' '}' { $$ = new mlang::Block(); }
       ;
 
-conditional : TIF expr block TELSE block {/*$$ = new mlang::Conditional($2,$3,$5);*/}
-            | TIF expr block {/*$$ = new mlang::Conditional($2,$3);*/}
+conditional : TIF '(' expr ')' block TELSE block { $$ = new mlang::Conditional($3,$5,$7,@$); }
+            | TIF '(' expr ')' block { $$ = new mlang::Conditional($3,$5,@$); }
             ;
 
 while : TWHILE '(' expr ')' block TELSE block {/*$$ = new mlang::WhileLoop($3,$5,$7);*/}

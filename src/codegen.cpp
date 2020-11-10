@@ -28,18 +28,18 @@ namespace mlang {
         if (bb == nullptr) {
             bb = llvm::BasicBlock::Create(getGlobalContext(), "scope");
         }
-        codeBlocks.push_front(new CodeGenBlock(bb));
+        codeBlocks.push_front(new CodeGenBlock(bb, sc));
     }
 
     void CodeGenContext::endScope() {
         CodeGenBlock *top = codeBlocks.front();
         codeBlocks.pop_front();
         delete top;
-        scopeType = ScopeType::CODE_BLOCK;
+        scopeType = codeBlocks.empty() ? ScopeType::GLOBAL_BLOCK : codeBlocks.front()->getScopeType();
     }
 
     Variable *CodeGenContext::findVariable(const std::string &name, bool onlyLocals) {
-        if (scopeType == ScopeType::FUNCTION_DECL) {
+        if (scopeType != ScopeType::GLOBAL_BLOCK) {
             auto &names = locals();
             if (names.find(name) != names.end()) {
                 return names[name];
@@ -146,26 +146,33 @@ namespace mlang {
         std::vector<llvm::Type *> argTypes;
         llvm::FunctionType *ftype = llvm::FunctionType::get(llvm::Type::getVoidTy(getGlobalContext()), argTypes, false);
         initFunction = llvm::Function::Create(ftype, llvm::GlobalValue::InternalLinkage, "__mlang_init_fun",
-                                               getModule());
+                                              getModule());
         llvm::BasicBlock *bblock = llvm::BasicBlock::Create(getGlobalContext(), "entry", initFunction, 0);
         setUpBuildIns();
 
-        newScope(bblock);
+        newScope(bblock, ScopeType::GLOBAL_BLOCK);
+
+        outs << "Code gen 1...\n";
         root.codeGen(*this);
         if (errors > 0) {
             outs << "Compilation error(s). Abort.\n";
             return false;
         }
+        outs << "Code gen 2...\n";
         if (currentBlock()->getTerminator() == nullptr) {
+            outs << "Code gen 3...\n";
             llvm::ReturnInst::Create(getGlobalContext(), nullptr, currentBlock());
         }
+        outs << "Code gen 4...\n";
         endScope();
+        outs << "Code gen 5...\n";
 
         if (llvm::verifyModule(*getModule())) {
             outs << ": Error constructing fun! \n";
             printf("%s", LLVMPrintModuleToString((LLVMModuleRef) module));
             return false;
         }
+        outs << "Code gen 6...\n";
 
         // TODO
         //if(!debug) {

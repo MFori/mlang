@@ -24,6 +24,7 @@ namespace mlang {
     class Assignment;
     class FunctionCall;
     class FunctionDeclaration;
+    class Conditional;
 
     class Visitor {
     public:
@@ -58,6 +59,8 @@ namespace mlang {
         virtual void visitFunctionCall(FunctionCall *e) = 0;
 
         virtual void visitFunctionDeclaration(FunctionDeclaration *e) = 0;
+
+        virtual void visitConditional(Conditional *e) = 0;
     };
 
 }

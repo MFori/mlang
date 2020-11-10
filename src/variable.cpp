@@ -26,7 +26,7 @@ namespace mlang {
         }
 
         Variable *variable;
-        bool global = context.getScopeType() == ScopeType::CODE_BLOCK;
+        bool global = context.getScopeType() == ScopeType::GLOBAL_BLOCK;
 
         if (ty->isStructTy()) {
             bool constant = ty->getStructName() == "val";

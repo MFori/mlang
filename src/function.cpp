@@ -12,7 +12,7 @@ namespace mlang {
     llvm::Value *FunctionDeclaration::codeGen(CodeGenContext &context) {
         std::cout << "Code gen fun decl 1 \n";
 
-        if (context.getScopeType() == ScopeType::FUNCTION_DECL) {
+        if (context.getScopeType() != ScopeType::GLOBAL_BLOCK) {
             Node::printError(location, " cannot declare function inside another\n");
             context.addError();
             return nullptr;
@@ -91,7 +91,7 @@ namespace mlang {
         }
 
         context.endScope();
-        std::cout << "Code gen fun decl 4 " + fname + "\n";
+        std::cout << "Code gen fun decl 4 " + fname + ", current scope = " + (context.getScopeType() == ScopeType::GLOBAL_BLOCK ? "global" : "not global") + "\n";
         return fun;
     }
 

@@ -47,7 +47,8 @@ namespace mlang {
 
     enum class ScopeType {
         FUNCTION_DECL,
-        CODE_BLOCK
+        CODE_BLOCK,
+        GLOBAL_BLOCK
     };
 
     enum class VariableScope {
@@ -93,9 +94,14 @@ namespace mlang {
 
     class CodeGenBlock {
     public:
-        explicit CodeGenBlock(llvm::BasicBlock *bb) { block = bb; }
+        explicit CodeGenBlock(llvm::BasicBlock *bb, ScopeType sc) {
+            block = bb;
+            scopeType = sc;
+        }
 
         ~CodeGenBlock() = default;
+
+        void setCodeBlock(llvm::BasicBlock *bb) { block = bb; }
 
         llvm::BasicBlock *currentBlock() { return block; }
 
@@ -103,8 +109,11 @@ namespace mlang {
 
         VariableTypeMap &getTypeMap() { return types; }
 
+        ScopeType getScopeType() { return scopeType; }
+
     private:
         llvm::BasicBlock *block{nullptr};
+        ScopeType scopeType;
         ValueNames locals;
         VariableTypeMap types;
     };
@@ -119,13 +128,15 @@ namespace mlang {
 
         llvm::Module *getModule() const { return module; }
 
-        void newScope(llvm::BasicBlock *bb = nullptr, ScopeType sc = ScopeType::CODE_BLOCK);
+        void newScope(llvm::BasicBlock *bb, ScopeType sc);
 
         void endScope();
 
         ScopeType getScopeType() { return scopeType; }
 
         llvm::BasicBlock *currentBlock() { return codeBlocks.front()->currentBlock(); }
+
+        void setInsertPoint(llvm::BasicBlock *bblock) { setCurrentBlock(bblock); }
 
         Variable *findVariable(const std::string &name, bool onlyLocals = true);
 
@@ -160,6 +171,8 @@ namespace mlang {
         void setMainFunction(llvm::Function *function) { this->mainFunction = function; }
 
     private:
+        void setCurrentBlock(llvm::BasicBlock *block) { codeBlocks.front()->setCodeBlock(block); }
+
         std::list<CodeGenBlock *> codeBlocks;
         llvm::Function *initFunction{nullptr};
         llvm::Function *mainFunction{nullptr};

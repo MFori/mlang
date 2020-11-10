@@ -30,7 +30,7 @@ namespace mlang {
 
         if (var->getValue() == nullptr) {
             /* In this case the type deductions takes place. This is an assignment with the var/val keyword. */
-            bool global = context.getScopeType() == ScopeType::CODE_BLOCK;
+            bool global = context.getScopeType() == ScopeType::GLOBAL_BLOCK;
             llvm::Type *ty = value->getType();
 
             if (global) {
