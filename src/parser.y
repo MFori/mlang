@@ -6,7 +6,6 @@
 
 %{
     #include "ast.h"
-    //#include "CompareOperator.h"
     #include "variable.h"
     #include "binaryop.h"
     #include "unaryop.h"
@@ -14,6 +13,7 @@
     #include "assignment.h"
     #include "function.h"
     #include "conditional.h"
+    #include "comparison.h"
     //#include "WhileLoop.h"
     //#include "Array.h"
     //#include "Range.h"
@@ -84,7 +84,6 @@
 %token <token> TINC TDEC
 %token <token> TIF TELSE TWHILE
 %token <token> TFUNDEF TRETURN TVAR TVAL
-/*%token <token> INDENT UNINDENT*/
 
 /* Define the type of node our nonterminal symbols represent.
    The types refer to the %union declaration above. Ex: when
@@ -92,18 +91,23 @@
    calling an (Identifier*). It makes the compiler happy.
  */
 %type <ident> ident
-%type <expr> literals expr boolean_expr binop_expr unaryop_expr array_expr array_access  range_expr
+%type <expr> literals expr unaryop_expr binop_expr boolean_expr array_expr array_access  range_expr
 %type <varvec> func_decl_args
 %type <exprvec> call_args array_elemets_expr
 %type <block> program stmts block
 %type <stmt> stmt var_decl func_decl func_arg_decl conditional return while array_add_element
-%type <token> comparison
 
 /* Operator precedence for mathematical operators */
 %left TPLUS TMINUS
 %left TMUL TDIV
-%left TAND TNOT
-%right TINC TDEC
+%left TAND TOR TNOT
+%left TCEQ
+%left TCNE
+%left TCLT
+%left TCLE
+%left TCGT
+%left TCGE
+%left TINC TDEC
 
 %start program
 %debug
@@ -145,14 +149,6 @@ while : TWHILE '(' expr ')' block TELSE block {/*$$ = new mlang::WhileLoop($3,$5
       | TWHILE '(' expr ')' block {/*$$ = new mlang::WhileLoop($3,$5);*/}
       ;
 
-/*var_decl : ident ident { $$ = new mlang::VariableDeclaration($1, $2, @$); }
-         | ident ident '=' expr { $$ = new mlang::VariableDeclaration($1, $2, $4, @$); }
-         | TVAR ident { $$ = new mlang::VariableDeclaration($2, "var", @$); }
-         | TVAR ident '=' expr { $$ = new mlang::VariableDeclaration($2, "var", $4, @$); }
-         | TVAL ident { $$ = new mlang::VariableDeclaration($2, "val", @$); }
-         | TVAL ident '=' expr { $$ = new mlang::VariableDeclaration($2, "val", $4, @$); }
-         ;*/
-
 var_decl : TVAR ident '=' expr { $$ = new mlang::VariableDeclaration($2, "var", $4, @$); }
          | TVAL ident '=' expr { $$ = new mlang::VariableDeclaration($2, "val", $4, @$); }
          ;
@@ -178,9 +174,9 @@ expr : ident '=' expr { $$ = new mlang::Assignment($<ident>1, $3, @$); }
      | ident '(' call_args ')' { $$ = new mlang::FunctionCall($1, $3, @$);  }
      | ident { $<ident>$ = $1; }
      | literals
-     | boolean_expr
-     | binop_expr
      | unaryop_expr
+     | binop_expr
+     | boolean_expr
      | '(' expr ')' { $$ = $2; }
      | range_expr
      | array_expr
@@ -212,16 +208,18 @@ unaryop_expr : TNOT expr { $$ = new mlang::UnaryOp($1, $2, @$); }
              | expr TDEC { $$ = new mlang::UnaryOp($2, $1, @$); }
              ;
 
-boolean_expr : expr comparison expr { /*$$ = new mlang::CompOperator($1, $2, $3);*/ }
+boolean_expr : expr TCEQ expr { $$ = new mlang::Comparison($1, $2, $3, @$); }
+             | expr TCNE expr { $$ = new mlang::Comparison($1, $2, $3, @$); }
+             | expr TCLT expr { $$ = new mlang::Comparison($1, $2, $3, @$); }
+             | expr TCLE expr { $$ = new mlang::Comparison($1, $2, $3, @$); }
+             | expr TCGT expr { $$ = new mlang::Comparison($1, $2, $3, @$); }
+             | expr TCGE expr { $$ = new mlang::Comparison($1, $2, $3, @$); }
              ;
 
 call_args : %empty  { $$ = new mlang::ExpressionList(); }
           | expr { $$ = new mlang::ExpressionList(); $$->push_back($1); }
           | call_args ',' expr  { $1->push_back($3); }
           ;
-
-comparison : TCEQ | TCNE | TCLT | TCLE | TCGT | TCGE
-           ;
 
 array_elemets_expr: %empty {$$ = new mlang::ExpressionList(); }
                  | expr {$$ = new mlang::ExpressionList(); $$->push_back($1);}

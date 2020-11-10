@@ -18,19 +18,32 @@ namespace mlang {
         }
 
         if (rhsValue->getType() != lhsValue->getType()) {
+            std::cout << rhsValue->getName().str() + " - " + lhsValue->getName().str()+ " \n";
             Node::printError(location, "binary operator incompatible types");
             context.addError();
             return nullptr;
         }
 
         bool isDoubleTy = rhsValue->getType()->isFloatingPointTy();
-        bool isBoolTy = rhsValue->getType()->isIntegerTy(1);
+        bool isIntTy = rhsValue->getType()->isIntegerTy();
 
-        if ((!isBoolTy && (op == TAND || op == TOR)) || (isBoolTy && (op != TAND && op != TOR))) {
+        /*if(!isIntTy) {
+            rhsValue = llvm::CastInst::Create(llvm::CastInst::getCastOpcode(rhsValue, true, llvm::Type::getInt1Ty(context.getGlobalContext()), true),
+                                              rhsValue, llvm::Type::getInt1Ty(context.getGlobalContext()), "castb", context.currentBlock());
+            lhsValue = llvm::CastInst::Create(llvm::CastInst::getCastOpcode(lhsValue, true, llvm::Type::getInt1Ty(context.getGlobalContext()), true),
+                                              lhsValue, llvm::Type::getInt1Ty(context.getGlobalContext()), "castb", context.currentBlock());
+        }
+        isIntTy = rhsValue->getType()->isIntegerTy();*/
+
+        if (!isIntTy && (op == TAND || op == TOR)) {
             Node::printError(location, "unsupported operation");
             context.addError();
             return nullptr;
-        }
+        } /*else if(isIntTy && (op != TAND && op != TOR)) {
+            Node::printError(location, "unsupported operation 2");
+            context.addError();
+            return nullptr;
+        }*/
 
         llvm::Instruction::BinaryOps instr;
         switch (op) {

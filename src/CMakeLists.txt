@@ -50,6 +50,7 @@ set(SOURCES_COMMON
         function.cpp
         unaryop.cpp
         conditional.cpp
+        comparison.cpp
         lexer.l
         parser.y
         )
@@ -66,6 +67,7 @@ set(HEADER_COMMON
         function.h
         unaryop.h
         conditional.h
+        comparison.h
         )
 
 if (MSVC)
