@@ -50,7 +50,7 @@ namespace mlang {
         std::cout << "code gen id " << name << "\n";
 
         Variable *var = context.findVariable(name, false);
-        if (var != nullptr) {
+        if (var != nullptr && var->getValue() != nullptr) {
             return new llvm::LoadInst(var->getType(), var->getValue(), name, false, context.currentBlock());
         }
 

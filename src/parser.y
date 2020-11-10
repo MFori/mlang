@@ -8,7 +8,6 @@
     #include "ast.h"
     //#include "Conditional.h"
     //#include "UnaryOperator.h"
-    //#include "BinaryOperator.h"
     //#include "CompareOperator.h"
     #include "variable.h"
     #include "binaryop.h"

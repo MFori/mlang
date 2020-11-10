@@ -80,7 +80,6 @@ import              BEGIN(incl);
                        parsing_error = 1;
                        yyterminate();
                     } else {
-                        printf("filenames push %s", yytext);
                        fileNames.push(yytext);
                        lineNo.push(yylineno);
                        yylineno = yycolumn = 1;
@@ -122,10 +121,8 @@ import              BEGIN(incl);
 
 <normal>"\n"     { yycolumn = 1; }
 <<EOF>>          {
-                    printf("eof!!\n");
                    if(lineNo.size() > 1 ) {
                        yypop_buffer_state();
-                       printf("filenames pop to %s", fileNames.top());
                        fileNames.pop();
                        yylineno = lineNo.top();
                        lineNo.pop();
@@ -148,7 +145,7 @@ import              BEGIN(incl);
 "while"                 return TOKEN(TWHILE);
 "true"                  SAVE_BOOLEAN; return TBOOL;
 "false"                 SAVE_BOOLEAN; return TBOOL;
-#.*                     /* comments one line til nl */
+\/\/.*                     /* comments one line til nl */
 [ \t\n]                 /* ignore */;
 [a-zA-Z_][a-zA-Z0-9_&%\$\?\-]*  SAVE_TOKEN; return TIDENTIFIER;
 -?[0-9]+                SAVE_INTEGER; return TINTEGER;
@@ -176,6 +173,6 @@ import              BEGIN(incl);
 ":"                     return ':';
 "["                     return '[';
 "]"                     return ']';
-.                       printf("line %d, len %d Unknown token %s !\n", yylineno, yyleng, yytext); yyterminate();
+.                       {printf("%s: line %d, len %d Unknown token %s !\n", fileNames.top(), yylineno, yyleng, yytext); parsing_error = 1; yyterminate();}
 
 %%
