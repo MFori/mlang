@@ -13,7 +13,7 @@ namespace mlang {
 
     class UnaryOp : public Expression {
     public:
-        explicit UnaryOp(int op, Expression *rhs, YYLTYPE location) : op(op), rhs(rhs),  location(location) {}
+        explicit UnaryOp(int op, Expression *lhs, Expression *rhs, YYLTYPE location) : op(op), rhs(rhs), lhs(lhs), location(location) {}
 
         ~UnaryOp() override { delete rhs; }
 
@@ -26,8 +26,11 @@ namespace mlang {
         void accept(Visitor &v) override { v.visitUnaryOp(this); }
 
     private:
+        llvm::Value *incDecCodeGen(CodeGenContext &context);
+
         int op{0};
         Expression *rhs;
+        Expression *lhs;
         YYLTYPE location;
     };
 
