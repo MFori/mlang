@@ -51,8 +51,8 @@ std::vector<std::string> libPaths;
 %x incl
 
 dig     [0-9]
-num1    [-+]?{dig}+\.([eE][-+]?{dig}+)?
-num2    [-+]?{dig}*\.{dig}+([eE][-+]?{dig}+)?
+num1    {dig}+\.([eE][-+]?{dig}+)?
+num2    {dig}*\.{dig}+([eE][-+]?{dig}+)?
 number  {num1}|{num2}
 
 %%
@@ -92,7 +92,7 @@ import              BEGIN(incl);
 
 \/\*                BEGIN(comment);
 <comment>\*\/       BEGIN(normal);
-<comment>.*         ;/* eat everything */
+<comment>.          ;/* eat everything */
 <comment>\n         ;/* eat everything */
 
 \"      g_str = ""; BEGIN(str);
@@ -143,12 +143,13 @@ import              BEGIN(incl);
 "var"                   return TOKEN(TVAR);
 "val"                   return TOKEN(TVAL);
 "while"                 return TOKEN(TWHILE);
+"do"                    return TOKEN(TDO);
 "true"                  SAVE_BOOLEAN; return TBOOL;
 "false"                 SAVE_BOOLEAN; return TBOOL;
 \/\/.*                     /* comments one line til nl */
 [ \t\n]                 /* ignore */;
 [a-zA-Z_][a-zA-Z0-9_]*  SAVE_TOKEN; return TIDENTIFIER;
--?[0-9]+                SAVE_INTEGER; return TINTEGER;
+[0-9]+                SAVE_INTEGER; return TINTEGER;
 {number}                SAVE_NUMBER; return TDOUBLE;
 "->"                    return TOKEN(TRANGE);
 "::"                    return TOKEN(TRANGE);

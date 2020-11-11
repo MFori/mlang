@@ -14,7 +14,7 @@
     #include "function.h"
     #include "conditional.h"
     #include "comparison.h"
-    //#include "WhileLoop.h"
+    #include "WhileLoop.h"
     //#include "Array.h"
     //#include "Range.h"
 
@@ -82,7 +82,7 @@
 %token <token> TPLUS TMINUS TMUL TDIV
 %token <token> TNOT TAND TOR
 %token <token> TINC TDEC
-%token <token> TIF TELSE TWHILE
+%token <token> TIF TELSE TWHILE TDO
 %token <token> TFUNDEF TRETURN TVAR TVAL
 
 /* Define the type of node our nonterminal symbols represent.
@@ -90,14 +90,15 @@
    we call an ident (defined by union type ident) we are really
    calling an (Identifier*). It makes the compiler happy.
  */
+%type <expr> expr unaryop_expr binop_expr boolean_expr array_expr array_access range_expr literals
 %type <ident> ident
-%type <expr> literals expr unaryop_expr binop_expr boolean_expr array_expr array_access  range_expr
 %type <varvec> func_decl_args
 %type <exprvec> call_args array_elemets_expr
 %type <block> program stmts block
 %type <stmt> stmt var_decl func_decl func_arg_decl conditional return while array_add_element
 
 /* Operator precedence for mathematical operators */
+%left TINTEGER
 %left TPLUS TMINUS
 %left TMUL TDIV
 %left TAND TOR TNOT
@@ -145,8 +146,8 @@ conditional : TIF '(' expr ')' block TELSE block { $$ = new mlang::Conditional($
             | TIF '(' expr ')' block { $$ = new mlang::Conditional($3,$5,@$); }
             ;
 
-while : TWHILE '(' expr ')' block TELSE block {/*$$ = new mlang::WhileLoop($3,$5,$7);*/}
-      | TWHILE '(' expr ')' block {/*$$ = new mlang::WhileLoop($3,$5);*/}
+while : TWHILE '(' expr ')' block { $$ = new mlang::WhileLoop($3,$5,0,@$); }
+      | TDO block TWHILE '(' expr ')' { $$ = new mlang::WhileLoop($5,$2,1,@$); }
       ;
 
 var_decl : TVAR ident '=' expr { $$ = new mlang::VariableDeclaration($2, "var", $4, @$); }
@@ -172,8 +173,6 @@ return : TRETURN { $$ = new mlang::Return(@$); }
 
 expr : ident '=' expr { $$ = new mlang::Assignment($<ident>1, $3, @$); }
      | ident '(' call_args ')' { $$ = new mlang::FunctionCall($1, $3, @$);  }
-     | ident { $<ident>$ = $1; }
-     | literals
      | unaryop_expr
      | binop_expr
      | boolean_expr
@@ -181,6 +180,8 @@ expr : ident '=' expr { $$ = new mlang::Assignment($<ident>1, $3, @$); }
      | range_expr
      | array_expr
      | array_access
+     | ident { $<ident>$ = $1; }
+     | literals
      ;
 
 ident : TIDENTIFIER { $$ = new mlang::Identifier(*$1, @1); delete $1; }
@@ -201,11 +202,13 @@ binop_expr : expr TAND expr { $$ = new mlang::BinaryOp($1, $2, $3, @$); }
            | expr TDIV expr { $$ = new mlang::BinaryOp($1, $2, $3, @$); }
            ;
 
-unaryop_expr : TNOT expr { $$ = new mlang::UnaryOp($1, $2, @$); }
-             | TMINUS expr { $$ = new mlang::UnaryOp($1, $2, @$); }
-             | TPLUS expr { $$ = new mlang::UnaryOp($1, $2, @$); }
-             | expr TINC { $$ = new mlang::UnaryOp($2, $1, @$); }
-             | expr TDEC { $$ = new mlang::UnaryOp($2, $1, @$); }
+unaryop_expr : TNOT expr { $$ = new mlang::UnaryOp($1, 0, $2, @$); }
+             | TMINUS expr { $$ = new mlang::UnaryOp($1, 0, $2, @$); }
+             | TPLUS expr { $$ = $2; }
+             | expr TINC { $$ = new mlang::UnaryOp($2, $1, 0, @$); }
+             | expr TDEC { $$ = new mlang::UnaryOp($2, $1, 0, @$); }
+             | TINC expr { $$ = new mlang::UnaryOp($1, 0, $2, @$); }
+             | TDEC expr { $$ = new mlang::UnaryOp($1, 0, $2, @$); }
              ;
 
 boolean_expr : expr TCEQ expr { $$ = new mlang::Comparison($1, $2, $3, @$); }

@@ -26,6 +26,7 @@ namespace mlang {
     class FunctionDeclaration;
     class Conditional;
     class Comparison;
+    class WhileLoop;
 
     class Visitor {
     public:
@@ -64,6 +65,8 @@ namespace mlang {
         virtual void visitConditional(Conditional *e) = 0;
 
         virtual void visitComparison(Comparison *e) = 0;
+
+        virtual void visitWhileLoop(WhileLoop *e) = 0;
     };
 
 }

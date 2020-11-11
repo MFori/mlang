@@ -51,6 +51,7 @@ set(SOURCES_COMMON
         unaryop.cpp
         conditional.cpp
         comparison.cpp
+        whileloop.cpp
         lexer.l
         parser.y
         )
@@ -68,6 +69,7 @@ set(HEADER_COMMON
         unaryop.h
         conditional.h
         comparison.h
+        whileloop.h
         )
 
 if (MSVC)

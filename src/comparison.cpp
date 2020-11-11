@@ -28,12 +28,12 @@ namespace mlang {
             return nullptr;
         }*/
         if (!lhsVal->getType()->isDoubleTy() && !lhsVal->getType()->isIntegerTy()) {
-            Node::printError("Left hand side of compare expression isn't a value type (number)");
+            Node::printError(location,"Left hand side of compare expression isn't a value type (number)");
             context.addError();
             return nullptr;
         }
         if (!rhsVal->getType()->isDoubleTy() && !rhsVal->getType()->isIntegerTy()) {
-            Node::printError("Right hand side of compare expression isn't a value type (number)");
+            Node::printError(location,"Right hand side of compare expression isn't a value type (number)");
             context.addError();
             return nullptr;
         }
@@ -69,7 +69,7 @@ namespace mlang {
                 predicate = isDouble ? llvm::CmpInst::FCMP_ONE : llvm::CmpInst::ICMP_NE;
                 break;
             default:
-                Node::printError("Unknown compare operator.");
+                Node::printError(location,"Unknown compare operator.");
                 context.addError();
                 return nullptr;
         }
