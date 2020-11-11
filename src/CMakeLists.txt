@@ -52,6 +52,7 @@ set(SOURCES_COMMON
         conditional.cpp
         comparison.cpp
         whileloop.cpp
+        forloop.cpp
         lexer.l
         parser.y
         )
@@ -70,6 +71,7 @@ set(HEADER_COMMON
         conditional.h
         comparison.h
         whileloop.h
+        forloop.h
         )
 
 if (MSVC)
