@@ -135,7 +135,6 @@ import              BEGIN(incl);
 \r                      /* cr are ignored */
 "if"                    return TOKEN(TIF);
 "else"                  return TOKEN(TELSE);
-"return"                return TOKEN(TRETURN);
 "not"                   return TOKEN(TNOT);
 "and"                   return TOKEN(TAND);
 "or"                    return TOKEN(TOR);
@@ -149,6 +148,8 @@ import              BEGIN(incl);
 "until"                 return TOKEN(TUNTIL);
 "to"                    return TOKEN(TTO);
 "step"                  return TOKEN(TSTEP);
+"return"                return TOKEN(TRETURN);
+"break"                 return TOKEN(TBREAK);
 "true"                  SAVE_BOOLEAN; return TBOOL;
 "false"                 SAVE_BOOLEAN; return TBOOL;
 \/\/.*                     /* comments one line til nl */

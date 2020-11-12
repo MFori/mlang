@@ -10,7 +10,7 @@
 namespace mlang {
 
     llvm::Value *FunctionDeclaration::codeGen(CodeGenContext &context) {
-        std::cout << "Code gen fun decl 1 \n";
+        std::cout << "Code gen fun decl " << id->getName();
 
         if (context.getScopeType() != ScopeType::GLOBAL_BLOCK) {
             Node::printError(location, " cannot declare function inside another\n");
@@ -32,29 +32,21 @@ namespace mlang {
             argTypes.push_back(ty);
         }
 
-        std::cout << "Code gen fun decl 2 \n" << type->getName() << "\n";
         llvm::Type *t = context.typeOf(*type);
-        std::cout << "Code gen fun decl 2.0.1 \n";
-        if (t == nullptr) {
+         if (t == nullptr) {
             Node::printError(location, " undefined data type: '" + type->getName() + "'\n");
             context.addError();
             return nullptr;
         }
 
-        std::cout << "Code gen fun decl 2.0.2 " << argTypes.size() << "\n";
         // TODO check return type if it is a structure type !!! May be it should be a ptr to the structure!
         llvm::FunctionType *ftype = llvm::FunctionType::get(t, argTypes, false);
-        std::cout << "Code gen fun decl 2.1 \n";
         std::string fname = id->getName();
-        std::cout << "Code gen fun decl 2.2 " + fname + "\n";
         llvm::Function *fun = llvm::Function::Create(ftype, llvm::GlobalValue::InternalLinkage, fname,
                                                      context.getModule());
-        std::cout << "Code gen fun decl 2.3 " + fname + "\n";
         llvm::BasicBlock *bblock = llvm::BasicBlock::Create(context.getGlobalContext(), "entry", fun, nullptr);
-        std::cout << "Code gen fun decl 2.4 " + fname + "\n";
         context.newScope(bblock, ScopeType::FUNCTION_DECL);
 
-        std::cout << "Code gen fun decl 3 " + fname + "\n";
         llvm::Function::arg_iterator actualArgs = fun->arg_begin();
         for (auto varDecl : *arguments) {
             auto *allocaInst = llvm::dyn_cast<llvm::AllocaInst>(varDecl->codeGen(context));
@@ -91,7 +83,6 @@ namespace mlang {
         }
 
         context.endScope();
-        std::cout << "Code gen fun decl 4 " + fname + ", current scope = " + (context.getScopeType() == ScopeType::GLOBAL_BLOCK ? "global" : "not global") + "\n";
         return fun;
     }
 

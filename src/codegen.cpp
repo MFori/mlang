@@ -23,12 +23,12 @@ namespace mlang {
         module = new llvm::Module("mlang", llvmContext);
     }
 
-    void CodeGenContext::newScope(llvm::BasicBlock *bb, ScopeType sc) {
+    void CodeGenContext::newScope(llvm::BasicBlock *bb, ScopeType sc, llvm::BasicBlock *exitBB) {
         scopeType = sc;
         if (bb == nullptr) {
             bb = llvm::BasicBlock::Create(getGlobalContext(), "scope");
         }
-        codeBlocks.push_front(new CodeGenBlock(bb, sc));
+        codeBlocks.push_front(new CodeGenBlock(bb, sc, exitBB));
     }
 
     void CodeGenContext::endScope() {
@@ -208,9 +208,6 @@ namespace mlang {
     }
 
     std::string CodeGenContext::getType(std::string varName) {
-        //if (varName == "self") {
-        //    return klassName;
-        //}
         for (auto &cb : codeBlocks) {
             auto iter = cb->getTypeMap().find(varName);
             if (iter != std::end(cb->getTypeMap())) {
@@ -218,6 +215,24 @@ namespace mlang {
             }
         }
         return std::string("");
+    }
+
+    llvm::BasicBlock *CodeGenContext::getExitBlockFromCurrent() {
+        for (auto &cb : codeBlocks) {
+            auto exitBB = cb->getExitBlock();
+            if (exitBB != nullptr) {
+                return exitBB;
+            }
+        }
+
+        return nullptr;
+    }
+
+    bool CodeGenContext::isBreakingInstruction(llvm::Value *value) {
+        if (value == nullptr) {
+            return false;
+        }
+        return llvm::ReturnInst::classof(value) || llvm::BranchInst::classof(value);
     }
 
     llvm::Type *Variable::getType() {

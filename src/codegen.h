@@ -94,9 +94,10 @@ namespace mlang {
 
     class CodeGenBlock {
     public:
-        explicit CodeGenBlock(llvm::BasicBlock *bb, ScopeType sc) {
+        explicit CodeGenBlock(llvm::BasicBlock *bb, ScopeType sc, llvm::BasicBlock *exitBB = nullptr) {
             block = bb;
             scopeType = sc;
+            exitBlock = exitBB;
         }
 
         ~CodeGenBlock() = default;
@@ -111,8 +112,11 @@ namespace mlang {
 
         ScopeType getScopeType() { return scopeType; }
 
+        llvm::BasicBlock *getExitBlock() { return exitBlock; }
+
     private:
         llvm::BasicBlock *block{nullptr};
+        llvm::BasicBlock *exitBlock{nullptr};
         ScopeType scopeType;
         ValueNames locals;
         VariableTypeMap types;
@@ -128,13 +132,15 @@ namespace mlang {
 
         llvm::Module *getModule() const { return module; }
 
-        void newScope(llvm::BasicBlock *bb, ScopeType sc);
+        void newScope(llvm::BasicBlock *bb, ScopeType sc, llvm::BasicBlock *exitBB = nullptr);
 
         void endScope();
 
         ScopeType getScopeType() { return scopeType; }
 
         llvm::BasicBlock *currentBlock() { return codeBlocks.front()->currentBlock(); }
+
+        llvm::BasicBlock *getExitBlockFromCurrent();
 
         void setInsertPoint(llvm::BasicBlock *bblock) { setCurrentBlock(bblock); }
 
@@ -169,6 +175,8 @@ namespace mlang {
         void addError() { ++errors; }
 
         void setMainFunction(llvm::Function *function) { this->mainFunction = function; }
+
+        static bool isBreakingInstruction(llvm::Value *value);
 
     private:
         void setCurrentBlock(llvm::BasicBlock *block) { codeBlocks.front()->setCodeBlock(block); }

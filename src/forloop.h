@@ -8,15 +8,19 @@
 #define MLANG_FORLOOP_H
 
 #include "ast.h"
+#include "range.h"
 
 namespace mlang {
 
     class ForLoop : public Statement {
     public:
-        explicit ForLoop(YYLTYPE location): location(location) {}
+        explicit ForLoop(Identifier *id, Range *range, Expression *step, Block *block, YYLTYPE location)
+                : ident(id), range(range), step(step), doBlock(block), location(location) {}
 
         ~ForLoop() override {
-
+            delete ident;
+            delete range;
+            delete step;
         }
 
         llvm::Value *codeGen(CodeGenContext &context) override;
@@ -28,6 +32,10 @@ namespace mlang {
         void accept(Visitor &v) override { v.visitForLoop(this); }
 
     private:
+        Identifier *ident{nullptr};
+        Range *range{nullptr};
+        Expression *step{nullptr};
+        Block *doBlock{nullptr};
         YYLTYPE location;
     };
 

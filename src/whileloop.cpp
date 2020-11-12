@@ -34,14 +34,11 @@ namespace mlang {
 
         function->getBasicBlockList().push_back(loopBB);
         context.endScope();
-        context.newScope(loopBB, ScopeType::CODE_BLOCK);
+        context.newScope(loopBB, ScopeType::CODE_BLOCK, afterBB);
         llvm::Value *loopValue = this->doBlock->codeGen(context);
-        if (loopValue == nullptr) {
-            Node::printError(location, "Code gen for loop value in while loop failed.");
-            context.addError();
-            return nullptr;
+        if (loopValue == nullptr || !mlang::CodeGenContext::isBreakingInstruction(loopValue)) {
+            llvm::BranchInst::Create(condBB, context.currentBlock());
         }
-        llvm::BranchInst::Create(condBB, context.currentBlock());
 
         function->getBasicBlockList().push_back(afterBB);
         context.endScope();

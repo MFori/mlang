@@ -13,7 +13,7 @@ namespace mlang {
 
     class Return : public Statement {
     public:
-        Return(YYLTYPE location, Expression *expr = nullptr) : returnExpression(expr), location(location) {}
+        explicit Return(YYLTYPE location, Expression *expr = nullptr) : returnExpression(expr), location(location) {}
 
         ~Return() override { delete returnExpression; }
 

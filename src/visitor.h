@@ -28,6 +28,8 @@ namespace mlang {
     class Comparison;
     class WhileLoop;
     class ForLoop;
+    class Range;
+    class Break;
 
     class Visitor {
     public:
@@ -70,6 +72,10 @@ namespace mlang {
         virtual void visitWhileLoop(WhileLoop *e) = 0;
 
         virtual void visitForLoop(ForLoop *e) = 0;
+
+        virtual void visitRange(Range *e) = 0;
+
+        virtual void visitBreakStatement(Break *e) = 0;
     };
 
 }

@@ -47,7 +47,7 @@ namespace mlang {
     }
 
     llvm::Value *Identifier::codeGen(CodeGenContext &context) {
-        std::cout << "code gen id " << name << "\n";
+        std::cout << "code gen id " << name << " 1 \n";
 
         Variable *var = context.findVariable(name, false);
         if (var != nullptr && var->getValue() != nullptr) {
@@ -63,6 +63,9 @@ namespace mlang {
         llvm::Value *last = nullptr;
         for (auto s: statements) {
             last = s->codeGen(context);
+            if (mlang::CodeGenContext::isBreakingInstruction(last)) {
+                break;
+            }
         }
         return last;
     }

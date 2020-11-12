@@ -10,12 +10,14 @@
     #include "binaryop.h"
     #include "unaryop.h"
     #include "return.h"
+    #include "break.h"
     #include "assignment.h"
     #include "function.h"
     #include "conditional.h"
     #include "comparison.h"
     #include "whileloop.h"
     #include "forloop.h"
+    #include "range.h"
     //#include "Array.h"
     //#include "Range.h"
 
@@ -59,6 +61,7 @@
     mlang::Expression *expr;
     mlang::Statement *stmt;
     mlang::Identifier *ident;
+    mlang::Range *range;
     mlang::VariableDeclaration *var_decl;
     std::vector<mlang::VariableDeclaration*> *varvec;
     std::vector<mlang::Expression*> *exprvec;
@@ -83,7 +86,7 @@
 %token <token> TNOT TAND TOR
 %token <token> TINC TDEC
 %token <token> TIF TELSE TWHILE TDO TFOR TIN TUNTIL TTO TSTEP
-%token <token> TFUNDEF TRETURN TVAR TVAL
+%token <token> TFUNDEF TRETURN TBREAK TVAR TVAL
 
 /* Define the type of node our nonterminal symbols represent.
    The types refer to the %union declaration above. Ex: when
@@ -95,7 +98,8 @@
 %type <varvec> func_decl_args
 %type <exprvec> call_args array_elemets_expr
 %type <block> program stmts block
-%type <stmt> stmt var_decl func_decl func_arg_decl conditional return while for range array_add_element
+%type <stmt> stmt var_decl func_decl func_arg_decl conditional return break while for array_add_element
+%type <range> range
 
 /* Operator precedence for mathematical operators */
 %left TINTEGER
@@ -133,6 +137,7 @@ stmt : var_decl
      | func_decl
      | conditional
      | return
+     | break
      | while
      | for
      | array_add_element
@@ -164,6 +169,8 @@ return : TRETURN { $$ = new mlang::Return(@$); }
        | TRETURN expr { $$ = new mlang::Return(@$, $2); }
        ;
 
+break : TBREAK { $$ = new mlang::Break(@$); }
+
 expr : ident '=' expr { $$ = new mlang::Assignment($<ident>1, $3, @$); }
      | ident '(' call_args ')' { $$ = new mlang::FunctionCall($1, $3, @$);  }
      | unaryop_expr
@@ -193,12 +200,12 @@ while : TWHILE '(' expr ')' block { $$ = new mlang::WhileLoop($3,$5,0,@$); }
       | TDO block TWHILE '(' expr ')' { $$ = new mlang::WhileLoop($5,$2,1,@$); }
       ;
 
-for : TFOR '(' TIDENTIFIER TIN range ')' block { }
-    | TFOR '(' TIDENTIFIER TIN range TSTEP expr ')' block { }
+for : TFOR '(' ident TIN range ')' block { $$ = new mlang::ForLoop($3, $<range>5, 0, $7, @$); }
+    | TFOR '(' ident TIN range TSTEP expr ')' block { $$ = new mlang::ForLoop($3, $<range>5, $7, $9, @$); }
     ;
 
-range : expr TUNTIL expr { }
-      | expr TTO expr { }
+range : expr TUNTIL expr { $$ = new mlang::Range($1, $2, $3, @$); }
+      | expr TTO expr { $$ = new mlang::Range($1, $2, $3, @$); }
       ;
 
 /* have to write it explicit to have the right operator precedence */
