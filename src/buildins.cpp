@@ -30,3 +30,7 @@ extern "C" DECLSPEC void fprintln(FILE *const stream, char *str, va_list args) {
     vfprintf(stream, out, args);
     free(out);
 }
+
+extern "C" DECLSPEC int read() {
+    return getchar();
+}

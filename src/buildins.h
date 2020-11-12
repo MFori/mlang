@@ -19,4 +19,6 @@ extern "C" DECLSPEC void fprint(FILE *stream, char *str, va_list args);
 
 extern "C" DECLSPEC void fprintln(FILE *stream, char *str, va_list args);
 
+extern "C" DECLSPEC int read();
+
 #endif /* MLANG_BUILDINS_H */

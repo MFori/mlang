@@ -116,17 +116,28 @@ namespace mlang {
         llvmTypeMap["val"] = valType;
 
         std::vector<llvm::Type *> argTypesOneInt(1, intType);
-        llvm::FunctionType *ft = llvm::FunctionType::get(intType, argTypesOneInt, false);
-
         std::vector<llvm::Type *> argTypesInt8Ptr(1, llvm::Type::getInt8PtrTy(getGlobalContext()));
-        ft = llvm::FunctionType::get(llvm::Type::getVoidTy(getGlobalContext()), argTypesInt8Ptr, true);
-        llvm::Function *f = llvm::Function::Create(ft, llvm::Function::ExternalLinkage, MAKE_LLVM_EXTERNAL_NAME(print),
-                                                   getModule());
+
+        llvm::FunctionType *ft = llvm::FunctionType::get(llvm::Type::getVoidTy(getGlobalContext()), argTypesInt8Ptr, true);
+        llvm::Function *f = llvm::Function::Create(ft, llvm::Function::ExternalLinkage, MAKE_LLVM_EXTERNAL_NAME(print),getModule());
         llvm::Function::arg_iterator i = f->arg_begin();
         if (i != f->arg_end()) {
             i->setName("format_str");
         }
         buildins.push_back({f, (void *) print});
+
+        ft = llvm::FunctionType::get(llvm::Type::getVoidTy(getGlobalContext()), argTypesInt8Ptr, true);
+        f = llvm::Function::Create(ft, llvm::Function::ExternalLinkage, MAKE_LLVM_EXTERNAL_NAME(println),getModule());
+        i = f->arg_begin();
+        if (i != f->arg_end()) {
+            i->setName("format_str");
+        }
+        buildins.push_back({f, (void *) println});
+
+
+        ft = llvm::FunctionType::get(llvm::Type::getInt8Ty(getGlobalContext()), false);
+        f = llvm::Function::Create(ft, llvm::Function::ExternalLinkage, MAKE_LLVM_EXTERNAL_NAME(read),getModule());
+        buildins.push_back({f, (int *) read});
     }
 
     void CodeGenContext::optimize() {
