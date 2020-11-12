@@ -55,6 +55,7 @@ set(SOURCES_COMMON
         forloop.cpp
         range.cpp
         break.cpp
+        ternaryop.cpp
         lexer.l
         parser.y
         )
@@ -74,6 +75,7 @@ set(HEADER_COMMON
         comparison.h
         whileloop.h
         forloop.h
+        ternaryop.h
         range.h
         break.h
         )

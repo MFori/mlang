@@ -178,6 +178,7 @@ import              BEGIN(incl);
 "++"                    return TOKEN(TINC);
 "--"                    return TOKEN(TDEC);
 ":"                     return ':';
+"?"                     return '?';
 "["                     return '[';
 "]"                     return ']';
 .                       {printf("%s: line %d, len %d Unknown token %s !\n", fileNames.top(), yylineno, yyleng, yytext); parsing_error = 1; yyterminate();}

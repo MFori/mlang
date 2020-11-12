@@ -7,11 +7,12 @@
 %{
     #include "ast.h"
     #include "variable.h"
-    #include "binaryop.h"
+    #include "assignment.h"
     #include "unaryop.h"
+    #include "binaryop.h"
+    #include "ternaryop.h"
     #include "return.h"
     #include "break.h"
-    #include "assignment.h"
     #include "function.h"
     #include "conditional.h"
     #include "comparison.h"
@@ -19,7 +20,6 @@
     #include "forloop.h"
     #include "range.h"
     //#include "Array.h"
-    //#include "Range.h"
 
     #include <stdio.h>
     #include <stack>
@@ -93,7 +93,7 @@
    we call an ident (defined by union type ident) we are really
    calling an (Identifier*). It makes the compiler happy.
  */
-%type <expr> expr unaryop_expr binop_expr boolean_expr array_expr array_access literals
+%type <expr> expr unaryop_expr binop_expr ternop_expr boolean_expr array_expr array_access literals
 %type <ident> ident
 %type <varvec> func_decl_args
 %type <exprvec> call_args array_elemets_expr
@@ -175,6 +175,7 @@ expr : ident '=' expr { $$ = new mlang::Assignment($<ident>1, $3, @$); }
      | ident '(' call_args ')' { $$ = new mlang::FunctionCall($1, $3, @$);  }
      | unaryop_expr
      | binop_expr
+     | ternop_expr
      | boolean_expr
      | '(' expr ')' { $$ = $2; }
      | array_expr
@@ -225,6 +226,9 @@ unaryop_expr : TNOT expr { $$ = new mlang::UnaryOp($1, 0, $2, @$); }
              | TINC expr { $$ = new mlang::UnaryOp($1, 0, $2, @$); }
              | TDEC expr { $$ = new mlang::UnaryOp($1, 0, $2, @$); }
              ;
+
+ternop_expr : expr '?' expr ':' expr { $$ = new mlang::TernaryOp($1, $3, $5, @$); }
+            ;
 
 boolean_expr : expr TCEQ expr { $$ = new mlang::Comparison($1, $2, $3, @$); }
              | expr TCNE expr { $$ = new mlang::Comparison($1, $2, $3, @$); }

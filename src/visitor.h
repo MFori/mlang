@@ -20,6 +20,7 @@ namespace mlang {
     class VariableDeclaration;
     class BinaryOp;
     class UnaryOp;
+    class TernaryOp;
     class Return;
     class Assignment;
     class FunctionCall;
@@ -56,6 +57,8 @@ namespace mlang {
         virtual void visitBinaryOp(BinaryOp *e) = 0;
 
         virtual void visitUnaryOp(UnaryOp *e) = 0;
+
+        virtual void visitTernaryOp(TernaryOp *e) = 0;
 
         virtual void visitReturnStatement(Return *e) = 0;
 
