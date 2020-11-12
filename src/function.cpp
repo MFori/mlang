@@ -33,7 +33,7 @@ namespace mlang {
         }
 
         llvm::Type *t = context.typeOf(*type);
-         if (t == nullptr) {
+        if (t == nullptr) {
             Node::printError(location, " undefined data type: '" + type->getName() + "'\n");
             context.addError();
             return nullptr;
@@ -63,18 +63,33 @@ namespace mlang {
         }
 
         auto blockValue = block->codeGen(context);
-        if (blockValue == nullptr) {
-            Node::printError(location, id->getName() + "(): Function block returns nothing");
-            context.addError();
-            return nullptr;
-        }
-        auto retTy = blockValue->getType();
 
-        if (context.currentBlock()->getTerminator() == nullptr) {
-            if (type->getName() == "Void" && retTy->isVoidTy()) {
+
+        if (blockValue == nullptr) {
+            if (t->isVoidTy()) {
                 llvm::ReturnInst::Create(context.getGlobalContext(), nullptr, context.currentBlock());
             } else {
+                Node::printError(location, id->getName() + "(): Function invalid return value");
+                context.addError();
+                return nullptr;
+            }
+        } else {
+            auto retTy = blockValue->getType();
+            bool hasReturn = llvm::ReturnInst::classof(blockValue);
+            if (hasReturn) {
+                auto returnValue = ((llvm::ReturnInst *) blockValue)->getReturnValue();
+                retTy = returnValue == nullptr ? llvm::Type::getVoidTy(context.getGlobalContext())
+                                               : returnValue->getType();
+            }
+
+            if(!hasReturn && t->isVoidTy()) {
+                llvm::ReturnInst::Create(context.getGlobalContext(), nullptr, context.currentBlock());
+            } else if(!hasReturn && retTy == t) {
                 llvm::ReturnInst::Create(context.getGlobalContext(), blockValue, context.currentBlock());
+            } else if(retTy != t) {
+                Node::printError(location, id->getName() + "(): Function invalid return value");
+                context.addError();
+                return nullptr;
             }
         }
 
