@@ -21,6 +21,7 @@ namespace mlang {
         llvm::InitializeNativeTargetAsmParser();
         llvm::InitializeNativeTargetAsmPrinter();
         module = new llvm::Module("mlang", llvmContext);
+        builder = new llvm::IRBuilder<>(llvmContext);
     }
 
     void CodeGenContext::newScope(llvm::BasicBlock *bb, ScopeType sc, llvm::BasicBlock *exitBB) {
@@ -118,8 +119,10 @@ namespace mlang {
         std::vector<llvm::Type *> argTypesOneInt(1, intType);
         std::vector<llvm::Type *> argTypesInt8Ptr(1, llvm::Type::getInt8PtrTy(getGlobalContext()));
 
-        llvm::FunctionType *ft = llvm::FunctionType::get(llvm::Type::getVoidTy(getGlobalContext()), argTypesInt8Ptr, true);
-        llvm::Function *f = llvm::Function::Create(ft, llvm::Function::ExternalLinkage, MAKE_LLVM_EXTERNAL_NAME(print),getModule());
+        llvm::FunctionType *ft = llvm::FunctionType::get(llvm::Type::getVoidTy(getGlobalContext()), argTypesInt8Ptr,
+                                                         true);
+        llvm::Function *f = llvm::Function::Create(ft, llvm::Function::ExternalLinkage, MAKE_LLVM_EXTERNAL_NAME(print),
+                                                   getModule());
         llvm::Function::arg_iterator i = f->arg_begin();
         if (i != f->arg_end()) {
             i->setName("format_str");
@@ -127,7 +130,7 @@ namespace mlang {
         buildins.push_back({f, (void *) print});
 
         ft = llvm::FunctionType::get(llvm::Type::getVoidTy(getGlobalContext()), argTypesInt8Ptr, true);
-        f = llvm::Function::Create(ft, llvm::Function::ExternalLinkage, MAKE_LLVM_EXTERNAL_NAME(println),getModule());
+        f = llvm::Function::Create(ft, llvm::Function::ExternalLinkage, MAKE_LLVM_EXTERNAL_NAME(println), getModule());
         i = f->arg_begin();
         if (i != f->arg_end()) {
             i->setName("format_str");
@@ -136,7 +139,7 @@ namespace mlang {
 
 
         ft = llvm::FunctionType::get(llvm::Type::getInt8Ty(getGlobalContext()), false);
-        f = llvm::Function::Create(ft, llvm::Function::ExternalLinkage, MAKE_LLVM_EXTERNAL_NAME(read),getModule());
+        f = llvm::Function::Create(ft, llvm::Function::ExternalLinkage, MAKE_LLVM_EXTERNAL_NAME(read), getModule());
         buildins.push_back({f, (int *) read});
     }
 
@@ -180,8 +183,8 @@ namespace mlang {
 
         if (llvm::verifyModule(*getModule())) {
             outs << ": Error constructing fun! \n";
-            printf("%s", LLVMPrintModuleToString((LLVMModuleRef) module));
-            return false;
+            // printf("%s", LLVMPrintModuleToString((LLVMModuleRef) module));
+            // return false;
         }
         outs << "Code gen 6...\n";
 
@@ -244,6 +247,36 @@ namespace mlang {
             return false;
         }
         return llvm::ReturnInst::classof(value) || llvm::BranchInst::classof(value);
+    }
+
+    llvm::Value *CodeGenContext::createMallocCall(llvm::Type *type, int count, const std::string &name) {
+        if (mallocFunc == nullptr) {
+            auto fun = (module->getOrInsertFunction("malloc",
+                                                    llvm::Type::getInt8PtrTy(llvmContext),
+                                                    llvm::Type::getInt64Ty(llvmContext)));
+            mallocFunc = &fun;
+        }
+
+        auto typeSize = llvm::ConstantExpr::getSizeOf(type);
+        auto totalSize = llvm::ConstantExpr::getMul(typeSize,
+                                                    llvm::ConstantInt::get(llvm::Type::getInt64Ty(llvmContext), count));
+        std::vector<llvm::Value *> fargs;
+        fargs.push_back(totalSize);
+        auto mallocatedSpaceRaw = llvm::CallInst::Create(*mallocFunc, fargs, "tmp", currentBlock());
+        return new llvm::BitCastInst(mallocatedSpaceRaw, type, name, currentBlock());
+    }
+
+    void CodeGenContext::createFreeCall(llvm::Value *value) {
+        if (freeFunc == nullptr) {
+            auto fun = (module->getOrInsertFunction("free",
+                                                    llvm::Type::getVoidTy(llvmContext),
+                                                    llvm::Type::getInt8PtrTy(llvmContext)));
+            freeFunc = &fun;
+        }
+
+        std::vector<llvm::Value *> fargs;
+        fargs.push_back(value);
+        llvm::CallInst::Create(*freeFunc, fargs, "tmp", currentBlock());
     }
 
     llvm::Type *Variable::getType() {

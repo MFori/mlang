@@ -22,6 +22,7 @@
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/Support/ManagedStatic.h>
 #include <llvm/Support/TargetSelect.h>
+#include <llvm/IR/IRBuilder.h>
 
 /*#include "llvm/IR/Module.h"
 #include "llvm/IR/Function.h"
@@ -178,6 +179,11 @@ namespace mlang {
 
         static bool isBreakingInstruction(llvm::Value *value);
 
+        llvm::Value* createMallocCall(llvm::Type *type, int count, const std::string &name);
+
+        void createFreeCall(llvm::Value *value);
+
+        llvm::IRBuilder<> *builder;
     private:
         void setCurrentBlock(llvm::BasicBlock *block) { codeBlocks.front()->setCodeBlock(block); }
 
@@ -203,6 +209,9 @@ namespace mlang {
         llvm::Type *varType{nullptr};
         llvm::Type *valType{nullptr};
         std::map<std::string, llvm::Type *> llvmTypeMap;
+
+        llvm::FunctionCallee* mallocFunc{nullptr};
+        llvm::FunctionCallee* freeFunc{nullptr};
     };
 }
 
