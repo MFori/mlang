@@ -208,6 +208,9 @@ namespace mlang {
         llvm::Type *voidType{nullptr};
         llvm::Type *varType{nullptr};
         llvm::Type *valType{nullptr};
+        llvm::Type *intArrayType{nullptr};
+        llvm::Type *doubleArrayType{nullptr};
+        llvm::Type *boolArrayType{nullptr};
         std::map<std::string, llvm::Type *> llvmTypeMap;
 
         llvm::FunctionCallee* mallocFunc{nullptr};

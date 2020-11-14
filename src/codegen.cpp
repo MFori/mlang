@@ -103,16 +103,23 @@ namespace mlang {
     void CodeGenContext::setUpBuildIns() {
         intType = llvm::Type::getInt64Ty(getGlobalContext());
         doubleType = llvm::Type::getDoubleTy(getGlobalContext());
-        stringType = llvm::Type::getInt8PtrTy(getGlobalContext());
         boolType = llvm::Type::getInt1Ty(getGlobalContext());
         voidType = llvm::Type::getVoidTy(getGlobalContext());
+        stringType = llvm::Type::getInt8PtrTy(getGlobalContext());
+        intArrayType = llvm::Type::getInt64PtrTy(getGlobalContext());
+        doubleArrayType = llvm::Type::getDoublePtrTy(getGlobalContext());
+        boolArrayType = llvm::Type::getInt1PtrTy(getGlobalContext());
         varType = llvm::StructType::create(getGlobalContext(), "var");
         valType = llvm::StructType::create(getGlobalContext(), "val");
+
         llvmTypeMap["Int"] = intType;
         llvmTypeMap["Double"] = doubleType;
-        llvmTypeMap["String"] = stringType;
         llvmTypeMap["Bool"] = boolType;
         llvmTypeMap["Void"] = voidType;
+        llvmTypeMap["String"] = stringType;
+        llvmTypeMap["IntArray"] = intArrayType;
+        llvmTypeMap["DoubleArray"] = doubleArrayType;
+        llvmTypeMap["BoolArray"] = boolArrayType;
         llvmTypeMap["var"] = varType;
         llvmTypeMap["val"] = valType;
 
@@ -263,7 +270,7 @@ namespace mlang {
         std::vector<llvm::Value *> fargs;
         fargs.push_back(totalSize);
         auto mallocatedSpaceRaw = llvm::CallInst::Create(*mallocFunc, fargs, "tmp", currentBlock());
-        return new llvm::BitCastInst(mallocatedSpaceRaw, type, name, currentBlock());
+        return new llvm::BitCastInst(mallocatedSpaceRaw, type->getPointerTo(0), name, currentBlock());
     }
 
     void CodeGenContext::createFreeCall(llvm::Value *value) {
