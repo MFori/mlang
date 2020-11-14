@@ -15,6 +15,7 @@ namespace mlang {
         // TODO count validation can be only integer
 
         // TODO store size at front
+        // TODO create get length function
 
         return context.createMallocCall(llvm::Type::getInt64Ty(context.getGlobalContext()), count, "array");
 
