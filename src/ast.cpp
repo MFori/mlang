@@ -25,6 +25,10 @@ namespace mlang {
         return llvm::ConstantInt::get(llvm::Type::getInt1Ty(context.getGlobalContext()), boolVal);
     }
 
+    llvm::Value *Char::codeGen(CodeGenContext &context) {
+        return llvm::ConstantInt::get(llvm::Type::getInt8Ty(context.getGlobalContext()), value);
+    }
+
     llvm::Value *String::codeGen(CodeGenContext &context) {
         std::cout << "code gen string " << value << "\n";
 

@@ -19,7 +19,7 @@
     #include "whileloop.h"
     #include "forloop.h"
     #include "range.h"
-    //#include "Array.h"
+    #include "Array.h"
 
     #include <stdio.h>
     #include <stack>
@@ -69,6 +69,7 @@
     long long integer;
     double number;
     int boolean;
+    char character;
     int token;
 }
 
@@ -80,6 +81,7 @@
 %token <integer> TINTEGER
 %token <number> TDOUBLE
 %token <boolean> TBOOL
+%token <character> TCHAR
 %token <token> TCEQ TCNE TCLT TCLE TCGT TCGE
 %token <token> TLTLT "<<"
 %token <token> TPLUS TMINUS TMUL TDIV
@@ -93,12 +95,12 @@
    we call an ident (defined by union type ident) we are really
    calling an (Identifier*). It makes the compiler happy.
  */
-%type <expr> expr unaryop_expr binop_expr ternop_expr boolean_expr array_expr array_access literals
+%type <expr> expr unaryop_expr binop_expr ternop_expr boolean_expr array_access literals
 %type <ident> ident
 %type <varvec> func_decl_args
-%type <exprvec> call_args array_elemets_expr
+%type <exprvec> call_args
 %type <block> program stmts block
-%type <stmt> stmt var_decl func_decl func_arg_decl conditional return break while for array_add_element
+%type <stmt> stmt var_decl func_decl func_arg_decl conditional return break while for
 %type <range> range
 
 /* Operator precedence for mathematical operators */
@@ -140,7 +142,6 @@ stmt : var_decl
      | break
      | while
      | for
-     | array_add_element
      | expr { $$ = new mlang::ExpressionStatement($1); }
      ;
 
@@ -178,8 +179,8 @@ expr : ident '=' expr { $$ = new mlang::Assignment($<ident>1, $3, @$); }
      | ternop_expr
      | boolean_expr
      | '(' expr ')' { $$ = $2; }
-     | array_expr
      | array_access
+     | ident '[' expr ']' '=' expr { $$ = new mlang::ArrayAssignment($1, $3, $6, @$); }
      | ident { $<ident>$ = $1; }
      | literals
      ;
@@ -191,6 +192,7 @@ literals : TINTEGER { $$ = new mlang::Integer($1); }
          | TDOUBLE { $$ = new mlang::Double($1); }
          | TSTR { $$ = new mlang::String(*$1); delete $1; }
          | TBOOL { $$ = new mlang::Boolean($1); }
+         | TCHAR { $$ = new mlang::Char($1); }
          ;
 
 conditional : TIF '(' expr ')' block TELSE block { $$ = new mlang::Conditional($3,$5,$7,@$); }
@@ -243,19 +245,7 @@ call_args : %empty  { $$ = new mlang::ExpressionList(); }
           | call_args ',' expr  { $1->push_back($3); }
           ;
 
-array_elemets_expr: %empty {$$ = new mlang::ExpressionList(); }
-                 | expr {$$ = new mlang::ExpressionList(); $$->push_back($1);}
-                 | array_elemets_expr ',' expr {$$->push_back($3); }
-                 ;
-
-array_expr : '[' array_elemets_expr ']' {/*$$ = new mlang::Array($2, @$);*/}
-          ;
-
-array_add_element: ident "<<" expr { /*$$ = new mlang::ArrayAddElement($1, $3, @$);*/ }
-                ;
-
-array_access: ident '[' TINTEGER ']' { /*$$ = new mlang::ArrayAccess($1, $3, @$);*/ }
-           | array_access '[' TINTEGER ']' { /*$$ = new mlang::ArrayAccess($1, $3, @$);*/ }
+array_access: ident '[' expr ']' { $$ = new mlang::ArrayAccess($1, $3, @$); }
            ;
 
 %%

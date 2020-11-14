@@ -179,7 +179,9 @@ namespace mlang {
 
         static bool isBreakingInstruction(llvm::Value *value);
 
-        llvm::Value* createMallocCall(llvm::Type *type, int count, const std::string &name);
+        llvm::Value *createMallocCall(llvm::Type *type, int count, const std::string &name);
+
+        llvm::Value *createMallocCall(llvm::Type *type, llvm::Value *count, const std::string &name);
 
         void createFreeCall(llvm::Value *value);
 
@@ -205,6 +207,7 @@ namespace mlang {
         llvm::Type *doubleType{nullptr};
         llvm::Type *stringType{nullptr};
         llvm::Type *boolType{nullptr};
+        llvm::Type *charType{nullptr};
         llvm::Type *voidType{nullptr};
         llvm::Type *varType{nullptr};
         llvm::Type *valType{nullptr};
@@ -212,9 +215,6 @@ namespace mlang {
         llvm::Type *doubleArrayType{nullptr};
         llvm::Type *boolArrayType{nullptr};
         std::map<std::string, llvm::Type *> llvmTypeMap;
-
-        llvm::FunctionCallee* mallocFunc{nullptr};
-        llvm::FunctionCallee* freeFunc{nullptr};
     };
 }
 

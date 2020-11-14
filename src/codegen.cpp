@@ -104,6 +104,7 @@ namespace mlang {
         intType = llvm::Type::getInt64Ty(getGlobalContext());
         doubleType = llvm::Type::getDoubleTy(getGlobalContext());
         boolType = llvm::Type::getInt1Ty(getGlobalContext());
+        charType = llvm::Type::getInt8Ty(getGlobalContext());
         voidType = llvm::Type::getVoidTy(getGlobalContext());
         stringType = llvm::Type::getInt8PtrTy(getGlobalContext());
         intArrayType = llvm::Type::getInt64PtrTy(getGlobalContext());
@@ -115,6 +116,7 @@ namespace mlang {
         llvmTypeMap["Int"] = intType;
         llvmTypeMap["Double"] = doubleType;
         llvmTypeMap["Bool"] = boolType;
+        llvmTypeMap["Char"] = charType;
         llvmTypeMap["Void"] = voidType;
         llvmTypeMap["String"] = stringType;
         llvmTypeMap["IntArray"] = intArrayType;
@@ -257,33 +259,34 @@ namespace mlang {
     }
 
     llvm::Value *CodeGenContext::createMallocCall(llvm::Type *type, int count, const std::string &name) {
-        if (mallocFunc == nullptr) {
-            auto fun = (module->getOrInsertFunction("malloc",
-                                                    llvm::Type::getInt8PtrTy(llvmContext),
-                                                    llvm::Type::getInt64Ty(llvmContext)));
-            mallocFunc = &fun;
-        }
+        return createMallocCall(type, llvm::ConstantInt::get(llvm::Type::getInt64Ty(llvmContext), count), name);
+    }
+
+    llvm::Value *CodeGenContext::createMallocCall(llvm::Type *type, llvm::Value *count, const std::string &name) {
+        auto fun = (module->getOrInsertFunction("malloc",
+                                                llvm::Type::getInt8PtrTy(llvmContext),
+                                                llvm::Type::getInt64Ty(llvmContext)));
 
         auto typeSize = llvm::ConstantExpr::getSizeOf(type);
-        auto totalSize = llvm::ConstantExpr::getMul(typeSize,
-                                                    llvm::ConstantInt::get(llvm::Type::getInt64Ty(llvmContext), count));
+        auto totalSize = llvm::BinaryOperator::Create(llvm::Instruction::Mul, typeSize, count, "malloc_size",
+                                                      currentBlock());
+        //auto totalSize = llvm::ConstantExpr::getMul(typeSize,
+        //                                            llvm::ConstantInt::get(llvm::Type::getInt64Ty(llvmContext), 10));
+
         std::vector<llvm::Value *> fargs;
         fargs.push_back(totalSize);
-        auto mallocatedSpaceRaw = llvm::CallInst::Create(*mallocFunc, fargs, "tmp", currentBlock());
+        auto mallocatedSpaceRaw = llvm::CallInst::Create(fun, fargs, "tmp", currentBlock());
         return new llvm::BitCastInst(mallocatedSpaceRaw, type->getPointerTo(0), name, currentBlock());
     }
 
     void CodeGenContext::createFreeCall(llvm::Value *value) {
-        if (freeFunc == nullptr) {
-            auto fun = (module->getOrInsertFunction("free",
-                                                    llvm::Type::getVoidTy(llvmContext),
-                                                    llvm::Type::getInt8PtrTy(llvmContext)));
-            freeFunc = &fun;
-        }
+        auto fun = (module->getOrInsertFunction("free",
+                                                llvm::Type::getVoidTy(llvmContext),
+                                                llvm::Type::getInt8PtrTy(llvmContext)));
 
         std::vector<llvm::Value *> fargs;
         fargs.push_back(value);
-        llvm::CallInst::Create(*freeFunc, fargs, "tmp", currentBlock());
+        llvm::CallInst::Create(fun, fargs, "tmp", currentBlock());
     }
 
     llvm::Type *Variable::getType() {

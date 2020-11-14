@@ -6,6 +6,7 @@
  */
 #include "function.h"
 #include "variable.h"
+#include "array.h"
 
 namespace mlang {
 
@@ -38,6 +39,8 @@ namespace mlang {
             context.addError();
             return nullptr;
         }
+
+        // TODO check if name is key word for creating array IntArray(size int)
 
         // TODO check return type if it is a structure type !!! May be it should be a ptr to the structure!
         llvm::FunctionType *ftype = llvm::FunctionType::get(t, argTypes, false);
@@ -103,6 +106,14 @@ namespace mlang {
 
     llvm::Value *FunctionCall::codeGen(CodeGenContext &context) {
         std::string functionName = id->getName();
+
+        // TODO create defined keywords for every array type
+        if(functionName == "IntArray") {
+            std::cout << "IntArray 1 \n";
+            auto arr = Array(llvm::Type::getInt64Ty(context.getGlobalContext()), new Integer(10), location);
+            std::cout << "IntArray 2 \n";
+            return arr.codeGen(context);
+        }
 
         llvm::Function *function = context.getModule()->getFunction(functionName);
         if (function == nullptr) {

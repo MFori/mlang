@@ -13,7 +13,7 @@
 
 extern "C" DECLSPEC void print(char *str, ...);
 
-extern "C" DECLSPEC void println(char *str, va_list args);
+extern "C" DECLSPEC void println(char *str, ...);
 
 extern "C" DECLSPEC void fprint(FILE *stream, char *str, va_list args);
 

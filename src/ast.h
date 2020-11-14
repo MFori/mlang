@@ -46,6 +46,7 @@ namespace mlang {
         INTEGER,
         DOUBLE,
         BOOLEAN,
+        CHAR,
         STRING,
         ARRAY,
         IDENTIFIER
@@ -152,6 +153,27 @@ namespace mlang {
 
     private:
         int boolVal{0};
+    };
+
+    /**
+    * Char ast node representation
+    */
+    class Char : public Expression {
+    public:
+        explicit Char(char const value) : value(value) {}
+
+        ~Char() override = default;
+
+        llvm::Value *codeGen(CodeGenContext &context) override;
+
+        NodeType getType() override { return NodeType::CHAR; }
+
+        std::string toString() override { return "char"; }
+
+        void accept(Visitor &v) override { v.visitChar(this); }
+
+    private:
+        char value{0};
     };
 
     /**

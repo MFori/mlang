@@ -13,6 +13,7 @@ namespace mlang {
     class Integer;
     class Double;
     class Boolean;
+    class Char;
     class String;
     class Identifier;
     class Block;
@@ -31,6 +32,9 @@ namespace mlang {
     class ForLoop;
     class Range;
     class Break;
+    class Array;
+    class ArrayAccess;
+    class ArrayAssignment;
 
     class Visitor {
     public:
@@ -43,6 +47,8 @@ namespace mlang {
         virtual void visitDouble(Double *e) = 0;
 
         virtual void visitBoolean(Boolean *e) = 0;
+
+        virtual void visitChar(Char *e) = 0;
 
         virtual void visitString(String *e) = 0;
 
@@ -79,6 +85,12 @@ namespace mlang {
         virtual void visitRange(Range *e) = 0;
 
         virtual void visitBreakStatement(Break *e) = 0;
+
+        virtual void visitArray(Array *e) = 0;
+
+        virtual void visitArrayAccess(ArrayAccess *e) = 0;
+
+        virtual void visitArrayAssignment(ArrayAssignment *e) = 0;
     };
 
 }

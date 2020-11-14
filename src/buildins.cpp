@@ -11,12 +11,15 @@
 extern "C" DECLSPEC void print(char *str, ...) {
     va_list argp;
     va_start(argp, str);
-    vfprintf(stdout, str, argp);
+    fprint(stdout, str, argp);
     va_end(argp);
 }
 
-extern "C" DECLSPEC void println(char *str, va_list args) {
-    fprintln(stdout, str, args);
+extern "C" DECLSPEC void println(char *str, ...) {
+    va_list argp;
+    va_start(argp, str);
+    fprintln(stdout, str, argp);
+    va_end(argp);
 }
 
 extern "C" DECLSPEC void fprint(FILE *const stream, char *str, va_list args) {
