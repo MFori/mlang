@@ -57,6 +57,7 @@ set(SOURCES_COMMON
         break.cpp
         ternaryop.cpp
         array.cpp
+        free.cpp
         lexer.l
         parser.y
         )
@@ -80,6 +81,7 @@ set(HEADER_COMMON
         range.h
         break.h
         array.h
+        free.h
         )
 
 if (MSVC)

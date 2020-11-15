@@ -6,7 +6,6 @@
  */
 #include "function.h"
 #include "variable.h"
-#include "array.h"
 
 namespace mlang {
 
@@ -40,11 +39,15 @@ namespace mlang {
             return nullptr;
         }
 
-        // TODO check if name is key word for creating array IntArray(size int)
-
-        // TODO check return type if it is a structure type !!! May be it should be a ptr to the structure!
         llvm::FunctionType *ftype = llvm::FunctionType::get(t, argTypes, false);
         std::string fname = id->getName();
+
+        if (context.isKeyFunction(fname)) {
+            Node::printError(location, "Invalid function name");
+            context.addError();
+            return nullptr;
+        }
+
         llvm::Function *fun = llvm::Function::Create(ftype, llvm::GlobalValue::InternalLinkage, fname,
                                                      context.getModule());
         llvm::BasicBlock *bblock = llvm::BasicBlock::Create(context.getGlobalContext(), "entry", fun, nullptr);
@@ -54,7 +57,7 @@ namespace mlang {
         for (auto varDecl : *arguments) {
             auto *allocaInst = llvm::dyn_cast<llvm::AllocaInst>(varDecl->codeGen(context));
             std::string valName = varDecl->getVariableName();
-            // TODO a struct is coming as struct alloca, but needed to be a pointer to a struct alloca.
+
             if (allocaInst) {
                 if (allocaInst->getAllocatedType()->isPointerTy()) {
                     valName += "_addr";
@@ -85,11 +88,11 @@ namespace mlang {
                                                : returnValue->getType();
             }
 
-            if(!hasReturn && t->isVoidTy()) {
+            if (!hasReturn && t->isVoidTy()) {
                 llvm::ReturnInst::Create(context.getGlobalContext(), nullptr, context.currentBlock());
-            } else if(!hasReturn && retTy == t) {
+            } else if (!hasReturn && retTy == t) {
                 llvm::ReturnInst::Create(context.getGlobalContext(), blockValue, context.currentBlock());
-            } else if(retTy != t) {
+            } else if (retTy != t) {
                 Node::printError(location, id->getName() + "(): Function invalid return value");
                 context.addError();
                 return nullptr;
@@ -107,12 +110,9 @@ namespace mlang {
     llvm::Value *FunctionCall::codeGen(CodeGenContext &context) {
         std::string functionName = id->getName();
 
-        // TODO create defined keywords for every array type
-        if(functionName == "IntArray") {
-            std::cout << "IntArray 1 \n";
-            auto arr = Array(llvm::Type::getInt64Ty(context.getGlobalContext()), new Integer(10), location);
-            std::cout << "IntArray 2 \n";
-            return arr.codeGen(context);
+        if (context.isKeyFunction(functionName)) {
+            llvm::Value *val = context.callKeyFunction(functionName, args, location);
+            return val;
         }
 
         llvm::Function *function = context.getModule()->getFunction(functionName);

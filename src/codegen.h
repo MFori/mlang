@@ -43,6 +43,7 @@
 #pragma warning(pop)
 
 #include "ast.h"
+#include "array.h"
 
 namespace mlang {
 
@@ -184,6 +185,10 @@ namespace mlang {
         llvm::Value *createMallocCall(llvm::Type *type, llvm::Value *count, const std::string &name);
 
         void createFreeCall(llvm::Value *value);
+
+        bool isKeyFunction(const std::string &name);
+
+        llvm::Value *callKeyFunction(const std::string &name, ExpressionList *args, YYLTYPE location);
 
         llvm::IRBuilder<> *builder;
     private:

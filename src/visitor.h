@@ -35,6 +35,7 @@ namespace mlang {
     class Array;
     class ArrayAccess;
     class ArrayAssignment;
+    class FreeMemory;
 
     class Visitor {
     public:
@@ -91,6 +92,8 @@ namespace mlang {
         virtual void visitArrayAccess(ArrayAccess *e) = 0;
 
         virtual void visitArrayAssignment(ArrayAssignment *e) = 0;
+
+        virtual void visitFreeMemory(FreeMemory *e) = 0;
     };
 
 }

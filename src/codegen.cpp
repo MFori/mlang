@@ -270,8 +270,6 @@ namespace mlang {
         auto typeSize = llvm::ConstantExpr::getSizeOf(type);
         auto totalSize = llvm::BinaryOperator::Create(llvm::Instruction::Mul, typeSize, count, "malloc_size",
                                                       currentBlock());
-        //auto totalSize = llvm::ConstantExpr::getMul(typeSize,
-        //                                            llvm::ConstantInt::get(llvm::Type::getInt64Ty(llvmContext), 10));
 
         std::vector<llvm::Value *> fargs;
         fargs.push_back(totalSize);
@@ -287,6 +285,32 @@ namespace mlang {
         std::vector<llvm::Value *> fargs;
         fargs.push_back(value);
         llvm::CallInst::Create(fun, fargs, "tmp", currentBlock());
+    }
+
+    bool CodeGenContext::isKeyFunction(const std::string &name) {
+        if (llvmTypeMap.count(name) != 0) {
+            return true;
+        }
+
+        return false;
+    }
+
+    llvm::Value *CodeGenContext::callKeyFunction(const std::string &name, ExpressionList *args, YYLTYPE location) {
+        if (llvmTypeMap.count(name) != 0) {
+            if (args->size() != 1) {
+                Node::printError(location, "Invalid number of arguments");
+                addError();
+                return nullptr;
+            }
+
+            auto type = llvmTypeMap[name];
+            auto arr = new Array(type->getPointerElementType(), args->at(0), location);
+
+            std::cout << "Call key 2\n";
+            return arr->codeGen(*this);
+        }
+
+        return nullptr;
     }
 
     llvm::Type *Variable::getType() {

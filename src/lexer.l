@@ -151,6 +151,7 @@ import              BEGIN(incl);
 "step"                  return TOKEN(TSTEP);
 "return"                return TOKEN(TRETURN);
 "break"                 return TOKEN(TBREAK);
+"rm"                    return TOKEN(TFREE);
 "true"                  SAVE_BOOLEAN; return TBOOL;
 "false"                 SAVE_BOOLEAN; return TBOOL;
 \/\/.*                     /* comments one line til nl */

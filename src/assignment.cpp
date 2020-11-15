@@ -50,11 +50,6 @@ namespace mlang {
             varType = var->getType();
             llvm::Type *ty = varType;
 
-            if (ty->isStructTy() && ty->getStructName() == "val") {
-                Node::printError(location, "Val cannot be reassignet first! " + lhs->getName() + "\n");
-                context.addError();
-            }
-
             std::string typeName = context.getVarType(lhs->getName());
             if (typeName == "val") {
                 Node::printError(location, "final val '" + lhs->getName() + "' cannot be reassignet!\n");

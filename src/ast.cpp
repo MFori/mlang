@@ -31,7 +31,7 @@ namespace mlang {
 
     llvm::Value *String::codeGen(CodeGenContext &context) {
         std::cout << "code gen string " << value << "\n";
-
+        
         // generate the type for the global var
         ArrayType *ArrayTy_0 = ArrayType::get(IntegerType::get(context.getGlobalContext(), 8), value.size() + 1);
         // create global var which holds the constant string.

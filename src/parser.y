@@ -13,13 +13,14 @@
     #include "ternaryop.h"
     #include "return.h"
     #include "break.h"
+    #include "free.h"
     #include "function.h"
     #include "conditional.h"
     #include "comparison.h"
     #include "whileloop.h"
     #include "forloop.h"
     #include "range.h"
-    #include "Array.h"
+    #include "array.h"
 
     #include <stdio.h>
     #include <stack>
@@ -88,7 +89,7 @@
 %token <token> TNOT TAND TOR
 %token <token> TINC TDEC
 %token <token> TIF TELSE TWHILE TDO TFOR TIN TUNTIL TTO TSTEP
-%token <token> TFUNDEF TRETURN TBREAK TVAR TVAL
+%token <token> TFUNDEF TRETURN TBREAK TFREE TVAR TVAL
 
 /* Define the type of node our nonterminal symbols represent.
    The types refer to the %union declaration above. Ex: when
@@ -100,7 +101,7 @@
 %type <varvec> func_decl_args
 %type <exprvec> call_args
 %type <block> program stmts block
-%type <stmt> stmt var_decl func_decl func_arg_decl conditional return break while for
+%type <stmt> stmt var_decl func_decl func_arg_decl conditional return break free while for
 %type <range> range
 
 /* Operator precedence for mathematical operators */
@@ -140,6 +141,7 @@ stmt : var_decl
      | conditional
      | return
      | break
+     | free
      | while
      | for
      | expr { $$ = new mlang::ExpressionStatement($1); }
@@ -171,6 +173,8 @@ return : TRETURN { $$ = new mlang::Return(@$); }
        ;
 
 break : TBREAK { $$ = new mlang::Break(@$); }
+
+free : TFREE expr { $$ = new mlang::FreeMemory($2, @$); }
 
 expr : ident '=' expr { $$ = new mlang::Assignment($<ident>1, $3, @$); }
      | ident '(' call_args ')' { $$ = new mlang::FunctionCall($1, $3, @$);  }
