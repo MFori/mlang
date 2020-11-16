@@ -34,12 +34,20 @@ namespace mlang {
             llvm::Type *ty = value->getType();
 
             if (global) {
-                auto *gv = new llvm::GlobalVariable(*context.getModule(), ty, var->isConst(),
-                                                    llvm::GlobalValue::PrivateLinkage,
-                                                    (llvm::Constant *) value, lhs->getName());
-                gv->setAlignment(llvm::MaybeAlign(4));
+                llvm::GlobalVariable* gv;
+                if(ty->isPointerTy()) {
+                    gv = new llvm::GlobalVariable(*context.getModule(), ty, false,
+                                                        llvm::GlobalValue::PrivateLinkage,
+                                                  llvm::Constant::getNullValue(ty), lhs->getName());
+                    gv->setAlignment(llvm::MaybeAlign(4));
+                    new llvm::StoreInst(value, gv, false, context.currentBlock());
+                } else {
+                    gv = new llvm::GlobalVariable(*context.getModule(), ty, var->isConst(),
+                                                        llvm::GlobalValue::PrivateLinkage,
+                                                        (llvm::Constant *) value, lhs->getName());
+                    gv->setAlignment(llvm::MaybeAlign(4));
+                }
                 var->setValue(gv);
-                //varType = var->getType();
                 return gv;
             } else {
                 auto lv = new llvm::AllocaInst(ty, 0, lhs->getName(), context.currentBlock());
