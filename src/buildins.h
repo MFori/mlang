@@ -8,6 +8,7 @@
 #define MLANG_BUILDINS_H
 
 #include <cstdio>
+#include <cstdint>
 
 #define DECLSPEC __declspec(dllexport)
 
@@ -20,5 +21,17 @@ extern "C" DECLSPEC void fprint(FILE *stream, char *str, va_list args);
 extern "C" DECLSPEC void fprintln(FILE *stream, char *str, va_list args);
 
 extern "C" DECLSPEC int read();
+
+extern "C" DECLSPEC int sizeOf(int64_t *ptr);
+
+extern "C" DECLSPEC int __mlang_rm(int64_t *ptr);
+
+enum class RuntimeError {
+    INVALID_SIZEOF_USAGE,
+    INDEX_OUT_OF_RANGE
+};
+
+
+extern "C" DECLSPEC int __mlang_error(int error);
 
 #endif /* MLANG_BUILDINS_H */

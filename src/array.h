@@ -28,6 +28,8 @@ namespace mlang {
 
         void accept(Visitor &v) override { v.visitArray(this); }
 
+        static void validateArrayBounds(llvm::Value *arrayPtr, llvm::Value *index, CodeGenContext &context);
+
     private:
         llvm::Type *type;
         Expression *size;

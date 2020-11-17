@@ -48,7 +48,14 @@ namespace mlang {
             return nullptr;
         }
 
-        llvm::Function *fun = llvm::Function::Create(ftype, llvm::GlobalValue::InternalLinkage, fname,
+        llvm::Function *fun = context.getModule()->getFunction(fname);
+        if (fun != nullptr) {
+            Node::printError(location, " function already exists: " + id->getName());
+            context.addError();
+            return nullptr;
+        }
+
+        fun = llvm::Function::Create(ftype, llvm::GlobalValue::InternalLinkage, fname,
                                                      context.getModule());
         llvm::BasicBlock *bblock = llvm::BasicBlock::Create(context.getGlobalContext(), "entry", fun, nullptr);
         context.newScope(bblock, ScopeType::FUNCTION_DECL);

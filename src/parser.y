@@ -6,6 +6,7 @@
 
 %{
     #include "ast.h"
+    #include "str.h"
     #include "variable.h"
     #include "assignment.h"
     #include "unaryop.h"

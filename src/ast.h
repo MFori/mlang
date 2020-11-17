@@ -177,27 +177,6 @@ namespace mlang {
     };
 
     /**
-     * String ast node representation
-     */
-    class String : public Expression {
-    public:
-        explicit String(const std::string &value) : value(value) {}
-
-        ~String() override = default;
-
-        llvm::Value *codeGen(CodeGenContext &context) override;
-
-        NodeType getType() override { return NodeType::STRING; }
-
-        std::string toString() override { return "string"; }
-
-        void accept(Visitor &v) override { v.visitString(this); }
-
-    private:
-        std::string value;
-    };
-
-    /**
      * Identifier ast node representation
      */
     class Identifier : public Expression {

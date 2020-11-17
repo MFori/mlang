@@ -10,7 +10,6 @@
 #include <llvm/IR/Verifier.h>
 
 #include "codegen.h"
-#include "buildins.h"
 
 #define MAKE_LLVM_EXTERNAL_NAME(a) #a
 
@@ -127,6 +126,7 @@ namespace mlang {
 
         std::vector<llvm::Type *> argTypesOneInt(1, intType);
         std::vector<llvm::Type *> argTypesInt8Ptr(1, llvm::Type::getInt8PtrTy(getGlobalContext()));
+        std::vector<llvm::Type *> argTypesInt64Ptr(1, llvm::Type::getInt64PtrTy(getGlobalContext()));
 
         llvm::FunctionType *ft = llvm::FunctionType::get(llvm::Type::getVoidTy(getGlobalContext()), argTypesInt8Ptr,
                                                          true);
@@ -150,6 +150,20 @@ namespace mlang {
         ft = llvm::FunctionType::get(llvm::Type::getInt8Ty(getGlobalContext()), false);
         f = llvm::Function::Create(ft, llvm::Function::ExternalLinkage, MAKE_LLVM_EXTERNAL_NAME(read), getModule());
         buildins.push_back({f, (int *) read});
+
+        ft = llvm::FunctionType::get(llvm::Type::getInt64Ty(getGlobalContext()), argTypesInt64Ptr, false);
+        f = llvm::Function::Create(ft, llvm::Function::ExternalLinkage, MAKE_LLVM_EXTERNAL_NAME(sizeOf), getModule());
+        buildins.push_back({f, (void *) sizeOf});
+
+        ft = llvm::FunctionType::get(llvm::Type::getVoidTy(getGlobalContext()), argTypesInt8Ptr, false);
+        f = llvm::Function::Create(ft, llvm::Function::ExternalLinkage, MAKE_LLVM_EXTERNAL_NAME(__mlang_error),
+                                   getModule());
+        buildins.push_back({f, (void *) __mlang_error});
+
+        ft = llvm::FunctionType::get(llvm::Type::getInt64Ty(getGlobalContext()), argTypesInt64Ptr, false);
+        f = llvm::Function::Create(ft, llvm::Function::ExternalLinkage, MAKE_LLVM_EXTERNAL_NAME(__mlang_rm),
+                                   getModule());
+        buildins.push_back({f, (void *) __mlang_rm});
     }
 
     void CodeGenContext::optimize() {
@@ -258,11 +272,13 @@ namespace mlang {
         return llvm::ReturnInst::classof(value) || llvm::BranchInst::classof(value);
     }
 
-    llvm::Value *CodeGenContext::createMallocCall(llvm::Type *type, int count, const std::string &name) {
+    llvm::Value *
+    CodeGenContext::createMallocCall(llvm::Type *type, int count, const std::string &name, llvm::Value *offset) {
         return createMallocCall(type, llvm::ConstantInt::get(llvm::Type::getInt64Ty(llvmContext), count), name);
     }
 
-    llvm::Value *CodeGenContext::createMallocCall(llvm::Type *type, llvm::Value *count, const std::string &name) {
+    llvm::Value *CodeGenContext::createMallocCall(llvm::Type *type, llvm::Value *count, const std::string &name,
+                                                  llvm::Value *offset) {
         auto fun = (module->getOrInsertFunction("malloc",
                                                 llvm::Type::getInt8PtrTy(llvmContext),
                                                 llvm::Type::getInt64Ty(llvmContext)));
@@ -270,21 +286,26 @@ namespace mlang {
         auto typeSize = llvm::ConstantExpr::getSizeOf(type);
         auto totalSize = llvm::BinaryOperator::Create(llvm::Instruction::Mul, typeSize, count, "malloc_size",
                                                       currentBlock());
+        if (offset != nullptr) {
+            totalSize = llvm::BinaryOperator::Create(llvm::Instruction::Add, totalSize, offset, "malloc_size",
+                                                     currentBlock());
+        }
 
         std::vector<llvm::Value *> fargs;
         fargs.push_back(totalSize);
         auto mallocatedSpaceRaw = llvm::CallInst::Create(fun, fargs, "tmp", currentBlock());
+        clearMemory(mallocatedSpaceRaw, totalSize);
+
         return new llvm::BitCastInst(mallocatedSpaceRaw, type->getPointerTo(0), name, currentBlock());
     }
 
     void CodeGenContext::createFreeCall(llvm::Value *value) {
-        auto fun = (module->getOrInsertFunction("free",
-                                                llvm::Type::getVoidTy(llvmContext),
-                                                llvm::Type::getInt8PtrTy(llvmContext)));
-
+        auto fun = (module->getOrInsertFunction("__mlang_rm",
+                                                llvm::Type::getInt64Ty(llvmContext),
+                                                llvm::Type::getInt64PtrTy(llvmContext)));
         std::vector<llvm::Value *> fargs;
         fargs.push_back(value);
-        llvm::CallInst::Create(fun, fargs, "tmp", currentBlock());
+        llvm::CallInst::Create(fun, fargs, "", currentBlock());
     }
 
     bool CodeGenContext::isKeyFunction(const std::string &name) {
@@ -311,6 +332,39 @@ namespace mlang {
         }
 
         return nullptr;
+    }
+
+    void CodeGenContext::runtimeError(RuntimeError error) {
+        auto fun = (module->getOrInsertFunction("__mlang_error",
+                                                llvm::Type::getInt64Ty(llvmContext),
+                                                llvm::Type::getInt64Ty(llvmContext)));
+
+        std::vector<llvm::Value *> fargs;
+        fargs.push_back((new Integer((int) error))->codeGen(*this));
+
+        llvm::CallInst::Create(fun, fargs, "tmp", currentBlock());
+    }
+
+    void CodeGenContext::clearMemory(llvm::Value *ptr, llvm::Value *size) {
+        auto memset = (module->getOrInsertFunction("memset",
+                                                   llvm::Type::getInt8PtrTy(llvmContext),
+                                                   llvm::Type::getInt64Ty(llvmContext),
+                                                   llvm::Type::getInt64Ty(llvmContext)));
+        std::vector<llvm::Value *> fargs;
+        fargs.push_back(ptr);
+        fargs.push_back(llvm::ConstantInt::get(llvm::Type::getInt64Ty(llvmContext), 0));
+        fargs.push_back(size);
+        llvm::CallInst::Create(memset, fargs, "tmp", currentBlock());
+    }
+
+    llvm::Value *CodeGenContext::callSizeOf(llvm::Value *arr) {
+        auto fun = (module->getOrInsertFunction("sizeOf",
+                                                llvm::Type::getInt64Ty(llvmContext),
+                                                llvm::Type::getInt64PtrTy(llvmContext)));
+        std::vector<llvm::Value *> fargs;
+        fargs.push_back(arr);
+        llvm::Value *size = llvm::CallInst::Create(fun, fargs, "size_of", currentBlock());
+        return new llvm::BitCastInst(size, llvm::Type::getInt64Ty(llvmContext), "size", currentBlock());
     }
 
     llvm::Type *Variable::getType() {

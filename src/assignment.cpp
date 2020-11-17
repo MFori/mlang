@@ -35,7 +35,7 @@ namespace mlang {
 
             if (global) {
                 llvm::GlobalVariable* gv;
-                if(ty->isPointerTy()) {
+                if(ty->isPointerTy() || !llvm::Constant::classof(value)) {
                     gv = new llvm::GlobalVariable(*context.getModule(), ty, false,
                                                         llvm::GlobalValue::PrivateLinkage,
                                                   llvm::Constant::getNullValue(ty), lhs->getName());
@@ -56,7 +56,6 @@ namespace mlang {
             }
         } else {
             varType = var->getType();
-            llvm::Type *ty = varType;
 
             std::string typeName = context.getVarType(lhs->getName());
             if (typeName == "val") {
@@ -85,7 +84,6 @@ namespace mlang {
 
         new llvm::StoreInst(value, var->getValue(), false, context.currentBlock());
         return value;
-        //return new llvm::StoreInst(value, var->getValue(), false, context.currentBlock());
     }
 
 }

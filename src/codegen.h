@@ -42,6 +42,7 @@
 
 #pragma warning(pop)
 
+#include "buildins.h"
 #include "ast.h"
 #include "array.h"
 
@@ -180,15 +181,23 @@ namespace mlang {
 
         static bool isBreakingInstruction(llvm::Value *value);
 
-        llvm::Value *createMallocCall(llvm::Type *type, int count, const std::string &name);
+        llvm::Value *
+        createMallocCall(llvm::Type *type, int count, const std::string &name, llvm::Value *offset = nullptr);
 
-        llvm::Value *createMallocCall(llvm::Type *type, llvm::Value *count, const std::string &name);
+        llvm::Value *
+        createMallocCall(llvm::Type *type, llvm::Value *count, const std::string &name, llvm::Value *offset = nullptr);
+
+        void clearMemory(llvm::Value *ptr, llvm::Value *size);
+
+        llvm::Value *callSizeOf(llvm::Value *arr);
 
         void createFreeCall(llvm::Value *value);
 
         bool isKeyFunction(const std::string &name);
 
         llvm::Value *callKeyFunction(const std::string &name, ExpressionList *args, YYLTYPE location);
+
+        void runtimeError(RuntimeError error);
 
         llvm::IRBuilder<> *builder;
     private:
