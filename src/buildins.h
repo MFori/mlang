@@ -24,7 +24,9 @@ extern "C" DECLSPEC int read();
 
 extern "C" DECLSPEC int sizeOf(int64_t *ptr);
 
-extern "C" DECLSPEC int __mlang_rm(int64_t *ptr);
+extern "C" DECLSPEC void __mlang_rm(char *ptr);
+
+extern "C" DECLSPEC char* __mlang_alloc(int64_t size);
 
 enum class RuntimeError {
     INVALID_SIZEOF_USAGE,

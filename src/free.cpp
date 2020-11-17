@@ -24,7 +24,6 @@ namespace mlang {
             return nullptr;
         }
 
-        // TODO fix rm call error
         context.createFreeCall(ptrValue);
         return nullptr;
     }

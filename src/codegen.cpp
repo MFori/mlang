@@ -149,7 +149,7 @@ namespace mlang {
 
         ft = llvm::FunctionType::get(llvm::Type::getInt8Ty(getGlobalContext()), false);
         f = llvm::Function::Create(ft, llvm::Function::ExternalLinkage, MAKE_LLVM_EXTERNAL_NAME(read), getModule());
-        buildins.push_back({f, (int *) read});
+        buildins.push_back({f, (void *) read});
 
         ft = llvm::FunctionType::get(llvm::Type::getInt64Ty(getGlobalContext()), argTypesInt64Ptr, false);
         f = llvm::Function::Create(ft, llvm::Function::ExternalLinkage, MAKE_LLVM_EXTERNAL_NAME(sizeOf), getModule());
@@ -160,10 +160,15 @@ namespace mlang {
                                    getModule());
         buildins.push_back({f, (void *) __mlang_error});
 
-        ft = llvm::FunctionType::get(llvm::Type::getInt64Ty(getGlobalContext()), argTypesInt64Ptr, false);
+        ft = llvm::FunctionType::get(llvm::Type::getVoidTy(getGlobalContext()), argTypesInt8Ptr, false);
         f = llvm::Function::Create(ft, llvm::Function::ExternalLinkage, MAKE_LLVM_EXTERNAL_NAME(__mlang_rm),
                                    getModule());
         buildins.push_back({f, (void *) __mlang_rm});
+
+        ft = llvm::FunctionType::get(llvm::Type::getInt8PtrTy(getGlobalContext()), argTypesOneInt, false);
+        f = llvm::Function::Create(ft, llvm::Function::ExternalLinkage, MAKE_LLVM_EXTERNAL_NAME(__mlang_alloc),
+                                   getModule());
+        buildins.push_back({f, (void *) __mlang_alloc});
     }
 
     void CodeGenContext::optimize() {
@@ -230,14 +235,16 @@ namespace mlang {
         std::cout << err;
         assert(ee);
 
+        for (auto info : buildins) {
+            ee->addGlobalMapping(info.f, info.addr);
+        }
+
         ee->finalizeObject();
         std::vector<llvm::GenericValue> noargs;
         llvm::GenericValue v = ee->runFunction(initFunction, noargs);
         if (mainFunction != nullptr) {
             v = ee->runFunction(mainFunction, noargs);
         }
-
-        //printf("%s", LLVMPrintModuleToString((LLVMModuleRef)module));
 
         delete ee;
 
@@ -279,7 +286,7 @@ namespace mlang {
 
     llvm::Value *CodeGenContext::createMallocCall(llvm::Type *type, llvm::Value *count, const std::string &name,
                                                   llvm::Value *offset) {
-        auto fun = (module->getOrInsertFunction("malloc",
+        auto fun = (module->getOrInsertFunction("__mlang_alloc",
                                                 llvm::Type::getInt8PtrTy(llvmContext),
                                                 llvm::Type::getInt64Ty(llvmContext)));
 
@@ -294,15 +301,14 @@ namespace mlang {
         std::vector<llvm::Value *> fargs;
         fargs.push_back(totalSize);
         auto mallocatedSpaceRaw = llvm::CallInst::Create(fun, fargs, "tmp", currentBlock());
-        clearMemory(mallocatedSpaceRaw, totalSize);
 
         return new llvm::BitCastInst(mallocatedSpaceRaw, type->getPointerTo(0), name, currentBlock());
     }
 
     void CodeGenContext::createFreeCall(llvm::Value *value) {
         auto fun = (module->getOrInsertFunction("__mlang_rm",
-                                                llvm::Type::getInt64Ty(llvmContext),
-                                                llvm::Type::getInt64PtrTy(llvmContext)));
+                                                llvm::Type::getVoidTy(llvmContext),
+                                                llvm::Type::getInt8PtrTy(llvmContext)));
         std::vector<llvm::Value *> fargs;
         fargs.push_back(value);
         llvm::CallInst::Create(fun, fargs, "", currentBlock());
