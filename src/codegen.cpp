@@ -319,11 +319,16 @@ namespace mlang {
             return true;
         }
 
+        if (name == "sizeOf") {
+            return true;
+        }
+
         return false;
     }
 
     llvm::Value *CodeGenContext::callKeyFunction(const std::string &name, ExpressionList *args, YYLTYPE location) {
         if (llvmTypeMap.count(name) != 0) {
+            // array construct
             if (args->size() != 1) {
                 Node::printError(location, "Invalid number of arguments");
                 addError();
@@ -336,6 +341,13 @@ namespace mlang {
             std::cout << "Call key 2\n";
             return arr->codeGen(*this);
         }
+
+        if (name == "sizeOf") {
+            // sizeOf
+            return callSizeOf(args->at(0)->codeGen(*this));
+        }
+
+        // TODO toInt toDouble toString
 
         return nullptr;
     }
@@ -364,6 +376,12 @@ namespace mlang {
     }
 
     llvm::Value *CodeGenContext::callSizeOf(llvm::Value *arr) {
+        if (arr == nullptr || !arr->getType()->isPointerTy()) {
+            Node::printError("sizeOf invalid parameter");
+            addError();
+            return nullptr;
+        }
+
         auto fun = (module->getOrInsertFunction("sizeOf",
                                                 llvm::Type::getInt64Ty(llvmContext),
                                                 llvm::Type::getInt64PtrTy(llvmContext)));

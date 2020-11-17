@@ -49,12 +49,10 @@ extern "C" DECLSPEC int sizeOf(int64_t *ptr) {
 }
 
 extern "C" DECLSPEC void __mlang_rm(char *ptr) {
-    std::cout << "mlang rm called 1 \n";
     free(ptr - 8);
 }
 
 extern "C" DECLSPEC char *__mlang_alloc(int64_t size) {
-    std::cout << "mlang alloc called 1 \n";
     char *mem = (char *) malloc(size);
     memset(mem, 0, size);
     return mem;
