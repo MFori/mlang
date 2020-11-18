@@ -15,6 +15,7 @@ namespace mlang {
     llvm::Value *ForLoop::codeGen(CodeGenContext &context) {
         llvm::Function *function = context.currentBlock()->getParent();
 
+        llvm::BasicBlock *beforeBB = llvm::BasicBlock::Create(context.getGlobalContext(), "before", function);
         llvm::BasicBlock *loopBB = llvm::BasicBlock::Create(context.getGlobalContext(), "loop");
         llvm::BasicBlock *progressBB = llvm::BasicBlock::Create(context.getGlobalContext(), "progress");
         llvm::BasicBlock *afterBB = llvm::BasicBlock::Create(context.getGlobalContext(), "after");
@@ -35,6 +36,9 @@ namespace mlang {
             context.addError();
             return nullptr;
         }
+
+        llvm::BranchInst::Create(beforeBB, context.currentBlock());
+        context.newScope(beforeBB, ScopeType::CODE_BLOCK);
 
         auto *alloc = new llvm::AllocaInst(llvm::Type::getInt64Ty(context.getGlobalContext()), 0, ident->getName(),
                                            context.currentBlock());
@@ -67,10 +71,12 @@ namespace mlang {
         new llvm::StoreInst(tmp, variable->getValue(), false, context.currentBlock());
         cmp = llvm::CmpInst::Create(llvm::Instruction::ICmp, op, tmp, to, "cmptmp", context.currentBlock());
         llvm::BranchInst::Create(loopBB, afterBB, cmp, context.currentBlock());
-        function->getBasicBlockList().push_back(afterBB);
         context.endScope();
 
+        context.endScope();
+        function->getBasicBlockList().push_back(afterBB);
         context.setInsertPoint(afterBB);
+
         return afterBB;
     }
 
