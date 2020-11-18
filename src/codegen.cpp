@@ -82,6 +82,16 @@ namespace mlang {
         return nullptr;
     }
 
+    std::string CodeGenContext::llvmTypeToString(llvm::Type *type) {
+        for (auto &it : llvmTypeMap) {
+            if (it.second == type) {
+                return it.first;
+            }
+        }
+
+        return nullptr;
+    }
+
     std::string CodeGenContext::getVarType(const std::string &varName) {
         for (auto &cb : codeBlocks) {
             auto &types = cb->getTypeMap();

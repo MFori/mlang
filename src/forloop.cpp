@@ -7,7 +7,6 @@
 #include "forloop.h"
 #include "codegen.h"
 #include "variable.h"
-#include "binaryop.h"
 #include "parser.hpp"
 
 namespace mlang {
@@ -55,7 +54,6 @@ namespace mlang {
 
         context.newScope(loopBB, ScopeType::CODE_BLOCK, afterBB);
 
-        ((llvm::AllocaInst *) variable->getValue())->getType()->getElementType();
         llvm::Value *loopValue = this->doBlock->codeGen(context);
         if (loopValue == nullptr || !mlang::CodeGenContext::isBreakingInstruction(loopValue)) {
             llvm::BranchInst::Create(progressBB, context.currentBlock());

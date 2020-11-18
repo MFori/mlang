@@ -163,6 +163,8 @@ namespace mlang {
 
         std::string getVarType(const std::string &varName);
 
+        std::string llvmTypeToString(llvm::Type *type);
+
         void optimize();
 
         bool generateCode(class Block &root);
