@@ -43,7 +43,10 @@ namespace mlang {
         context.setVarType("Int", ident->getName());
         new llvm::StoreInst(from, variable->getValue(), false, context.currentBlock());
 
-        llvm::BranchInst::Create(loopBB, context.currentBlock());
+        auto op = range->getOp() == TUNTIL ? llvm::CmpInst::ICMP_SLT : llvm::CmpInst::ICMP_SLE;
+        auto cmp = llvm::CmpInst::Create(llvm::Instruction::ICmp, op, from, to, "cmptmp", context.currentBlock());
+        llvm::BranchInst::Create(loopBB, afterBB, cmp, context.currentBlock());
+
         function->getBasicBlockList().push_back(loopBB);
 
         context.newScope(loopBB, ScopeType::CODE_BLOCK, afterBB);
@@ -62,8 +65,7 @@ namespace mlang {
         auto tmp = llvm::BinaryOperator::Create(llvm::Instruction::Add, value, stepVal, "mathtmp",
                                                 context.currentBlock());
         new llvm::StoreInst(tmp, variable->getValue(), false, context.currentBlock());
-        auto op = range->getOp() == TUNTIL ? llvm::CmpInst::ICMP_SLT : llvm::CmpInst::ICMP_SLE;
-        auto cmp = llvm::CmpInst::Create(llvm::Instruction::ICmp, op, tmp, to, "cmptmp", context.currentBlock());
+        cmp = llvm::CmpInst::Create(llvm::Instruction::ICmp, op, tmp, to, "cmptmp", context.currentBlock());
         llvm::BranchInst::Create(loopBB, afterBB, cmp, context.currentBlock());
         function->getBasicBlockList().push_back(afterBB);
         context.endScope();
