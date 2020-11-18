@@ -20,6 +20,7 @@
     #include "comparison.h"
     #include "whileloop.h"
     #include "forloop.h"
+    #include "foreach.h"
     #include "range.h"
     #include "array.h"
 
@@ -210,6 +211,7 @@ while : TWHILE '(' expr ')' block { $$ = new mlang::WhileLoop($3,$5,0,@$); }
 
 for : TFOR '(' ident TIN range ')' block { $$ = new mlang::ForLoop($3, $<range>5, 0, $7, @$); }
     | TFOR '(' ident TIN range TSTEP expr ')' block { $$ = new mlang::ForLoop($3, $<range>5, $7, $9, @$); }
+    | TFOR '(' ident TIN expr ')' block { $$ = new mlang::ForEach($3, $5, $7, @$); }
     ;
 
 range : expr TUNTIL expr { $$ = new mlang::Range($1, $2, $3, @$); }

@@ -59,6 +59,7 @@ set(SOURCES_COMMON
         array.cpp
         free.cpp
         str.cpp
+        foreach.cpp
         lexer.l
         parser.y
         )
@@ -84,6 +85,7 @@ set(HEADER_COMMON
         array.h
         free.h
         str.h
+        foreach.h
         )
 
 if (MSVC)

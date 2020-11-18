@@ -30,6 +30,7 @@ namespace mlang {
     class Comparison;
     class WhileLoop;
     class ForLoop;
+    class ForEach;
     class Range;
     class Break;
     class Array;
@@ -82,6 +83,8 @@ namespace mlang {
         virtual void visitWhileLoop(WhileLoop *e) = 0;
 
         virtual void visitForLoop(ForLoop *e) = 0;
+
+        virtual void visitForEach(ForEach *e) = 0;
 
         virtual void visitRange(Range *e) = 0;
 
