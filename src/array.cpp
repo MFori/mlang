@@ -26,7 +26,8 @@ namespace mlang {
                                                                   context.currentBlock());
 
         new llvm::StoreInst(count, array, false, context.currentBlock());
-        return elementPtr;
+        //return elementPtr;
+        return new llvm::BitCastInst(elementPtr, type->getPointerTo(), "array", context.currentBlock());
     }
 
     void Array::validateArrayBounds(llvm::Value *arrayPtr, llvm::Value *index, CodeGenContext &context) {

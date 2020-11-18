@@ -312,7 +312,7 @@ namespace mlang {
         fargs.push_back(totalSize);
         auto mallocatedSpaceRaw = llvm::CallInst::Create(fun, fargs, "tmp", currentBlock());
 
-        return new llvm::BitCastInst(mallocatedSpaceRaw, type->getPointerTo(0), name, currentBlock());
+        return new llvm::BitCastInst(mallocatedSpaceRaw, llvm::Type::getInt64PtrTy(llvmContext), name, currentBlock());
     }
 
     void CodeGenContext::createFreeCall(llvm::Value *value) {
