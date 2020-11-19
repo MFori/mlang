@@ -10,30 +10,30 @@
 namespace mlang {
 
     llvm::Value *Conditional::codeGen(CodeGenContext &context) {
-        llvm::Value* comp = condExpr->codeGen(context);
+        llvm::Value *comp = condExpr->codeGen(context);
         if (comp == nullptr) {
-            Node::printError(location,"Code generation for compare operator of the conditional statement failed.");
+            Node::printError(location, "Code generation for compare operator of the conditional statement failed.");
             context.addError();
             return nullptr;
         }
         if (!comp->getType()->isIntegerTy(1)) {
-            Node::printError(location,"If condition doesn't result in a boolean expression.");
+            Node::printError(location, "If condition doesn't result in a boolean expression.");
             context.addError();
             return nullptr;
         }
 
-        llvm::Function*   function   = context.currentBlock()->getParent();
-        llvm::BasicBlock* thenBlock  = llvm::BasicBlock::Create(context.getGlobalContext(), "then", function);
-        llvm::BasicBlock* elseBlock  = llvm::BasicBlock::Create(context.getGlobalContext(), "else");
-        llvm::BasicBlock* mergeBlock = llvm::BasicBlock::Create(context.getGlobalContext(), "merge");
+        llvm::Function *function = context.currentBlock()->getParent();
+        llvm::BasicBlock *thenBlock = llvm::BasicBlock::Create(context.getGlobalContext(), "then", function);
+        llvm::BasicBlock *elseBlock = llvm::BasicBlock::Create(context.getGlobalContext(), "else");
+        llvm::BasicBlock *mergeBlock = llvm::BasicBlock::Create(context.getGlobalContext(), "merge");
         llvm::BranchInst::Create(thenBlock, elseBlock, comp, context.currentBlock());
 
         bool needMergeBlock = false;
 
         context.newScope(thenBlock, ScopeType::CODE_BLOCK);
-        thenExpr->codeGen(context);
+        auto thenVal = thenExpr->codeGen(context);
 
-        if (context.currentBlock()->getTerminator() == nullptr) {
+        if (thenVal == nullptr || !llvm::ReturnInst::classof(thenVal)) {
             llvm::BranchInst::Create(mergeBlock, context.currentBlock());
             needMergeBlock = true;
         }
@@ -42,11 +42,12 @@ namespace mlang {
         context.endScope();
 
         context.newScope(elseBlock, ScopeType::CODE_BLOCK);
+        llvm::Value *elseVal = nullptr;
         if (elseExpr != nullptr) {
-            elseExpr->codeGen(context);
+            elseVal = elseExpr->codeGen(context);
         }
 
-        if (context.currentBlock()->getTerminator() == nullptr) {
+        if (elseVal == nullptr || !llvm::ReturnInst::classof(elseVal)) {
             llvm::BranchInst::Create(mergeBlock, context.currentBlock());
             needMergeBlock = true;
         }
@@ -55,6 +56,10 @@ namespace mlang {
         if (needMergeBlock) {
             function->getBasicBlockList().push_back(mergeBlock);
             context.setInsertPoint(mergeBlock);
+        }
+
+        if (!needMergeBlock) {
+            return thenVal;
         }
 
         return mergeBlock;
