@@ -68,7 +68,7 @@ namespace mlang {
 
         if (isIdentifier && var != nullptr && var->getValue() != nullptr) {
             bool isDoubleTy = var->getType()->isFloatingPointTy();
-            bool isIntTy = var->getType()->isIntegerTy();
+            bool isIntTy = var->getType()->isIntegerTy(64);
 
             if (!isDoubleTy && !isIntTy) {
                 Node::printError(location, "unsupported operation");

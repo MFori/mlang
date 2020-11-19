@@ -14,11 +14,12 @@ namespace mlang {
         llvm::Value *rhsValue = rhs->codeGen(context);
         llvm::Value *lhsValue = lhs->codeGen(context);
         if (rhsValue == nullptr || lhsValue == nullptr) {
+            Node::printError(location, "unsupported operation");
+            context.addError();
             return nullptr;
         }
 
         if (rhsValue->getType() != lhsValue->getType()) {
-            std::cout << rhsValue->getName().str() + " - " + lhsValue->getName().str() + " \n";
             Node::printError(location, "binary operator incompatible types");
             context.addError();
             return nullptr;
