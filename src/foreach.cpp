@@ -45,12 +45,17 @@ namespace mlang {
         auto variable = Variable::newLocal(alloc);
         context.locals()[ident->getName()] = variable;
         context.setVarType(context.llvmTypeToString(array->getType()), ident->getName());
-        new llvm::StoreInst(from, variable->getValue(), false, context.currentBlock());
-
+        
         auto *indexAlloc = new llvm::AllocaInst(llvm::Type::getInt64Ty(context.getGlobalContext()), 0, "index",
                                                 context.currentBlock());
         auto index = Variable::newLocal(indexAlloc);
         new llvm::StoreInst(from, index->getValue(), false, context.currentBlock());
+
+        llvm::Value *indices[1] = {from};
+        llvm::Value *elementPtr = llvm::GetElementPtrInst::Create(nullptr, array, indices, "elem_ptr",
+                                                                  context.currentBlock());
+        auto item = new llvm::LoadInst(array->getType()->getPointerElementType(), elementPtr, "item", context.currentBlock());
+        new llvm::StoreInst(item, variable->getValue(), false, context.currentBlock());
 
         auto op = llvm::CmpInst::ICMP_SLT;
         auto cmp = llvm::CmpInst::Create(llvm::Instruction::ICmp, op, from, to, "cmptmp", context.currentBlock());
@@ -74,10 +79,10 @@ namespace mlang {
                                                 context.currentBlock());
         new llvm::StoreInst(tmp, index->getValue(), false, context.currentBlock());
 
-        llvm::Value *indices[1] = {tmp};
-        llvm::Value *elementPtr = llvm::GetElementPtrInst::Create(nullptr, array, indices, "elem_ptr",
+        llvm::Value *indices2[1] = {tmp};
+        elementPtr = llvm::GetElementPtrInst::Create(nullptr, array, indices2, "elem_ptr",
                                                                   context.currentBlock());
-        auto item = new llvm::LoadInst(array->getType()->getPointerElementType(), elementPtr, "item", context.currentBlock());
+        item = new llvm::LoadInst(array->getType()->getPointerElementType(), elementPtr, "item", context.currentBlock());
         new llvm::StoreInst(item, variable->getValue(), false, context.currentBlock());
 
         cmp = llvm::CmpInst::Create(llvm::Instruction::ICmp, op, tmp, to, "cmptmp", context.currentBlock());
