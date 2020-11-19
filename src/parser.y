@@ -86,7 +86,6 @@
 %token <boolean> TBOOL
 %token <character> TCHAR
 %token <token> TCEQ TCNE TCLT TCLE TCGT TCGE
-%token <token> TLTLT "<<"
 %token <token> TPLUS TMINUS TMUL TDIV
 %token <token> TNOT TAND TOR
 %token <token> TINC TDEC

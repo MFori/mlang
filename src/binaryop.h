@@ -29,6 +29,16 @@ namespace mlang {
 
         void accept(Visitor &v) override { v.visitBinaryOp(this); }
 
+        llvm::Value *doubleCodeGen(llvm::Value *lhsValue, llvm::Value *rhsValue, CodeGenContext &context) const;
+
+        llvm::Value *integerCodeGen(llvm::Value *lhsValue, llvm::Value *rhsValue, CodeGenContext &context) const;
+
+        llvm::Value *charCodeGen(llvm::Value *lhsValue, llvm::Value *rhsValue, CodeGenContext &context) const;
+
+        llvm::Value *boolCodeGen(llvm::Value *lhsValue, llvm::Value *rhsValue, CodeGenContext &context) const;
+
+        llvm::Value *stringCodeGen(llvm::Value *lhsValue, llvm::Value *rhsValue, CodeGenContext &context);
+
     private:
         int op{0};
         Expression *lhs{nullptr};

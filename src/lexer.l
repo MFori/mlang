@@ -165,7 +165,6 @@ import              BEGIN(incl);
 "="                     return '=';
 "=="                    return TOKEN(TCEQ);
 "!="                    return TOKEN(TCNE);
-"<<"                    return TOKEN(TLTLT);
 "<"                     return TOKEN(TCLT);
 "<="                    return TOKEN(TCLE);
 ">"                     return TOKEN(TCGT);

@@ -18,47 +18,108 @@ namespace mlang {
         }
 
         if (rhsValue->getType() != lhsValue->getType()) {
-            std::cout << rhsValue->getName().str() + " - " + lhsValue->getName().str()+ " \n";
+            std::cout << rhsValue->getName().str() + " - " + lhsValue->getName().str() + " \n";
             Node::printError(location, "binary operator incompatible types");
             context.addError();
             return nullptr;
         }
 
         bool isDoubleTy = rhsValue->getType()->isFloatingPointTy();
-        bool isIntTy = rhsValue->getType()->isIntegerTy();
+        bool isIntTy = rhsValue->getType()->isIntegerTy(64);
+        bool isCharTy = rhsValue->getType()->isIntegerTy(8);
+        bool isBoolTy = rhsValue->getType()->isIntegerTy(1);
+        bool isStringTy = rhsValue->getType() == llvm::Type::getInt8PtrTy(context.getGlobalContext());
 
-        /*if(!isIntTy) {
-            rhsValue = llvm::CastInst::Create(llvm::CastInst::getCastOpcode(rhsValue, true, llvm::Type::getInt1Ty(context.getGlobalContext()), true),
-                                              rhsValue, llvm::Type::getInt1Ty(context.getGlobalContext()), "castb", context.currentBlock());
-            lhsValue = llvm::CastInst::Create(llvm::CastInst::getCastOpcode(lhsValue, true, llvm::Type::getInt1Ty(context.getGlobalContext()), true),
-                                              lhsValue, llvm::Type::getInt1Ty(context.getGlobalContext()), "castb", context.currentBlock());
+        llvm::Value *val = nullptr;
+        if (isDoubleTy) {
+            val = doubleCodeGen(lhsValue, rhsValue, context);
+        } else if (isIntTy) {
+            val = integerCodeGen(lhsValue, rhsValue, context);
+        } else if (isCharTy) {
+            val = charCodeGen(lhsValue, rhsValue, context);
+        } else if (isBoolTy) {
+            val = boolCodeGen(lhsValue, rhsValue, context);
+        } else if (isStringTy) {
+            val = stringCodeGen(lhsValue, rhsValue, context);
         }
-        isIntTy = rhsValue->getType()->isIntegerTy();*/
 
-        if (!isIntTy && (op == TAND || op == TOR)) {
+        if (val == nullptr) {
             Node::printError(location, "unsupported operation");
             context.addError();
-            return nullptr;
-        } /*else if(isIntTy && (op != TAND && op != TOR)) {
-            Node::printError(location, "unsupported operation 2");
-            context.addError();
-            return nullptr;
-        }*/
+        }
 
+        return val;
+    }
+
+    llvm::Value *BinaryOp::doubleCodeGen(llvm::Value *lhsValue, llvm::Value *rhsValue, CodeGenContext &context) const {
         llvm::Instruction::BinaryOps instr;
         switch (op) {
             case TPLUS:
-                instr = isDoubleTy ? llvm::Instruction::FAdd : llvm::Instruction::Add;
+                instr = llvm::Instruction::FAdd;
                 break;
             case TMINUS:
-                instr = isDoubleTy ? llvm::Instruction::FSub : llvm::Instruction::Sub;
+                instr = llvm::Instruction::FSub;
                 break;
             case TMUL:
-                instr = isDoubleTy ? llvm::Instruction::FMul : llvm::Instruction::Mul;
+                instr = llvm::Instruction::FMul;
                 break;
             case TDIV:
-                instr = isDoubleTy ? llvm::Instruction::FDiv : llvm::Instruction::SDiv;
+                instr = llvm::Instruction::FDiv;
                 break;
+            default:
+                return nullptr;
+        }
+
+        return llvm::BinaryOperator::Create(instr, lhsValue, rhsValue, "mathtmp", context.currentBlock());
+    }
+
+    llvm::Value *BinaryOp::integerCodeGen(llvm::Value *lhsValue, llvm::Value *rhsValue, CodeGenContext &context) const {
+        llvm::Instruction::BinaryOps instr;
+        switch (op) {
+            case TPLUS:
+                instr = llvm::Instruction::Add;
+                break;
+            case TMINUS:
+                instr = llvm::Instruction::Sub;
+                break;
+            case TMUL:
+                instr = llvm::Instruction::Mul;
+                break;
+            case TDIV:
+                instr = llvm::Instruction::SDiv;
+                break;
+            default:
+                return nullptr;
+        }
+
+        return llvm::BinaryOperator::Create(instr, lhsValue, rhsValue, "mathtmp", context.currentBlock());
+    }
+
+    llvm::Value *BinaryOp::charCodeGen(llvm::Value *lhsValue, llvm::Value *rhsValue, CodeGenContext &context) const {
+        llvm::Instruction::BinaryOps instr;
+        switch (op) {
+            case TPLUS:
+                instr = llvm::Instruction::Add;
+                break;
+            case TMINUS:
+                instr = llvm::Instruction::Sub;
+                break;
+            case TMUL:
+                instr = llvm::Instruction::Mul;
+                break;
+            case TDIV:
+                instr = llvm::Instruction::SDiv;
+                break;
+            default:
+                return nullptr;
+        }
+
+        return llvm::BinaryOperator::Create(instr, lhsValue, rhsValue, "mathtmp", context.currentBlock());
+    }
+
+    llvm::Value *BinaryOp::boolCodeGen(llvm::Value *lhsValue, llvm::Value *rhsValue, CodeGenContext &context) const {
+        llvm::Instruction::BinaryOps instr;
+        switch (op) {
             case TAND:
                 instr = llvm::Instruction::And;
                 break;
@@ -66,12 +127,19 @@ namespace mlang {
                 instr = llvm::Instruction::Or;
                 break;
             default:
-                Node::printError(location, "Unknown operator.");
-                context.addError();
                 return nullptr;
         }
 
         return llvm::BinaryOperator::Create(instr, lhsValue, rhsValue, "mathtmp", context.currentBlock());
+    }
+
+    llvm::Value *BinaryOp::stringCodeGen(llvm::Value *lhsValue, llvm::Value *rhsValue, CodeGenContext &context) {
+        if (op != TPLUS) {
+            return nullptr;
+        }
+
+        // TODO string concatenation
+        return nullptr;
     }
 
 }
