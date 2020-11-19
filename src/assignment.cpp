@@ -12,7 +12,7 @@ namespace mlang {
 
     llvm::Value *Assignment::codeGen(CodeGenContext &context) {
         llvm::Value *value = rhs->codeGen(context);
-        
+
         if (value == nullptr) {
             Node::printError(location, " Assignment expression results in nothing");
             context.addError();
@@ -34,17 +34,17 @@ namespace mlang {
             llvm::Type *ty = value->getType();
 
             if (global) {
-                llvm::GlobalVariable* gv;
-                if(ty->isPointerTy() || !llvm::Constant::classof(value)) {
+                llvm::GlobalVariable *gv;
+                if (ty->isPointerTy() || !llvm::Constant::classof(value)) {
                     gv = new llvm::GlobalVariable(*context.getModule(), ty, false,
-                                                        llvm::GlobalValue::PrivateLinkage,
+                                                  llvm::GlobalValue::PrivateLinkage,
                                                   llvm::Constant::getNullValue(ty), lhs->getName());
                     gv->setAlignment(llvm::MaybeAlign(4));
                     new llvm::StoreInst(value, gv, false, context.currentBlock());
                 } else {
                     gv = new llvm::GlobalVariable(*context.getModule(), ty, var->isConst(),
-                                                        llvm::GlobalValue::PrivateLinkage,
-                                                        (llvm::Constant *) value, lhs->getName());
+                                                  llvm::GlobalValue::PrivateLinkage,
+                                                  (llvm::Constant *) value, lhs->getName());
                     gv->setAlignment(llvm::MaybeAlign(4));
                 }
                 var->setValue(gv);
@@ -65,14 +65,7 @@ namespace mlang {
             }
         }
 
-        if (value->getType()->getTypeID() == varType->getTypeID()) {
-            // same type but different bit size.
-            if (value->getType()->getScalarSizeInBits() > varType->getScalarSizeInBits()) {
-                value = llvm::CastInst::CreateTruncOrBitCast(value, varType, "cast", context.currentBlock());
-            } else if (value->getType()->getScalarSizeInBits() < varType->getScalarSizeInBits()) {
-                value = llvm::CastInst::CreateZExtOrBitCast(value, varType, "cast", context.currentBlock());
-            }
-        } else if (value->getType() != varType) {
+        if (value->getType() != varType) {
             std::stringstream msg;
             msg << " Assignment of incompatible types " << varType->getTypeID() << "(" << varType->getScalarSizeInBits()
                 << ") = " << value->getType()->getTypeID()
