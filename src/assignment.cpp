@@ -13,7 +13,7 @@ namespace mlang {
     llvm::Value *Assignment::codeGen(CodeGenContext &context) {
         llvm::Value *value = rhs->codeGen(context);
 
-        if (value == nullptr) {
+        if (value == nullptr || value->getType()->isVoidTy()) {
             Node::printError(location, " Assignment expression results in nothing");
             context.addError();
             return nullptr;
