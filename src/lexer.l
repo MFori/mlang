@@ -7,7 +7,8 @@
 #define SAVE_INTEGER yylval.integer = std::stoll(std::string(yytext, yyleng))
 #define SAVE_NUMBER yylval.number = std::stod(std::string(yytext, yyleng))
 #define SAVE_BOOLEAN yylval.boolean = std::string(yytext, yyleng) == "true" ? 1 : 0
-#define SAVE_CHAR yylval.character = yytext[1]; printf("Save char %s\n", yytext)
+#define SAVE_CHAR yylval.character = yytext[1]
+#define SAVE_NCHAR yylval.character = (char) std::stoi(std::string(yytext + 2, yyleng-2))
 #define TOKEN(t) (yylval.token = t)
 
 #ifdef _MSC_VER
@@ -156,6 +157,7 @@ import              BEGIN(incl);
 "false"                 SAVE_BOOLEAN; return TBOOL;
 \/\/.*                     /* comments one line til nl */
 [ \t\n]                 /* ignore */;
+\@\@[0-9]+              SAVE_NCHAR; return TCHAR;
 \@.                     SAVE_CHAR; return TCHAR;
 [a-zA-Z_][a-zA-Z0-9_]*  SAVE_TOKEN; return TIDENTIFIER;
 [0-9]+                  SAVE_INTEGER; return TINTEGER;
