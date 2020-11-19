@@ -10,71 +10,133 @@
 
 namespace mlang {
 
-    llvm::Value* Comparison::codeGen(CodeGenContext &context) {
-        llvm::Value* rhsVal = rhs->codeGen(context);
-        if (rhsVal == nullptr)
-            return nullptr;
-        llvm::Value* lhsVal = lhs->codeGen(context);
-        if (lhsVal == nullptr)
-            return nullptr;
-        /*if ((lhsVal->getType() != llvm::Type::getDoubleTy(context.getGlobalContext())) && (lhsVal->getType() != llvm::Type::getInt64Ty(context.getGlobalContext()))) {
-            Node::printError("Left hand side of compare expression isn't a value type (number)");
+    llvm::Value *Comparison::codeGen(CodeGenContext &context) {
+        llvm::Value *rhsVal = rhs->codeGen(context);
+        llvm::Value *lhsVal = lhs->codeGen(context);
+
+        if (lhsVal == nullptr || rhsVal == nullptr) {
+            Node::printError(location, "unsupported operation");
             context.addError();
             return nullptr;
         }
-        if ((rhsVal->getType() != llvm::Type::getDoubleTy(context.getGlobalContext())) && (rhsVal->getType() != llvm::Type::getInt64Ty(context.getGlobalContext()))) {
-            Node::printError("Right hand side of compare expression isn't a value type (number)");
-            context.addError();
-            return nullptr;
-        }*/
-        if (!lhsVal->getType()->isDoubleTy() && !lhsVal->getType()->isIntegerTy()) {
-            Node::printError(location,"Left hand side of compare expression isn't a value type (number)");
-            context.addError();
-            return nullptr;
-        }
-        if (!rhsVal->getType()->isDoubleTy() && !rhsVal->getType()->isIntegerTy()) {
-            Node::printError(location,"Right hand side of compare expression isn't a value type (number)");
-            context.addError();
-            return nullptr;
-        }
+
         if (rhsVal->getType() != lhsVal->getType()) {
-            // since we only support double and int, always cast to double in case of different types.
-            auto cinstr = llvm::CastInst::getCastOpcode(rhsVal, true, llvm::Type::getDoubleTy(context.getGlobalContext()), true);
-            rhsVal      = llvm::CastInst::Create(cinstr, rhsVal, llvm::Type::getDoubleTy(context.getGlobalContext()), "castdb", context.currentBlock());
-            cinstr      = llvm::CastInst::getCastOpcode(lhsVal, true, llvm::Type::getDoubleTy(context.getGlobalContext()), true);
-            lhsVal      = llvm::CastInst::Create(cinstr, lhsVal, llvm::Type::getDoubleTy(context.getGlobalContext()), "castdb", context.currentBlock());
+            Node::printError(location, "Comparison of incompatible types");
+            context.addError();
+            return nullptr;
         }
 
-        bool                  isDouble = rhsVal->getType() == llvm::Type::getDoubleTy(context.getGlobalContext());
-        llvm::Instruction::OtherOps oinstr   = isDouble ? llvm::Instruction::FCmp : llvm::Instruction::ICmp;
+        bool isDoubleTy = rhsVal->getType()->isFloatingPointTy();
+        bool isIntTy = rhsVal->getType()->isIntegerTy(64);
+        bool isCharTy = rhsVal->getType()->isIntegerTy(8);
+        bool isBoolTy = rhsVal->getType()->isIntegerTy(1);
+        bool isStringTy = rhsVal->getType() == llvm::Type::getInt8PtrTy(context.getGlobalContext());
 
+        llvm::Value *val = nullptr;
+        if (isDoubleTy) {
+            val = doubleCodeGen(lhsVal, rhsVal, context);
+        } else if (isIntTy) {
+            val = integerCodeGen(lhsVal, rhsVal, context);
+        } else if (isCharTy) {
+            val = charCodeGen(lhsVal, rhsVal, context);
+        } else if (isBoolTy) {
+            val = boolCodeGen(lhsVal, rhsVal, context);
+        } else if (isStringTy) {
+            val = stringCodeGen(lhsVal, rhsVal, context);
+        }
+
+        if (val == nullptr) {
+            Node::printError(location, "unsupported operation");
+            context.addError();
+        }
+
+        return val;
+    }
+
+    llvm::Value *
+    Comparison::doubleCodeGen(llvm::Value *lhsValue, llvm::Value *rhsValue, CodeGenContext &context) const {
         llvm::CmpInst::Predicate predicate;
         switch (op) {
             case TCGE:
-                predicate = isDouble ? llvm::CmpInst::FCMP_OGE : llvm::CmpInst::ICMP_SGE;
+                predicate = llvm::CmpInst::FCMP_OGE;
                 break;
             case TCGT:
-                predicate = isDouble ? llvm::CmpInst::FCMP_OGT : llvm::CmpInst::ICMP_SGT;
+                predicate = llvm::CmpInst::FCMP_OGT;
                 break;
             case TCLT:
-                predicate = isDouble ? llvm::CmpInst::FCMP_OLT : llvm::CmpInst::ICMP_SLT;
+                predicate = llvm::CmpInst::FCMP_OLT;
                 break;
             case TCLE:
-                predicate = isDouble ? llvm::CmpInst::FCMP_OLE : llvm::CmpInst::ICMP_SLE;
+                predicate = llvm::CmpInst::FCMP_OLE;
                 break;
             case TCEQ:
-                predicate = isDouble ? llvm::CmpInst::FCMP_OEQ : llvm::CmpInst::ICMP_EQ;
+                predicate = llvm::CmpInst::FCMP_OEQ;
                 break;
             case TCNE:
-                predicate = isDouble ? llvm::CmpInst::FCMP_ONE : llvm::CmpInst::ICMP_NE;
+                predicate = llvm::CmpInst::FCMP_ONE;
                 break;
             default:
-                Node::printError(location,"Unknown compare operator.");
-                context.addError();
                 return nullptr;
         }
 
-        return llvm::CmpInst::Create(oinstr, predicate, lhsVal, rhsVal, "cmptmp", context.currentBlock());
+        return llvm::CmpInst::Create(llvm::Instruction::FCmp, predicate, lhsValue, rhsValue, "cmptmp",
+                                     context.currentBlock());
     }
 
+    llvm::Value *
+    Comparison::integerCodeGen(llvm::Value *lhsValue, llvm::Value *rhsValue, CodeGenContext &context) const {
+        llvm::CmpInst::Predicate predicate;
+        switch (op) {
+            case TCGE:
+                predicate = llvm::CmpInst::ICMP_SGE;
+                break;
+            case TCGT:
+                predicate = llvm::CmpInst::ICMP_SGT;
+                break;
+            case TCLT:
+                predicate = llvm::CmpInst::ICMP_SLT;
+                break;
+            case TCLE:
+                predicate = llvm::CmpInst::ICMP_SLE;
+                break;
+            case TCEQ:
+                predicate = llvm::CmpInst::ICMP_EQ;
+                break;
+            case TCNE:
+                predicate = llvm::CmpInst::ICMP_NE;
+                break;
+            default:
+                return nullptr;
+        }
+
+        return llvm::CmpInst::Create(llvm::Instruction::ICmp, predicate, lhsValue, rhsValue, "cmptmp",
+                                     context.currentBlock());
+    }
+
+    llvm::Value *Comparison::charCodeGen(llvm::Value *lhsValue, llvm::Value *rhsValue, CodeGenContext &context) const {
+        return integerCodeGen(lhsValue, rhsValue, context);
+    }
+
+    llvm::Value *Comparison::boolCodeGen(llvm::Value *lhsValue, llvm::Value *rhsValue, CodeGenContext &context) const {
+        llvm::CmpInst::Predicate predicate;
+        switch (op) {
+            case TCEQ:
+                predicate = llvm::CmpInst::ICMP_EQ;
+                break;
+            case TCNE:
+                predicate = llvm::CmpInst::ICMP_NE;
+                break;
+            default:
+                return nullptr;
+        }
+
+        return llvm::CmpInst::Create(llvm::Instruction::ICmp, predicate, lhsValue, rhsValue, "cmptmp",
+                                     context.currentBlock());
+    }
+
+    llvm::Value *Comparison::stringCodeGen(llvm::Value *lhsValue, llvm::Value *rhsValue, CodeGenContext &context) {
+
+        // TODO string comparison
+        return nullptr;
+    }
 }
