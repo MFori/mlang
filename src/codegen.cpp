@@ -134,6 +134,17 @@ namespace mlang {
         llvmTypeMap["var"] = varType;
         llvmTypeMap["val"] = valType;
 
+        arrayFunctions["String"] = stringType;
+        arrayFunctions["IntArray"] = intArrayType;
+        arrayFunctions["DoubleArray"] = doubleArrayType;
+        arrayFunctions["BoolArray"] = boolArrayType;
+
+        castFunctions["toInt"] = intType;
+        castFunctions["toDouble"] = doubleType;
+        castFunctions["toBool"] = boolType;
+        castFunctions["toChar"] = charType;
+        castFunctions["toString"] = stringType;
+
         std::vector<llvm::Type *> argTypesOneInt(1, intType);
         std::vector<llvm::Type *> argTypesInt8Ptr(1, llvm::Type::getInt8PtrTy(getGlobalContext()));
         std::vector<llvm::Type *> argTypesInt64Ptr(1, llvm::Type::getInt64PtrTy(getGlobalContext()));
@@ -179,6 +190,18 @@ namespace mlang {
         f = llvm::Function::Create(ft, llvm::Function::ExternalLinkage, MAKE_LLVM_EXTERNAL_NAME(__mlang_alloc),
                                    getModule());
         buildins.push_back({f, (void *) __mlang_alloc});
+
+        std::vector<llvm::Type *> castTypes {intType, intType, intType, intType, intType, stringType};
+        ft = llvm::FunctionType::get(llvm::Type::getInt8PtrTy(getGlobalContext()), castTypes, false);
+        f = llvm::Function::Create(ft, llvm::Function::ExternalLinkage, MAKE_LLVM_EXTERNAL_NAME(__mlang_cast),
+                                   getModule());
+        buildins.push_back({f, (void *) __mlang_cast});
+
+        std::vector<llvm::Type *> castTypesd {doubleType, intType, intType, stringType};
+        ft = llvm::FunctionType::get(llvm::Type::getInt8PtrTy(getGlobalContext()), castTypesd, false);
+        f = llvm::Function::Create(ft, llvm::Function::ExternalLinkage, MAKE_LLVM_EXTERNAL_NAME(__mlang_castd),
+                                   getModule());
+        buildins.push_back({f, (void *) __mlang_castd});
     }
 
     void CodeGenContext::optimize() {
@@ -325,7 +348,11 @@ namespace mlang {
     }
 
     bool CodeGenContext::isKeyFunction(const std::string &name) {
-        if (llvmTypeMap.count(name) != 0) {
+        if (arrayFunctions.count(name) != 0) {
+            return true;
+        }
+
+        if (castFunctions.count(name) != 0) {
             return true;
         }
 
@@ -337,27 +364,38 @@ namespace mlang {
     }
 
     llvm::Value *CodeGenContext::callKeyFunction(const std::string &name, ExpressionList *args, YYLTYPE location) {
-        if (llvmTypeMap.count(name) != 0) {
-            // array construct
+        if (arrayFunctions.count(name) != 0) {
             if (args->size() != 1) {
                 Node::printError(location, "Invalid number of arguments");
                 addError();
                 return nullptr;
             }
 
-            auto type = llvmTypeMap[name];
+            auto type = arrayFunctions[name];
             auto arr = new Array(type->getPointerElementType(), args->at(0), location);
-
-            std::cout << "Call key 2\n";
             return arr->codeGen(*this);
         }
 
-        if (name == "sizeOf") {
-            // sizeOf
-            return callSizeOf(args->at(0)->codeGen(*this));
+        if (castFunctions.count(name) != 0) {
+            if (args->size() != 1) {
+                Node::printError(location, "Invalid number of arguments");
+                addError();
+                return nullptr;
+            }
+
+            auto type = castFunctions[name];
+            auto cast = new Cast(type, args->at(0), location);
+            return cast->codeGen(*this);
         }
 
-        // TODO toInt toDouble toString
+        if (name == "sizeOf") {
+            if (args->size() != 1) {
+                Node::printError(location, "Invalid number of arguments");
+                addError();
+                return nullptr;
+            }
+            return callSizeOf(args->at(0)->codeGen(*this));
+        }
 
         return nullptr;
     }

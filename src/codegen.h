@@ -45,6 +45,7 @@
 #include "buildins.h"
 #include "ast.h"
 #include "array.h"
+#include "cast.h"
 
 namespace mlang {
 
@@ -231,6 +232,8 @@ namespace mlang {
         llvm::Type *doubleArrayType{nullptr};
         llvm::Type *boolArrayType{nullptr};
         std::map<std::string, llvm::Type *> llvmTypeMap;
+        std::map<std::string, llvm::Type *> arrayFunctions;
+        std::map<std::string, llvm::Type *> castFunctions;
     };
 }
 

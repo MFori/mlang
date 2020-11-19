@@ -68,3 +68,123 @@ extern "C" DECLSPEC int __mlang_error(int error) {
     std::cout << errors[error];
     exit(1);
 }
+
+extern "C" DECLSPEC void *__mlang_cast(long long val, int fTy, int fBit, int tTy, int tBit, void *space) {
+    if (tTy == 14) {
+        // toString
+        if (fTy == 12) {
+            // int type
+            char *c;
+            int size = 0;
+            switch (fBit) {
+                case 1: {
+                    auto str = std::string((((bool) val) ? "true" : "false"));
+                    size = str.size();
+                    c = new char[size];
+                    strcpy(c, str.c_str());
+                }
+                case 8: {
+                    size = 1;
+                    c = new char[size];
+                    c[0] = (char) val;
+                }
+                case 64: {
+                    auto str = std::to_string(val);
+                    size = str.size();
+                    c = new char[size];
+                    strcpy(c, str.c_str());
+                }
+            }
+
+            if (c == nullptr) {
+                return nullptr;
+            }
+
+            int s = size;
+            char *sizeParts = new char[8]{0};
+
+            for (int i = 0; i < 8; ++i) {
+                sizeParts[i] = s & 0xff;
+                s >>= 8;
+            }
+
+            char *buffer = (char *) space;
+            std::copy(sizeParts, sizeParts + 8, buffer);
+            std::copy(c, c + size, buffer + 8);
+            buffer[size + 8] = '\0';
+            delete[] c;
+
+            return buffer;
+        }
+    } else {
+        // from String
+
+        if (tTy == 12) {
+            // in type
+            switch (tBit) {
+                case 1: {
+                    char *str = (char *) val;
+                    int *i = (int *) space;
+                    if (strcmp(str, "true") != 0) {
+                        i[0] = 0;
+                    } else {
+                        i[0] = 1;
+                    }
+                    return i;
+                }
+                case 8: {
+                    return (char *) val;
+                }
+                case 64: {
+                    int *i = (int *) space;
+                    int ii = std::stoi((char *) val);
+                    i[0] = ii;
+                    return i;
+                }
+                default:
+                    return nullptr;
+            }
+        } else if (tTy == 3) {
+            // double ty
+            auto *d = (double *) space;
+            double dd = std::stod((char *) val);
+            d[0] = dd;
+            return d;
+        }
+
+    }
+
+    return nullptr;
+}
+
+extern "C" DECLSPEC void *__mlang_castd(double val, int fTy, int tTy, void *space) {
+    if (tTy == 14) {
+        // toString
+        if (fTy == 3) {
+            // double ty
+            auto str = std::to_string((double) val);
+            int size = str.size();
+            char *c = new char[size];
+            strcpy(c, str.c_str());
+
+            int s = size;
+            char *sizeParts = new char[8]{0};
+
+            for (int i = 0; i < 8; ++i) {
+                sizeParts[i] = s & 0xff;
+                s >>= 8;
+            }
+
+            char *buffer = (char *) space;
+            std::copy(sizeParts, sizeParts + 8, buffer);
+            std::copy(c, c + size, buffer + 8);
+            buffer[size + 8] = '\0';
+            delete[] c;
+
+
+            return buffer;
+        }
+    }
+
+    return nullptr;
+}

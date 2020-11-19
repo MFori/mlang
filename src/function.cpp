@@ -10,8 +10,6 @@
 namespace mlang {
 
     llvm::Value *FunctionDeclaration::codeGen(CodeGenContext &context) {
-        std::cout << "Code gen fun decl " << id->getName();
-
         if (context.getScopeType() != ScopeType::GLOBAL_BLOCK) {
             Node::printError(location, " cannot declare function inside another\n");
             context.addError();
@@ -148,7 +146,7 @@ namespace mlang {
         }
 
         for (int i = 0; i < fType->getNumParams(); i++) {
-            if(fType->getParamType(i) != fargs.at(i)->getType()) {
+            if (fType->getParamType(i) != fargs.at(i)->getType()) {
                 Node::printError(location, "invalid parameter type");
                 context.addError();
                 return nullptr;

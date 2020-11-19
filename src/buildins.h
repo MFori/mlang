@@ -36,4 +36,8 @@ enum class RuntimeError {
 
 extern "C" DECLSPEC int __mlang_error(int error);
 
+extern "C" DECLSPEC void* __mlang_cast(long long val, int fTy, int fBit, int tTy, int tBit, void* space);
+
+extern "C" DECLSPEC void* __mlang_castd(double val, int fTy, int tTy, void* space);
+
 #endif /* MLANG_BUILDINS_H */
