@@ -74,25 +74,28 @@ extern "C" DECLSPEC void *__mlang_cast(long long val, int fTy, int fBit, int tTy
         // toString
         if (fTy == 12) {
             // int type
-            char *c;
+            char *c = nullptr;
             int size = 0;
             switch (fBit) {
                 case 1: {
-                    auto str = std::string((((bool) val) ? "true" : "false"));
+                    auto str = std::string(((bool) val) ? "true" : "false");
                     size = str.size();
                     c = new char[size];
                     strcpy(c, str.c_str());
+                    break;
                 }
                 case 8: {
                     size = 1;
                     c = new char[size];
                     c[0] = (char) val;
+                    break;
                 }
                 case 64: {
                     auto str = std::to_string(val);
                     size = str.size();
                     c = new char[size];
                     strcpy(c, str.c_str());
+                    break;
                 }
             }
 
