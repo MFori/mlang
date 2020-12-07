@@ -192,6 +192,19 @@ extern "C" DECLSPEC void *__mlang_castd(double val, int fTy, int tTy, void *spac
     return nullptr;
 }
 
-extern "C" DECLSPEC int __mlang_scompare(char *s1, char *s2) {
-    return 0;
+extern "C" DECLSPEC int64_t __mlang_scompare(const char *s1, const char *s2) {
+    size_t len1 =  ((int64_t*) s1)[-1];
+    size_t len2 =  ((int64_t*) s2)[-1];
+
+    int cmp = std::strncmp(s1, s2, std::min(len1, len2));
+
+    if(cmp == 0 && len1 != len2) {
+        if(len1 > len2) {
+            return 1;
+        } else {
+            return -1;
+        }
+    }
+
+    return cmp;
 }

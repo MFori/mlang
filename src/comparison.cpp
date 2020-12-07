@@ -135,30 +135,46 @@ namespace mlang {
     }
 
     llvm::Value *Comparison::stringCodeGen(llvm::Value *lhsValue, llvm::Value *rhsValue, CodeGenContext &context) {
+        auto intType = llvm::Type::getInt64Ty(context.getGlobalContext());
+        auto ptrType = llvm::Type::getInt8PtrTy(context.getGlobalContext());
+        llvm::FunctionCallee fun = (context.getModule()->getOrInsertFunction("__mlang_scompare", intType, ptrType, ptrType));
+        std::vector<llvm::Value *> fargs;
+        fargs.push_back(lhsValue);
+        fargs.push_back(rhsValue);
+
+        llvm::Value *result = llvm::CallInst::Create(fun, fargs, "compare", context.currentBlock());
+        llvm::Value *val;
+
         llvm::CmpInst::Predicate predicate;
         switch (op) {
-            case TCGE:
+            case TCGE: // >=
                 predicate = llvm::CmpInst::ICMP_SGE;
+                val = llvm::ConstantInt::get(intType, 0);
                 break;
-            case TCGT:
+            case TCGT: // >
                 predicate = llvm::CmpInst::ICMP_SGT;
+                val = llvm::ConstantInt::get(intType, 0);
                 break;
-            case TCLT:
+            case TCLT: // <
                 predicate = llvm::CmpInst::ICMP_SLT;
+                val = llvm::ConstantInt::get(intType, 0);
                 break;
-            case TCLE:
+            case TCLE: // <=
                 predicate = llvm::CmpInst::ICMP_SLE;
+                val = llvm::ConstantInt::get(intType, 0);
                 break;
-            case TCEQ:
+            case TCEQ: // ==
                 predicate = llvm::CmpInst::ICMP_EQ;
+                val = llvm::ConstantInt::get(intType, 0);
                 break;
-            case TCNE:
+            case TCNE: // !=
                 predicate = llvm::CmpInst::ICMP_NE;
+                val = llvm::ConstantInt::get(intType, 0);
                 break;
             default:
                 return nullptr;
         }
-        // TODO string comparison
-        return nullptr;
+
+        return llvm::CmpInst::Create(llvm::Instruction::ICmp, predicate, result, val, "cmptmp", context.currentBlock());
     }
 }

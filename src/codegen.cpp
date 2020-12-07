@@ -202,6 +202,11 @@ namespace mlang {
         f = llvm::Function::Create(ft, llvm::Function::ExternalLinkage, MAKE_LLVM_EXTERNAL_NAME(__mlang_castd),
                                    getModule());
         buildins.push_back({f, (void *) __mlang_castd});
+
+        std::vector<llvm::Type *> scompareTypes {stringType, stringType};
+        ft = llvm::FunctionType::get(llvm::Type::getInt64Ty(getGlobalContext()), scompareTypes, false);
+        f = llvm::Function::Create(ft, llvm::Function::ExternalLinkage, MAKE_LLVM_EXTERNAL_NAME(__mlang_scompare),getModule());
+        buildins.push_back({f, (void *) __mlang_scompare});
     }
 
     void CodeGenContext::optimize() {

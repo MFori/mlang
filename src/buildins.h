@@ -40,6 +40,6 @@ extern "C" DECLSPEC void* __mlang_cast(long long val, int fTy, int fBit, int tTy
 
 extern "C" DECLSPEC void* __mlang_castd(double val, int fTy, int tTy, void* space);
 
-extern "C" DECLSPEC int __mlang_scompare(char *s1, char *s2);
+extern "C" DECLSPEC int64_t __mlang_scompare(const char *s1, const char *s2);
 
 #endif /* MLANG_BUILDINS_H */
