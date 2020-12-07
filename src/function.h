@@ -9,6 +9,7 @@
 
 #include "ast.h"
 #include "codegen.h"
+#include "variable.h"
 
 namespace mlang {
 

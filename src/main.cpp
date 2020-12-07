@@ -26,7 +26,7 @@ extern int parsing_error;
 void usage();
 
 int main(int argc, char **argv) {
-    libPaths.push_back("./");
+    libPaths.emplace_back("./");
 
     std::string fileName = argv[1];
     yyin = fopen(fileName.c_str(), "r+");

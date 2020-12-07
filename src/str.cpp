@@ -14,7 +14,7 @@ namespace mlang {
         int64_t totalSize = size + 1 + 8;
         llvm::ArrayType *arrTy = llvm::ArrayType::get(llvm::Type::getInt8Ty(context.getGlobalContext()), totalSize);
 
-        int s = size;
+        size_t s = size;
         char *sizeParts = new char[8]{0};
 
         for (int i = 0; i < 8; ++i) {

@@ -159,7 +159,7 @@ import              BEGIN(incl);
 [ \t\n]                 /* ignore */;
 \@\@[0-9]+              SAVE_NCHAR; return TCHAR;
 \@.                     SAVE_CHAR; return TCHAR;
-[a-zA-Z_][a-zA-Z0-9_]*  SAVE_TOKEN; return TIDENTIFIER;
+[a-zA-Z][a-zA-Z0-9_]*   SAVE_TOKEN; return TIDENTIFIER;
 [0-9]+                  SAVE_INTEGER; return TINTEGER;
 {number}                SAVE_NUMBER; return TDOUBLE;
 "="                     return '=';

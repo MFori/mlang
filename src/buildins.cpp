@@ -41,7 +41,7 @@ extern "C" DECLSPEC int read() {
     return getchar();
 }
 
-extern "C" DECLSPEC int sizeOf(int64_t *ptr) {
+extern "C" DECLSPEC int64_t sizeOf(int64_t *ptr) {
     if (ptr == nullptr) {
         __mlang_error((int) RuntimeError::INVALID_SIZEOF_USAGE);
     }
@@ -75,7 +75,7 @@ extern "C" DECLSPEC void *__mlang_cast(long long val, int fTy, int fBit, int tTy
         if (fTy == 12) {
             // int type
             char *c = nullptr;
-            int size = 0;
+            size_t size = 0;
             switch (fBit) {
                 case 1: {
                     auto str = std::string(((bool) val) ? "true" : "false");
@@ -166,11 +166,11 @@ extern "C" DECLSPEC void *__mlang_castd(double val, int fTy, int tTy, void *spac
         if (fTy == 3) {
             // double ty
             auto str = std::to_string((double) val);
-            int size = str.size();
+            size_t size = str.size();
             char *c = new char[size];
             strcpy(c, str.c_str());
 
-            int s = size;
+            size_t s = size;
             char *sizeParts = new char[8]{0};
 
             for (int i = 0; i < 8; ++i) {
@@ -190,4 +190,8 @@ extern "C" DECLSPEC void *__mlang_castd(double val, int fTy, int tTy, void *spac
     }
 
     return nullptr;
+}
+
+extern "C" DECLSPEC int __mlang_scompare(char *s1, char *s2) {
+    return 0;
 }

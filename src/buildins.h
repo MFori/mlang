@@ -22,7 +22,7 @@ extern "C" DECLSPEC void fprintln(FILE *stream, char *str, va_list args);
 
 extern "C" DECLSPEC int read();
 
-extern "C" DECLSPEC int sizeOf(int64_t *ptr);
+extern "C" DECLSPEC int64_t sizeOf(int64_t *ptr);
 
 extern "C" DECLSPEC void __mlang_rm(char *ptr);
 
@@ -39,5 +39,7 @@ extern "C" DECLSPEC int __mlang_error(int error);
 extern "C" DECLSPEC void* __mlang_cast(long long val, int fTy, int fBit, int tTy, int tBit, void* space);
 
 extern "C" DECLSPEC void* __mlang_castd(double val, int fTy, int tTy, void* space);
+
+extern "C" DECLSPEC int __mlang_scompare(char *s1, char *s2);
 
 #endif /* MLANG_BUILDINS_H */

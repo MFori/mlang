@@ -135,7 +135,29 @@ namespace mlang {
     }
 
     llvm::Value *Comparison::stringCodeGen(llvm::Value *lhsValue, llvm::Value *rhsValue, CodeGenContext &context) {
-
+        llvm::CmpInst::Predicate predicate;
+        switch (op) {
+            case TCGE:
+                predicate = llvm::CmpInst::ICMP_SGE;
+                break;
+            case TCGT:
+                predicate = llvm::CmpInst::ICMP_SGT;
+                break;
+            case TCLT:
+                predicate = llvm::CmpInst::ICMP_SLT;
+                break;
+            case TCLE:
+                predicate = llvm::CmpInst::ICMP_SLE;
+                break;
+            case TCEQ:
+                predicate = llvm::CmpInst::ICMP_EQ;
+                break;
+            case TCNE:
+                predicate = llvm::CmpInst::ICMP_NE;
+                break;
+            default:
+                return nullptr;
+        }
         // TODO string comparison
         return nullptr;
     }

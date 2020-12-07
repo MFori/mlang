@@ -145,7 +145,7 @@ namespace mlang {
             return nullptr;
         }
 
-        for (int i = 0; i < fType->getNumParams(); i++) {
+        for (unsigned int i = 0; i < fType->getNumParams(); i++) {
             if (fType->getParamType(i) != fargs.at(i)->getType()) {
                 Node::printError(location, "invalid parameter type");
                 context.addError();
