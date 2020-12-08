@@ -61,6 +61,7 @@ set(SOURCES_COMMON
         str.cpp
         foreach.cpp
         cast.cpp
+        str_join.cpp
         lexer.l
         parser.y
         )
@@ -88,6 +89,7 @@ set(HEADER_COMMON
         str.h
         foreach.h
         cast.h
+        str_join.h
         )
 
 if (MSVC)

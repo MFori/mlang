@@ -173,7 +173,6 @@ import              BEGIN(incl);
 "}"                     return '}';
 "("                     return '(';
 ")"                     return ')';
-"."                     return '.';
 ","                     return ',';
 "+"                     return TOKEN(TPLUS);
 "-"                     return TOKEN(TMINUS);
@@ -185,6 +184,8 @@ import              BEGIN(incl);
 "?"                     return '?';
 "["                     return '[';
 "]"                     return ']';
+"(."                    return TOKEN(TJOINO);
+".)"                    return TOKEN(TJOINC);
 .                       {printf("%s: line %d, len %d Unknown token %s !\n", fileNames.top(), yylineno, yyleng, yytext); parsing_error = 1; yyterminate();}
 
 %%

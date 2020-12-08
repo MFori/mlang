@@ -22,6 +22,7 @@ namespace mlang {
     class BinaryOp;
     class UnaryOp;
     class TernaryOp;
+    class StringJoin;
     class Return;
     class Assignment;
     class FunctionCall;
@@ -64,6 +65,8 @@ namespace mlang {
         virtual void visitVariableDeclaration(VariableDeclaration *e) = 0;
 
         virtual void visitBinaryOp(BinaryOp *e) = 0;
+
+        virtual void visitStringJoin(StringJoin *e) = 0;
 
         virtual void visitUnaryOp(UnaryOp *e) = 0;
 

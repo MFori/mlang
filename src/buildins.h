@@ -24,6 +24,8 @@ extern "C" DECLSPEC int read();
 
 extern "C" DECLSPEC int64_t sizeOf(int64_t *ptr);
 
+extern "C" DECLSPEC int64_t len(char *ptr);
+
 extern "C" DECLSPEC void __mlang_rm(char *ptr);
 
 extern "C" DECLSPEC char* __mlang_alloc(int64_t size);

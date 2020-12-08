@@ -48,6 +48,11 @@ extern "C" DECLSPEC int64_t sizeOf(int64_t *ptr) {
     return ptr[-1];
 }
 
+extern "C" DECLSPEC int64_t len(char *ptr) {
+    int64_t size = sizeOf((int64_t*) ptr);
+    return strnlen(ptr, size);
+}
+
 extern "C" DECLSPEC void __mlang_rm(char *ptr) {
     free(ptr - 8);
 }

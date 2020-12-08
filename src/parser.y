@@ -12,6 +12,7 @@
     #include "unaryop.h"
     #include "binaryop.h"
     #include "ternaryop.h"
+    #include "str_join.h"
     #include "return.h"
     #include "break.h"
     #include "free.h"
@@ -87,7 +88,7 @@
 %token <boolean> TBOOL
 %token <character> TCHAR
 %token <token> TCEQ TCNE TCLT TCLE TCGT TCGE
-%token <token> TPLUS TMINUS TMUL TDIV
+%token <token> TPLUS TMINUS TMUL TDIV TJOINO TJOINC
 %token <token> TNOT TAND TOR
 %token <token> TINC TDEC
 %token <token> TIF TELSE TWHILE TDO TFOR TIN TUNTIL TTO TSTEP
@@ -184,6 +185,7 @@ expr : ident '=' expr { $$ = new mlang::Assignment($<ident>1, $3, @$); }
      | binop_expr
      | ternop_expr
      | boolean_expr
+     | TJOINO call_args TJOINC { $$ = new mlang::StringJoin($2, @$); }
      | '(' expr ')' { $$ = $2; }
      | array_access
      | ident '[' expr ']' '=' expr { $$ = new mlang::ArrayAssignment($1, $3, $6, @$); }
@@ -218,7 +220,6 @@ range : expr TUNTIL expr { $$ = new mlang::Range($1, $2, $3, @$); }
       | expr TTO expr { $$ = new mlang::Range($1, $2, $3, @$); }
       ;
 
-/* have to write it explicit to have the right operator precedence */
 binop_expr : expr TAND expr { $$ = new mlang::BinaryOp($1, $2, $3, @$); }
            | expr TOR expr { $$ = new mlang::BinaryOp($1, $2, $3, @$); }
            | expr TPLUS expr { $$ = new mlang::BinaryOp($1, $2, $3, @$); }
