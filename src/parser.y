@@ -12,7 +12,6 @@
     #include "unaryop.h"
     #include "binaryop.h"
     #include "ternaryop.h"
-    #include "str_join.h"
     #include "return.h"
     #include "break.h"
     #include "free.h"
@@ -99,12 +98,12 @@
    we call an ident (defined by union type ident) we are really
    calling an (Identifier*). It makes the compiler happy.
  */
-%type <expr> expr unaryop_expr binop_expr ternop_expr boolean_expr array_access literals
+%type <expr> primary_expr expr postfix_expr assignment_expr unary_expr ternary_expr compare_expr or_expr and_expr binop_expr literals
 %type <ident> ident
 %type <varvec> func_decl_args
 %type <exprvec> call_args
 %type <block> program stmts block
-%type <stmt> stmt var_decl func_decl func_arg_decl conditional return break free while for
+%type <stmt> stmt expression_statement var_decl func_decl func_arg_decl conditional return break free while for
 %type <range> range
 
 /* Operator precedence for mathematical operators */
@@ -124,10 +123,6 @@
 %debug
 %verbose
 %locations /* track locations: @n of component N; @$ of entire range */
-/*
-%define parse.lac full
-%define lr.type ielr
-*/
 
 %%
 
@@ -139,7 +134,8 @@ stmts : stmt { $$ = new mlang::Block(); $$->statements.push_back($<stmt>1); }
       | stmts stmt { $1->statements.push_back($<stmt>2); }
       ;
 
-stmt : var_decl
+stmt : expression_statement
+     | var_decl
      | func_decl
      | conditional
      | return
@@ -147,15 +143,81 @@ stmt : var_decl
      | free
      | while
      | for
-     | expr { $$ = new mlang::ExpressionStatement($1); }
      ;
+
+expression_statement : expr ';' { $$ = new mlang::ExpressionStatement($1); }
+                     ;
 
 block : '{' stmts '}' { $$ = $2; }
       | '{' '}' { $$ = new mlang::Block(); }
       ;
 
-var_decl : TVAR ident '=' expr { $$ = new mlang::VariableDeclaration($2, "var", $4, @$); }
-         | TVAL ident '=' expr { $$ = new mlang::VariableDeclaration($2, "val", $4, @$); }
+primary_expr : ident { $<ident>$ = $1; }
+             | ident '(' call_args ')' { $$ = new mlang::FunctionCall($1, $3, @$);  }
+             | '(' expr ')' { $$ = $2; }
+             | literals
+             | TJOINO call_args TJOINC { $$ = new mlang::StringJoin($2, @$); }
+             ;
+
+postfix_expr : primary_expr
+             | postfix_expr '[' expr ']' { $$ = new mlang::ArrayAccess($1, $3, @$); }
+             | postfix_expr TINC { $$ = new mlang::UnaryOp($2, $1, 0, @$); }
+             | postfix_expr TDEC { $$ = new mlang::UnaryOp($2, $1, 0, @$); }
+             ;
+
+unary_expr : postfix_expr
+           | TINC unary_expr { $$ = new mlang::UnaryOp($1, 0, $2, @$); }
+           | TDEC unary_expr { $$ = new mlang::UnaryOp($1, 0, $2, @$); }
+           | TNOT unary_expr { $$ = new mlang::UnaryOp($1, 0, $2, @$); }
+           | TMINUS unary_expr { $$ = new mlang::UnaryOp($1, 0, $2, @$); }
+           | TPLUS unary_expr { $$ = $2; }
+           ;
+
+binop_expr : unary_expr
+           | binop_expr TPLUS unary_expr { $$ = new mlang::BinaryOp($1, $2, $3, @$); }
+           | binop_expr TMINUS unary_expr { $$ = new mlang::BinaryOp($1, $2, $3, @$); }
+           | binop_expr TMUL unary_expr { $$ = new mlang::BinaryOp($1, $2, $3, @$); }
+           | binop_expr TDIV unary_expr { $$ = new mlang::BinaryOp($1, $2, $3, @$); }
+           ;
+
+compare_expr : binop_expr
+             | compare_expr TCEQ binop_expr { $$ = new mlang::Comparison($1, $2, $3, @$); }
+             | compare_expr TCNE binop_expr { $$ = new mlang::Comparison($1, $2, $3, @$); }
+             | compare_expr TCLT binop_expr { $$ = new mlang::Comparison($1, $2, $3, @$); }
+             | compare_expr TCLE binop_expr { $$ = new mlang::Comparison($1, $2, $3, @$); }
+             | compare_expr TCGT binop_expr { $$ = new mlang::Comparison($1, $2, $3, @$); }
+             | compare_expr TCGE binop_expr { $$ = new mlang::Comparison($1, $2, $3, @$); }
+             ;
+
+and_expr
+	: compare_expr
+	| and_expr TAND compare_expr { $$ = new mlang::BinaryOp($1, $2, $3, @$); }
+	;
+
+or_expr
+	: and_expr
+	| or_expr TOR and_expr { $$ = new mlang::BinaryOp($1, $2, $3, @$); }
+	;
+
+ternary_expr
+	: or_expr
+	| or_expr '?' expr ':' ternary_expr { $$ = new mlang::TernaryOp($1, $3, $5, @$); }
+	;
+
+assignment_expr : ternary_expr
+                | unary_expr '=' assignment_expr { $$ = new mlang::Assignment($1, $3, @$); }
+                ;
+
+expr : assignment_expr
+     ;
+
+call_args : %empty  { $$ = new mlang::ExpressionList(); }
+          | expr { $$ = new mlang::ExpressionList(); $$->push_back($1); }
+          | call_args ',' expr  { $1->push_back($3); }
+          ;
+
+var_decl : TVAR ident '=' expr ';' { $$ = new mlang::VariableDeclaration($2, "var", $4, @$); }
+         | TVAL ident '=' expr ';' { $$ = new mlang::VariableDeclaration($2, "val", $4, @$); }
          ;
 
 func_decl : TFUNDEF ident '(' func_decl_args ')' ':' ident block { $$ = new mlang::FunctionDeclaration($7, $2, $4, $8, @$); }
@@ -171,27 +233,13 @@ func_arg_decl : ident ident { $$ = new mlang::VariableDeclaration($1, $2, @$); }
             | ident ident '=' expr { $$ = new mlang::VariableDeclaration($1, $2, $4, @$); }
             ;
 
-return : TRETURN { $$ = new mlang::Return(@$); }
-       | TRETURN expr { $$ = new mlang::Return(@$, $2); }
+return : TRETURN ';' { $$ = new mlang::Return(@$); }
+       | TRETURN expr ';' { $$ = new mlang::Return(@$, $2); }
        ;
 
-break : TBREAK { $$ = new mlang::Break(@$); }
+break : TBREAK ';' { $$ = new mlang::Break(@$); }
 
-free : TFREE expr { $$ = new mlang::FreeMemory($2, @$); }
-
-expr : ident '=' expr { $$ = new mlang::Assignment($<ident>1, $3, @$); }
-     | ident '(' call_args ')' { $$ = new mlang::FunctionCall($1, $3, @$);  }
-     | unaryop_expr
-     | binop_expr
-     | ternop_expr
-     | boolean_expr
-     | TJOINO call_args TJOINC { $$ = new mlang::StringJoin($2, @$); }
-     | '(' expr ')' { $$ = $2; }
-     | array_access
-     | ident '[' expr ']' '=' expr { $$ = new mlang::ArrayAssignment($1, $3, $6, @$); }
-     | ident { $<ident>$ = $1; }
-     | literals
-     ;
+free : TFREE expr ';' { $$ = new mlang::FreeMemory($2, @$); }
 
 ident : TIDENTIFIER { $$ = new mlang::Identifier(*$1, @1); delete $1; }
       ;
@@ -219,41 +267,5 @@ for : TFOR '(' ident TIN range ')' block { $$ = new mlang::ForLoop($3, $<range>5
 range : expr TUNTIL expr { $$ = new mlang::Range($1, $2, $3, @$); }
       | expr TTO expr { $$ = new mlang::Range($1, $2, $3, @$); }
       ;
-
-binop_expr : expr TAND expr { $$ = new mlang::BinaryOp($1, $2, $3, @$); }
-           | expr TOR expr { $$ = new mlang::BinaryOp($1, $2, $3, @$); }
-           | expr TPLUS expr { $$ = new mlang::BinaryOp($1, $2, $3, @$); }
-           | expr TMINUS expr { $$ = new mlang::BinaryOp($1, $2, $3, @$); }
-           | expr TMUL expr { $$ = new mlang::BinaryOp($1, $2, $3, @$); }
-           | expr TDIV expr { $$ = new mlang::BinaryOp($1, $2, $3, @$); }
-           ;
-
-unaryop_expr : TNOT expr { $$ = new mlang::UnaryOp($1, 0, $2, @$); }
-             | TMINUS expr { $$ = new mlang::UnaryOp($1, 0, $2, @$); }
-             | TPLUS expr { $$ = $2; }
-             | expr TINC { $$ = new mlang::UnaryOp($2, $1, 0, @$); }
-             | expr TDEC { $$ = new mlang::UnaryOp($2, $1, 0, @$); }
-             | TINC expr { $$ = new mlang::UnaryOp($1, 0, $2, @$); }
-             | TDEC expr { $$ = new mlang::UnaryOp($1, 0, $2, @$); }
-             ;
-
-ternop_expr : expr '?' expr ':' expr { $$ = new mlang::TernaryOp($1, $3, $5, @$); }
-            ;
-
-boolean_expr : expr TCEQ expr { $$ = new mlang::Comparison($1, $2, $3, @$); }
-             | expr TCNE expr { $$ = new mlang::Comparison($1, $2, $3, @$); }
-             | expr TCLT expr { $$ = new mlang::Comparison($1, $2, $3, @$); }
-             | expr TCLE expr { $$ = new mlang::Comparison($1, $2, $3, @$); }
-             | expr TCGT expr { $$ = new mlang::Comparison($1, $2, $3, @$); }
-             | expr TCGE expr { $$ = new mlang::Comparison($1, $2, $3, @$); }
-             ;
-
-call_args : %empty  { $$ = new mlang::ExpressionList(); }
-          | expr { $$ = new mlang::ExpressionList(); $$->push_back($1); }
-          | call_args ',' expr  { $1->push_back($3); }
-          ;
-
-array_access: ident '[' expr ']' { $$ = new mlang::ArrayAccess($1, $3, @$); }
-           ;
 
 %%

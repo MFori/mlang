@@ -13,7 +13,7 @@ namespace mlang {
 
     class Assignment : public Statement {
     public:
-        explicit Assignment(Identifier *lhs, Expression *rhs, YYLTYPE location) : lhs(lhs), rhs(rhs),
+        explicit Assignment(Expression *lhs, Expression *rhs, YYLTYPE location) : lhs(lhs), rhs(rhs),
                                                                                   location(location) {}
 
         ~Assignment() override {
@@ -30,7 +30,7 @@ namespace mlang {
         void accept(Visitor &v) override { v.visitAssignment(this); }
 
     private:
-        Identifier *lhs{nullptr};
+        Expression *lhs{nullptr};
         Expression *rhs{nullptr};
         YYLTYPE location;
     };

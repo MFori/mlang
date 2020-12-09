@@ -7,6 +7,8 @@
 #ifndef MLANG_ARRAY_H
 #define MLANG_ARRAY_H
 
+#include <utility>
+
 #include "ast.h"
 
 namespace mlang {
@@ -14,7 +16,7 @@ namespace mlang {
     class Array : public Expression {
     public:
         explicit Array(llvm::Type *type, Expression *size, YYLTYPE location)
-                : type(type), size(size), location(location) {}
+                : type(type), size(size), location(std::move(location)) {}
 
         ~Array() override {
             delete size;
@@ -38,49 +40,53 @@ namespace mlang {
 
     class ArrayAccess : public Expression {
     public:
-        ArrayAccess(Identifier *id, Expression *index, YYLTYPE location)
-                : ident(id), index(index), location(location) {}
+        ArrayAccess(Expression *expr, Expression *index, YYLTYPE location)
+                : expr(expr), index(index), location(std::move(location)) {}
 
         ~ArrayAccess() override {
-            delete ident;
+            delete expr;
             delete index;
         }
 
         llvm::Value *codeGen(CodeGenContext &context) override;
 
-        NodeType getType() override { return NodeType::EXPRESSION; }
+        NodeType getType() override { return NodeType::ARRAY; }
 
         std::string toString() override { return "array access"; }
 
         void accept(Visitor &v) override { v.visitArrayAccess(this); }
 
+        Expression *getExpression() { return expr; }
+
+        Expression *getIndex() { return index; }
+
     private:
-        Identifier *ident{nullptr};
+        Expression *expr{nullptr};
         Expression *index{nullptr};
         YYLTYPE location;
     };
 
     class ArrayAssignment : public Expression {
     public:
-        ArrayAssignment(Identifier *id, Expression *index, Expression *rhs, YYLTYPE location)
-                : ident(id), index(index), rhs(rhs), location(location) {}
+        ArrayAssignment(Expression *lhs, Expression *index, Expression *rhs, YYLTYPE location)
+                : lhs(lhs), index(index), rhs(rhs), location(std::move(location)) {}
 
         ~ArrayAssignment() override {
-            delete ident;
+            delete lhs;
             delete index;
             delete rhs;
         }
 
         llvm::Value *codeGen(CodeGenContext &context) override;
 
-        NodeType getType() override { return NodeType::EXPRESSION; }
+        NodeType getType() override { return NodeType::ARRAY; }
 
         std::string toString() override { return "array assignment"; }
 
         void accept(Visitor &v) override { v.visitArrayAssignment(this); }
 
     private:
-        Identifier *ident{nullptr};
+        Expression *lhs{nullptr};
         Expression *index{nullptr};
         Expression *rhs{nullptr};
         YYLTYPE location;

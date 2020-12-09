@@ -186,6 +186,7 @@ import              BEGIN(incl);
 "]"                     return ']';
 "(."                    return TOKEN(TJOINO);
 ".)"                    return TOKEN(TJOINC);
+";"                     return ';';
 .                       {printf("%s: line %d, len %d Unknown token %s !\n", fileNames.top(), yylineno, yyleng, yytext); parsing_error = 1; yyterminate();}
 
 %%

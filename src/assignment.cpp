@@ -11,6 +11,17 @@
 namespace mlang {
 
     llvm::Value *Assignment::codeGen(CodeGenContext &context) {
+        if (lhs->getType() == NodeType::ARRAY) {
+            auto *access = (ArrayAccess *) lhs;
+            auto arr = new ArrayAssignment(access->getExpression(), access->getIndex(), rhs, location);
+            return arr->codeGen(context);
+        } else if(lhs->getType() != NodeType::IDENTIFIER) {
+            Node::printError(location, " Invalid assignment");
+            context.addError();
+            return nullptr;
+        }
+
+        auto* ident = (Identifier*) lhs;
         llvm::Value *value = rhs->codeGen(context);
 
         if (value == nullptr || value->getType()->isVoidTy()) {
@@ -19,13 +30,13 @@ namespace mlang {
             return nullptr;
         }
 
-        if (!context.hasVariable(lhs->getName())) {
-            Node::printError(location, " Assignment to undefined variable '" + lhs->getName() + "'");
+        if (!context.hasVariable(ident->getName())) {
+            Node::printError(location, " Assignment to undefined variable '" + ident->getName() + "'");
             context.addError();
             return nullptr;
         }
 
-        Variable *var = context.findVariable(lhs->getName(), false);
+        Variable *var = context.findVariable(ident->getName(), false);
         llvm::Type *varType;
 
         if (var->getValue() == nullptr) {
@@ -38,28 +49,28 @@ namespace mlang {
                 if (ty->isPointerTy() || !llvm::Constant::classof(value)) {
                     gv = new llvm::GlobalVariable(*context.getModule(), ty, false,
                                                   llvm::GlobalValue::PrivateLinkage,
-                                                  llvm::Constant::getNullValue(ty), lhs->getName());
+                                                  llvm::Constant::getNullValue(ty), ident->getName());
                     gv->setAlignment(llvm::MaybeAlign(4));
                     new llvm::StoreInst(value, gv, false, context.currentBlock());
                 } else {
                     gv = new llvm::GlobalVariable(*context.getModule(), ty, var->isConst(),
                                                   llvm::GlobalValue::PrivateLinkage,
-                                                  (llvm::Constant *) value, lhs->getName());
+                                                  (llvm::Constant *) value, ident->getName());
                     gv->setAlignment(llvm::MaybeAlign(4));
                 }
                 var->setValue(gv);
                 return gv;
             } else {
-                auto lv = new llvm::AllocaInst(ty, 0, lhs->getName(), context.currentBlock());
+                auto lv = new llvm::AllocaInst(ty, 0, ident->getName(), context.currentBlock());
                 var->setValue(lv);
                 varType = var->getType();
             }
         } else {
             varType = var->getType();
 
-            std::string typeName = context.getVarType(lhs->getName());
+            std::string typeName = context.getVarType(ident->getName());
             if (typeName == "val") {
-                Node::printError(location, "final val '" + lhs->getName() + "' cannot be reassignet!\n");
+                Node::printError(location, "final val '" + ident->getName() + "' cannot be reassignet!\n");
                 context.addError();
                 return nullptr;
             }

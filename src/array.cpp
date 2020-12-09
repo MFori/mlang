@@ -67,7 +67,7 @@ namespace mlang {
 
     llvm::Value *ArrayAccess::codeGen(CodeGenContext &context) {
         llvm::Value *indexValue = index->codeGen(context);
-        llvm::Value *var = ident->codeGen(context);
+        llvm::Value *var = expr->codeGen(context);
 
         if (indexValue == nullptr || !indexValue->getType()->isIntegerTy()) {
             Node::printError(location, "Invalid index value");
@@ -76,7 +76,12 @@ namespace mlang {
         }
 
         if (var == nullptr || !var->getType()->isPointerTy()) {
-            Node::printError(location, "variable '" + ident->getName() + "' is not array");
+            Identifier *ident = expr->getType() == NodeType::IDENTIFIER ? (Identifier*) expr : nullptr;
+            if(ident != nullptr) {
+                Node::printError(location, "variable '" + ident->getName() + "' is not array");
+            } else {
+                Node::printError(location, "invalid array access");
+            }
             context.addError();
             return nullptr;
         }
@@ -92,7 +97,7 @@ namespace mlang {
 
     llvm::Value *ArrayAssignment::codeGen(CodeGenContext &context) {
         llvm::Value *indexValue = index->codeGen(context);
-        llvm::Value *var = ident->codeGen(context);
+        llvm::Value *var = lhs->codeGen(context);
         llvm::Value *value = rhs->codeGen(context);
 
         if (indexValue == nullptr || !indexValue->getType()->isIntegerTy()) {
@@ -102,7 +107,12 @@ namespace mlang {
         }
 
         if (var == nullptr || !var->getType()->isPointerTy()) {
-            Node::printError(location, "variable '" + ident->getName() + "' is not array");
+            Identifier *ident = lhs->getType() == NodeType::IDENTIFIER ? (Identifier*) lhs : nullptr;
+            if(ident != nullptr) {
+                Node::printError(location, "variable '" + ident->getName() + "' is not array");
+            } else {
+                Node::printError(location, "invalid array assignment");
+            }
             context.addError();
             return nullptr;
         }
