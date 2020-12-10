@@ -42,6 +42,9 @@ namespace mlang {
     llvm::Value *Block::codeGen(CodeGenContext &context) {
         llvm::Value *last = nullptr;
         for (auto s: statements) {
+            if(s == nullptr) { // empty statement
+                continue;
+            }
             last = s->codeGen(context);
             if (mlang::CodeGenContext::isBreakingInstruction(last)) {
                 break;

@@ -27,6 +27,28 @@ int yyerror(char const * s )
     return 1;
 }
 
+int open_brackets = 0;
+int last_token = -1;
+#define RET(token) last_token = token; return token
+
+int need_semicolon() {
+     if(open_brackets > 0) {
+        return 0;
+     }
+     return last_token == TIDENTIFIER ||
+     	last_token == TINTEGER ||
+     	last_token == TCHAR ||
+     	last_token == TDOUBLE ||
+     	last_token == TBOOL ||
+     	last_token == TRETURN ||
+     	last_token == TBREAK ||
+     	last_token == TFREE ||
+     	last_token == TINC ||
+     	last_token == TDEC ||
+     	last_token == TJOINC ||
+     	last_token == ')';
+}
+
 std::string g_str;
 int first_time = 1 ;
 int parsing_error = 0;
@@ -121,7 +143,6 @@ import              BEGIN(incl);
 <qstr>[^\\']+  g_str += std::string(yytext);
 
 
-<normal>"\n"     { yycolumn = 1; }
 <<EOF>>          {
                    if(lineNo.size() > 1 ) {
                        yypop_buffer_state();
@@ -135,58 +156,59 @@ import              BEGIN(incl);
 
 
 \r                      /* cr are ignored */
-"if"                    return TOKEN(TIF);
-"else"                  return TOKEN(TELSE);
-"not"                   return TOKEN(TNOT);
-"and"                   return TOKEN(TAND);
-"or"                    return TOKEN(TOR);
-"func"                  return TOKEN(TFUNDEF);
-"var"                   return TOKEN(TVAR);
-"val"                   return TOKEN(TVAL);
-"while"                 return TOKEN(TWHILE);
-"do"                    return TOKEN(TDO);
-"for"                   return TOKEN(TFOR);
-"in"                    return TOKEN(TIN);
-"until"                 return TOKEN(TUNTIL);
-"to"                    return TOKEN(TTO);
-"step"                  return TOKEN(TSTEP);
-"return"                return TOKEN(TRETURN);
-"break"                 return TOKEN(TBREAK);
-"rm"                    return TOKEN(TFREE);
-"true"                  SAVE_BOOLEAN; return TBOOL;
-"false"                 SAVE_BOOLEAN; return TBOOL;
-\/\/.*                     /* comments one line til nl */
-[ \t\n]                 /* ignore */;
-\@\@[0-9]+              SAVE_NCHAR; return TCHAR;
-\@.                     SAVE_CHAR; return TCHAR;
-[a-zA-Z][a-zA-Z0-9_]*   SAVE_TOKEN; return TIDENTIFIER;
-[0-9]+                  SAVE_INTEGER; return TINTEGER;
-{number}                SAVE_NUMBER; return TDOUBLE;
-"="                     return '=';
-"=="                    return TOKEN(TCEQ);
-"!="                    return TOKEN(TCNE);
-"<"                     return TOKEN(TCLT);
-"<="                    return TOKEN(TCLE);
-">"                     return TOKEN(TCGT);
-">="                    return TOKEN(TCGE);
-"{"                     return '{';
-"}"                     return '}';
-"("                     return '(';
-")"                     return ')';
-","                     return ',';
-"+"                     return TOKEN(TPLUS);
-"-"                     return TOKEN(TMINUS);
-"*"                     return TOKEN(TMUL);
-"/"                     return TOKEN(TDIV);
-"++"                    return TOKEN(TINC);
-"--"                    return TOKEN(TDEC);
-":"                     return ':';
-"?"                     return '?';
-"["                     return '[';
-"]"                     return ']';
-"(."                    return TOKEN(TJOINO);
-".)"                    return TOKEN(TJOINC);
-";"                     return ';';
+"if"                    RET(TOKEN(TIF));
+"else"                  RET(TOKEN(TELSE));
+"not"                   RET(TOKEN(TNOT));
+"and"                   RET(TOKEN(TAND));
+"or"                    RET(TOKEN(TOR));
+"func"                  RET(TOKEN(TFUNDEF));
+"var"                   RET(TOKEN(TVAR));
+"val"                   RET(TOKEN(TVAL));
+"while"                 RET(TOKEN(TWHILE));
+"do"                    RET(TOKEN(TDO));
+"for"                   RET(TOKEN(TFOR));
+"in"                    RET(TOKEN(TIN));
+"until"                 RET(TOKEN(TUNTIL));
+"to"                    RET(TOKEN(TTO));
+"step"                  RET(TOKEN(TSTEP));
+"return"                RET(TOKEN(TRETURN));
+"break"                 RET(TOKEN(TBREAK));
+"rm"                    RET(TOKEN(TFREE));
+"true"                  SAVE_BOOLEAN; RET(TBOOL);
+"false"                 SAVE_BOOLEAN; RET(TBOOL);
+\/\/.*                  /* comments one line til nl */
+[ \t]                   /* ignore */;
+\@\@[0-9]+              SAVE_NCHAR; RET(TCHAR);
+\@.                     SAVE_CHAR; RET(TCHAR);
+[a-zA-Z][a-zA-Z0-9_]*   SAVE_TOKEN; RET(TIDENTIFIER);
+[0-9]+                  SAVE_INTEGER; RET(TINTEGER);
+{number}                SAVE_NUMBER; RET(TDOUBLE);
+"="                     RET('=');
+"=="                    RET(TOKEN(TCEQ));
+"!="                    RET(TOKEN(TCNE));
+"<"                     RET(TOKEN(TCLT));
+"<="                    RET(TOKEN(TCLE));
+">"                     RET(TOKEN(TCGT));
+">="                    RET(TOKEN(TCGE));
+"{"                     RET('{');
+"}"                     RET('}');
+"("                     { open_brackets++; RET('('); }
+")"                     { open_brackets--; RET(')'); }
+","                     RET(',');
+"+"                     RET(TOKEN(TPLUS));
+"-"                     RET(TOKEN(TMINUS));
+"*"                     RET(TOKEN(TMUL));
+"/"                     RET(TOKEN(TDIV));
+"++"                    RET(TOKEN(TINC));
+"--"                    RET(TOKEN(TDEC));
+":"                     RET(':');
+"?"                     RET('?');
+"["                     RET('[');
+"]"                     RET(']');
+"(."                    RET(TOKEN(TJOINO));
+".)"                    RET(TOKEN(TJOINC));
+\n                      { if(need_semicolon()) { RET(';'); }}
+";"                     RET(';');
 .                       {printf("%s: line %d, len %d Unknown token %s !\n", fileNames.top(), yylineno, yyleng, yytext); parsing_error = 1; yyterminate();}
 
 %%

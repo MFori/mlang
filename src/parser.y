@@ -103,7 +103,7 @@
 %type <varvec> func_decl_args
 %type <exprvec> call_args
 %type <block> program stmts block
-%type <stmt> stmt expression_statement var_decl func_decl func_arg_decl conditional return break free while for
+%type <stmt> stmt lstmt expression_statement var_decl func_decl func_arg_decl conditional return break free while for
 %type <range> range
 
 /* Operator precedence for mathematical operators */
@@ -135,20 +135,29 @@ stmts : stmt { $$ = new mlang::Block(); $$->statements.push_back($<stmt>1); }
       ;
 
 stmt : expression_statement
-     | var_decl
+     | var_decl ';'
      | func_decl
      | conditional
-     | return
-     | break
-     | free
+     | return ';'
+     | break ';'
+     | free ';'
      | while
      | for
      ;
 
+lstmt : expr { $$ = new mlang::ExpressionStatement($1); }
+      | var_decl
+      | return
+      | break
+      | free
+      ;
+
 expression_statement : expr ';' { $$ = new mlang::ExpressionStatement($1); }
+                     | ';' { $$ = 0; }
                      ;
 
 block : '{' stmts '}' { $$ = $2; }
+      | '{' stmts lstmt '}' { $$ = $2; $2->statements.push_back($<stmt>3); }
       | '{' '}' { $$ = new mlang::Block(); }
       ;
 
@@ -216,8 +225,8 @@ call_args : %empty  { $$ = new mlang::ExpressionList(); }
           | call_args ',' expr  { $1->push_back($3); }
           ;
 
-var_decl : TVAR ident '=' expr ';' { $$ = new mlang::VariableDeclaration($2, "var", $4, @$); }
-         | TVAL ident '=' expr ';' { $$ = new mlang::VariableDeclaration($2, "val", $4, @$); }
+var_decl : TVAR ident '=' expr { $$ = new mlang::VariableDeclaration($2, "var", $4, @$); }
+         | TVAL ident '=' expr { $$ = new mlang::VariableDeclaration($2, "val", $4, @$); }
          ;
 
 func_decl : TFUNDEF ident '(' func_decl_args ')' ':' ident block { $$ = new mlang::FunctionDeclaration($7, $2, $4, $8, @$); }
@@ -233,13 +242,13 @@ func_arg_decl : ident ident { $$ = new mlang::VariableDeclaration($1, $2, @$); }
             | ident ident '=' expr { $$ = new mlang::VariableDeclaration($1, $2, $4, @$); }
             ;
 
-return : TRETURN ';' { $$ = new mlang::Return(@$); }
-       | TRETURN expr ';' { $$ = new mlang::Return(@$, $2); }
+return : TRETURN { $$ = new mlang::Return(@$); }
+       | TRETURN expr { $$ = new mlang::Return(@$, $2); }
        ;
 
-break : TBREAK ';' { $$ = new mlang::Break(@$); }
+break : TBREAK { $$ = new mlang::Break(@$); }
 
-free : TFREE expr ';' { $$ = new mlang::FreeMemory($2, @$); }
+free : TFREE expr { $$ = new mlang::FreeMemory($2, @$); }
 
 ident : TIDENTIFIER { $$ = new mlang::Identifier(*$1, @1); delete $1; }
       ;
