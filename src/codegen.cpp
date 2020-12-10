@@ -211,6 +211,11 @@ namespace mlang {
         ft = llvm::FunctionType::get(llvm::Type::getInt64Ty(getGlobalContext()), argTypesInt8Ptr, false);
         f = llvm::Function::Create(ft, llvm::Function::ExternalLinkage, MAKE_LLVM_EXTERNAL_NAME(len),getModule());
         buildins.push_back({f, (void *) len});
+
+        std::vector<llvm::Type *> copyTypes {stringType, stringType, intType, intType};
+        ft = llvm::FunctionType::get(voidType, copyTypes, false);
+        f = llvm::Function::Create(ft, llvm::Function::ExternalLinkage, MAKE_LLVM_EXTERNAL_NAME(__mlang_copy),getModule());
+        buildins.push_back({f, (void *) __mlang_copy});
     }
 
     void CodeGenContext::optimize() {

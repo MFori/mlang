@@ -213,3 +213,7 @@ extern "C" DECLSPEC int64_t __mlang_scompare(const char *s1, const char *s2) {
 
     return cmp;
 }
+
+extern "C" DECLSPEC void __mlang_copy(char *dest, const char *source, int64_t size, int64_t offset) {
+    std::memcpy(dest + offset, source, size);
+}

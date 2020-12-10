@@ -18,6 +18,9 @@ namespace mlang {
         explicit Array(llvm::Type *type, Expression *size, YYLTYPE location)
                 : type(type), size(size), location(std::move(location)) {}
 
+        explicit Array(llvm::Type *type, llvm::Value *count, YYLTYPE location)
+                : type(type), count(count), location(std::move(location)) {}
+
         ~Array() override {
             delete size;
         }
@@ -34,7 +37,8 @@ namespace mlang {
 
     private:
         llvm::Type *type;
-        Expression *size;
+        Expression *size{nullptr};
+        llvm::Value *count{nullptr};
         YYLTYPE location;
     };
 
@@ -65,7 +69,6 @@ namespace mlang {
         Expression *index{nullptr};
         YYLTYPE location;
     };
-
     class ArrayAssignment : public Expression {
     public:
         ArrayAssignment(Expression *lhs, Expression *index, Expression *rhs, YYLTYPE location)

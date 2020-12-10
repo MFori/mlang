@@ -28,7 +28,7 @@ extern "C" DECLSPEC int64_t len(char *ptr);
 
 extern "C" DECLSPEC void __mlang_rm(char *ptr);
 
-extern "C" DECLSPEC char* __mlang_alloc(int64_t size);
+extern "C" DECLSPEC char *__mlang_alloc(int64_t size);
 
 enum class RuntimeError {
     INVALID_SIZEOF_USAGE,
@@ -38,10 +38,12 @@ enum class RuntimeError {
 
 extern "C" DECLSPEC int __mlang_error(int error);
 
-extern "C" DECLSPEC void* __mlang_cast(long long val, int fTy, int fBit, int tTy, int tBit, void* space);
+extern "C" DECLSPEC void *__mlang_cast(long long val, int fTy, int fBit, int tTy, int tBit, void *space);
 
-extern "C" DECLSPEC void* __mlang_castd(double val, int fTy, int tTy, void* space);
+extern "C" DECLSPEC void *__mlang_castd(double val, int fTy, int tTy, void *space);
 
 extern "C" DECLSPEC int64_t __mlang_scompare(const char *s1, const char *s2);
+
+extern "C" DECLSPEC void __mlang_copy(char *dest, const char *source, int64_t size, int64_t offset);
 
 #endif /* MLANG_BUILDINS_H */

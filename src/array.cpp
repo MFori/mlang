@@ -10,7 +10,9 @@
 namespace mlang {
 
     llvm::Value *Array::codeGen(CodeGenContext &context) {
-        llvm::Value *count = size->codeGen(context);
+        if (size != nullptr) {
+            count = size->codeGen(context);
+        }
 
         if (count == nullptr || !count->getType()->isIntegerTy()) {
             Node::printError(location, "Invalid array size");
@@ -76,8 +78,8 @@ namespace mlang {
         }
 
         if (var == nullptr || !var->getType()->isPointerTy()) {
-            Identifier *ident = expr->getType() == NodeType::IDENTIFIER ? (Identifier*) expr : nullptr;
-            if(ident != nullptr) {
+            Identifier *ident = expr->getType() == NodeType::IDENTIFIER ? (Identifier *) expr : nullptr;
+            if (ident != nullptr) {
                 Node::printError(location, "variable '" + ident->getName() + "' is not array");
             } else {
                 Node::printError(location, "invalid array access");
@@ -107,8 +109,8 @@ namespace mlang {
         }
 
         if (var == nullptr || !var->getType()->isPointerTy()) {
-            Identifier *ident = lhs->getType() == NodeType::IDENTIFIER ? (Identifier*) lhs : nullptr;
-            if(ident != nullptr) {
+            Identifier *ident = lhs->getType() == NodeType::IDENTIFIER ? (Identifier *) lhs : nullptr;
+            if (ident != nullptr) {
                 Node::printError(location, "variable '" + ident->getName() + "' is not array");
             } else {
                 Node::printError(location, "invalid array assignment");
