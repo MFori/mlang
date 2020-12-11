@@ -23,20 +23,21 @@ extern std::stack<std::string> fileNames;
 extern std::vector<std::string> libPaths;
 extern int parsing_error;
 
-void usage();
+void help();
 
 int main(int argc, char **argv) {
     libPaths.emplace_back("./");
 
     std::string fileName = argv[1];
     yyin = fopen(fileName.c_str(), "r+");
+    bool debug = false;
 
     if (yyin == nullptr) {
         std::cout << "File " << fileName << "not found. Abort" << std::endl;
         return -1;
     }
 
-    fileNames.push("");       // Add the empty file name after last EOF.
+    fileNames.push("");
     fileNames.push(fileName);
     if (yyparse() || parsing_error) {
         yylex_destroy();
@@ -47,10 +48,8 @@ int main(int argc, char **argv) {
         std::cout << "Parsing " << fileName << "failed. Abort" << std::endl;
     } else {
         std::ostringstream devNull;
-        mlang::CodeGenContext context(false ? devNull : std::cout);
-        //context.verbose = verbose;
-        //context.debug = debug;
-        //if( verbose ) context.printCodeGeneration(*programBlock, std::cout);
+        mlang::CodeGenContext context(std::cout, debug);
+
         if (context.preProcessing(*programBlock)) {
             if (context.generateCode(*programBlock)) {
                 context.runCode();
@@ -58,9 +57,20 @@ int main(int argc, char **argv) {
         }
     }
 
-    if (yyin != nullptr)
+    if (yyin != nullptr) {
         fclose(yyin);
+    }
     delete programBlock;
     yylex_destroy();
     return 0;
+}
+
+void help() {
+    std::cout << "Usage:\n";
+    std::cout << "liq filename -h -d -v -q -i path1;path2\n";
+    std::cout << "\t-h this help text.\n";
+    std::cout << "\t-d debug code generation. Disables the code optimizer pass.\n";
+    std::cout << "\t-v be more verbose.\n";
+    std::cout << "\t-q be quiet.\n";
+    std::cout << "\t-i semicolon separated list of import paths where additional liquid files are located.\n";
 }

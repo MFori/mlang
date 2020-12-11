@@ -27,8 +27,6 @@ namespace mlang {
     }
 
     llvm::Value *Identifier::codeGen(CodeGenContext &context) {
-        std::cout << "code gen id " << name << " 1 \n";
-
         Variable *var = context.findVariable(name, false);
         if (var != nullptr && var->getValue() != nullptr) {
             return new llvm::LoadInst(var->getType(), var->getValue(), name, false, context.currentBlock());

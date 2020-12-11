@@ -102,7 +102,7 @@ namespace mlang {
             fargs.push_back(sizes[i]);
             fargs.push_back(offset);
 
-            llvm::CallInst::Create(fun, fargs, "str_join", context.currentBlock());
+            llvm::CallInst::Create(fun, fargs, "", context.currentBlock());
             offset = llvm::BinaryOperator::Create(llvm::Instruction::Add, offset, sizes[i], "mathtmp", context.currentBlock());
         }
 

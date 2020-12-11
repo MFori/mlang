@@ -15,7 +15,7 @@
 
 namespace mlang {
 
-    CodeGenContext::CodeGenContext(std::ostream &outs) : outs(outs) {
+    CodeGenContext::CodeGenContext(std::ostream &outs, bool debug) : outs(outs), debug(debug) {
         llvm::InitializeNativeTarget();
         llvm::InitializeNativeTargetAsmParser();
         llvm::InitializeNativeTargetAsmPrinter();
@@ -224,9 +224,9 @@ namespace mlang {
 
     void CodeGenContext::optimize() {
         llvm::legacy::FunctionPassManager fpm(getModule());
-        llvm::PassManagerBuilder builder;
-        builder.OptLevel = 3;
-        builder.populateFunctionPassManager(fpm);
+        llvm::PassManagerBuilder pmbuilder;
+        pmbuilder.OptLevel = 3;
+        pmbuilder.populateFunctionPassManager(fpm);
         for (auto &fn : getModule()->getFunctionList()) {
             fpm.run(fn);
         }
@@ -245,44 +245,38 @@ namespace mlang {
 
         newScope(bblock, ScopeType::GLOBAL_BLOCK);
 
-        outs << "Code gen 1...\n";
         root.codeGen(*this);
         if (errors > 0) {
             outs << "Compilation error(s). Abort.\n";
             return false;
         }
-        outs << "Code gen 2...\n";
         if (currentBlock()->getTerminator() == nullptr) {
-            outs << "Code gen 3...\n";
             llvm::ReturnInst::Create(getGlobalContext(), nullptr, currentBlock());
         }
-        outs << "Code gen 4...\n";
         endScope();
-        outs << "Code gen 5...\n";
 
-        if (llvm::verifyModule(*getModule())) {
-            outs << ": Error constructing fun! \n";
-            // printf("%s", LLVMPrintModuleToString((LLVMModuleRef) module));
-            // return false;
+        std::string verifyOutputString;
+        llvm::raw_string_ostream verifyOutputStream(verifyOutputString);
+        if (llvm::verifyModule(*getModule(), &verifyOutputStream)) {
+            verifyOutputStream.flush();
+            outs << "Module verification errors:\n" << verifyOutputString;
+            return false;
         }
-        outs << "Code gen 6...\n";
 
-        // TODO
-        //if(!debug) {
-        //   optimize();
-        //}
-
-        printf("%s", LLVMPrintModuleToString((LLVMModuleRef) module));
+        if (!debug) {
+            optimize();
+        } else {
+            outs << LLVMPrintModuleToString((LLVMModuleRef) module);
+        }
 
         return true;
     }
 
     llvm::GenericValue CodeGenContext::runCode() {
-        // TODO
+        outs << "Running code...\n";
         std::string err;
         llvm::ExecutionEngine *ee = llvm::EngineBuilder(std::unique_ptr<llvm::Module>(module)).setErrorStr(
                 &err).setEngineKind(llvm::EngineKind::JIT).create();
-        // TODO
         std::cout << err;
         assert(ee);
 
@@ -298,11 +292,10 @@ namespace mlang {
         }
 
         delete ee;
-
         return v;
     }
 
-    std::string CodeGenContext::getType(std::string varName) {
+    std::string CodeGenContext::getType(const std::string &varName) {
         for (auto &cb : codeBlocks) {
             auto iter = cb->getTypeMap().find(varName);
             if (iter != std::end(cb->getTypeMap())) {
@@ -361,6 +354,7 @@ namespace mlang {
                                                 llvm::Type::getVoidTy(llvmContext),
                                                 llvm::Type::getInt8PtrTy(llvmContext)));
         std::vector<llvm::Value *> fargs;
+        value = llvm::CastInst::CreatePointerCast(value, llvm::Type::getInt8PtrTy(llvmContext), "cast_tmp", currentBlock());
         fargs.push_back(value);
         llvm::CallInst::Create(fun, fargs, "", currentBlock());
     }
@@ -452,6 +446,7 @@ namespace mlang {
                                                 llvm::Type::getInt64Ty(llvmContext),
                                                 llvm::Type::getInt64PtrTy(llvmContext)));
         std::vector<llvm::Value *> fargs;
+        arr = llvm::CastInst::CreatePointerCast(arr, llvm::Type::getInt64PtrTy(llvmContext), "cast_tmp", currentBlock());
         fargs.push_back(arr);
         llvm::Value *size = llvm::CallInst::Create(fun, fargs, "size_of", currentBlock());
         return new llvm::BitCastInst(size, llvm::Type::getInt64Ty(llvmContext), "size", currentBlock());

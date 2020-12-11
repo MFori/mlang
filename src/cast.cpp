@@ -52,6 +52,7 @@ namespace mlang {
                                                             intType, intType, ptrType));
 
             llvm::Value *space = new llvm::AllocaInst(llvm::ArrayType::get(llvm::Type::getInt8Ty(context.getGlobalContext()), 20), 0, "space", context.currentBlock());
+            space = llvm::CastInst::CreatePointerCast(space, llvm::Type::getInt8PtrTy(context.getGlobalContext()), "cast_tmp", context.currentBlock());
 
             fargs.push_back(val);
             fargs.push_back((new Integer((int) valTy->getTypeID()))->codeGen(context));
@@ -64,8 +65,10 @@ namespace mlang {
             llvm::Value *space;
             if(type->isPointerTy()) {
                 space = new llvm::AllocaInst(llvm::ArrayType::get(llvm::Type::getInt8Ty(context.getGlobalContext()), 30), 0, "space", context.currentBlock());
+                space = llvm::CastInst::CreatePointerCast(space, llvm::Type::getInt8PtrTy(context.getGlobalContext()), "cast_tmp", context.currentBlock());
             } else {
                 space = new llvm::AllocaInst(type, 0, "space", context.currentBlock());
+                space = llvm::CastInst::CreatePointerCast(space, llvm::Type::getInt8PtrTy(context.getGlobalContext()), "cast_tmp", context.currentBlock());
             }
 
             auto cinstr = llvm::CastInst::getCastOpcode(val, srcSigned, llvm::Type::getInt64Ty(context.getGlobalContext()), true);

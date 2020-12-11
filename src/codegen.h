@@ -128,7 +128,7 @@ namespace mlang {
 
     class CodeGenContext {
     public:
-        explicit CodeGenContext(std::ostream &outs);
+        explicit CodeGenContext(std::ostream &outs, bool debug);
 
         ~CodeGenContext() { llvm::llvm_shutdown(); }
 
@@ -176,7 +176,7 @@ namespace mlang {
 
         void setUpBuildIns();
 
-        std::string getType(std::string varName);
+        std::string getType(const std::string& varName);
 
         void addError() { ++errors; }
 
@@ -206,6 +206,7 @@ namespace mlang {
     private:
         void setCurrentBlock(llvm::BasicBlock *block) { codeBlocks.front()->setCodeBlock(block); }
 
+        bool debug {false};
         std::list<CodeGenBlock *> codeBlocks;
         llvm::Function *initFunction{nullptr};
         llvm::Function *mainFunction{nullptr};
