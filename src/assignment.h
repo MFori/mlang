@@ -13,8 +13,8 @@ namespace mlang {
 
     class Assignment : public Statement {
     public:
-        explicit Assignment(Expression *lhs, Expression *rhs, YYLTYPE location) : lhs(lhs), rhs(rhs),
-                                                                                  location(location) {}
+        explicit Assignment(Expression *lhs, Expression *rhs, YYLTYPE location)
+                : lhs(lhs), rhs(rhs), location(std::move(location)) {}
 
         ~Assignment() override {
             delete lhs;
@@ -26,8 +26,6 @@ namespace mlang {
         NodeType getType() override { return NodeType::EXPRESSION; }
 
         std::string toString() override { return "assignment"; }
-
-        void accept(Visitor &v) override { v.visitAssignment(this); }
 
     private:
         Expression *lhs{nullptr};

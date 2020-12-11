@@ -14,7 +14,7 @@ namespace mlang {
     class ForEach : public Statement {
     public:
         explicit ForEach(Identifier *id, Expression *expr, Block *block, YYLTYPE location)
-                : ident(id), expr(expr), doBlock(block), location(location) {}
+                : ident(id), expr(expr), doBlock(block), location(std::move(location)) {}
 
         ~ForEach() override {
             delete ident;
@@ -26,8 +26,6 @@ namespace mlang {
         NodeType getType() override { return NodeType::EXPRESSION; }
 
         std::string toString() override { return "foreach"; }
-
-        void accept(Visitor &v) override { v.visitForEach(this); }
 
     private:
         Identifier *ident{nullptr};

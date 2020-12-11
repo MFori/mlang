@@ -13,8 +13,8 @@ namespace mlang {
 
     class BinaryOp : public Expression {
     public:
-        BinaryOp(Expression *lhs, int op, Expression *rhs, YYLTYPE location) : op(op), lhs(lhs), rhs(rhs),
-                                                                               location(location) {}
+        BinaryOp(Expression *lhs, int op, Expression *rhs, YYLTYPE location)
+                : op(op), lhs(lhs), rhs(rhs), location(std::move(location)) {}
 
         ~BinaryOp() override {
             delete lhs;
@@ -26,8 +26,6 @@ namespace mlang {
         NodeType getType() override { return NodeType::EXPRESSION; }
 
         std::string toString() override { return "binaryop"; }
-
-        void accept(Visitor &v) override { v.visitBinaryOp(this); }
 
         llvm::Value *doubleCodeGen(llvm::Value *lhsValue, llvm::Value *rhsValue, CodeGenContext &context) const;
 

@@ -13,8 +13,8 @@ namespace mlang {
 
     class Comparison : public Expression {
     public:
-        explicit Comparison(Expression *lhs, int op, Expression *rhs, YYLTYPE location) : op(op), lhs(lhs), rhs(rhs),
-                                                                                          location(location) {}
+        explicit Comparison(Expression *lhs, int op, Expression *rhs, YYLTYPE location)
+                : op(op), lhs(lhs), rhs(rhs), location(std::move(location)) {}
 
         ~Comparison() override {
             delete lhs;
@@ -26,8 +26,6 @@ namespace mlang {
         NodeType getType() override { return NodeType::EXPRESSION; }
 
         std::string toString() override { return "comparison"; };
-
-        void accept(Visitor &v) override { v.visitComparison(this); }
 
         llvm::Value *doubleCodeGen(llvm::Value *lhsValue, llvm::Value *rhsValue, CodeGenContext &context) const;
 

@@ -14,7 +14,7 @@ namespace mlang {
     class TernaryOp : public Expression {
     public:
         TernaryOp(Expression *condExpr, Expression *thenExpr, Expression *elseExpr, YYLTYPE location)
-                : condExpr(condExpr), thenExpr(thenExpr), elseExpr(elseExpr), location(location) {}
+                : condExpr(condExpr), thenExpr(thenExpr), elseExpr(elseExpr), location(std::move(location)) {}
 
         ~TernaryOp() override {
             delete condExpr;
@@ -27,8 +27,6 @@ namespace mlang {
         NodeType getType() override { return NodeType::EXPRESSION; }
 
         std::string toString() override { return "ternary operator"; }
-
-        void accept(Visitor &v) override { v.visitTernaryOp(this); }
 
     private:
         Expression *condExpr{nullptr};

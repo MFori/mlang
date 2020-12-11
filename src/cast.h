@@ -14,7 +14,7 @@ namespace mlang {
     class Cast : public Expression {
     public:
         explicit Cast(llvm::Type *type, Expression *expr, YYLTYPE location)
-                : type(type), expr(expr), location(location) {}
+                : type(type), expr(expr), location(std::move(location)) {}
 
         ~Cast() override {
             delete expr;
@@ -25,8 +25,6 @@ namespace mlang {
         NodeType getType() override { return NodeType::EXPRESSION; }
 
         std::string toString() override { return "cast"; }
-
-        void accept(Visitor &v) override { v.visitCast(this); }
 
     private:
         llvm::Type *type;

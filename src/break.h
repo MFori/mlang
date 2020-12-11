@@ -7,8 +7,6 @@
 #ifndef MLANG_BREAK_H
 #define MLANG_BREAK_H
 
-#include <utility>
-
 #include "ast.h"
 
 namespace mlang {
@@ -24,8 +22,6 @@ namespace mlang {
         NodeType getType() override { return NodeType::EXPRESSION; }
 
         std::string toString() override { return "break"; }
-
-        void accept(Visitor &v) override { v.visitBreakStatement(this); }
 
     private:
         YYLTYPE location;

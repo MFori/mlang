@@ -16,8 +16,7 @@
 #pragma warning(pop)
 
 #include <iostream>
-
-#include "visitor.h"
+#include <utility>
 
 /**
  * Location type
@@ -34,6 +33,7 @@ typedef struct YYLTYPE {
 namespace mlang {
 
     class CodeGenContext;
+    class Range;
 
     using StatementList = std::vector<class Statement *>;
     using ExpressionList = std::vector<class Expression *>;
@@ -60,11 +60,9 @@ namespace mlang {
 
         virtual NodeType getType() = 0;
 
-        virtual void accept(Visitor &v) = 0;
-
         virtual std::string toString() { return "node"; }
 
-        static void printError(YYLTYPE location, const std::string &error) {
+        static void printError(const YYLTYPE& location, const std::string &error) {
             std::cerr
                     << location.file_name
                     << ": line "
@@ -84,8 +82,6 @@ namespace mlang {
         ~Expression() override = default;
 
         std::string toString() override { return "expression"; }
-
-        void accept(Visitor &v) override { v.visitExpression(this); }
     };
 
     class Statement : public Expression {
@@ -107,8 +103,6 @@ namespace mlang {
 
         std::string toString() override { return "integer"; }
 
-        void accept(Visitor &v) override { v.visitInteger(this); }
-
     private:
         long long value{0};
     };
@@ -127,8 +121,6 @@ namespace mlang {
         NodeType getType() override { return NodeType::DOUBLE; }
 
         std::string toString() override { return "double"; }
-
-        void accept(Visitor &v) override { v.visitDouble(this); }
 
     private:
         double value{0.0};
@@ -149,8 +141,6 @@ namespace mlang {
 
         std::string toString() override { return "boolean"; }
 
-        void accept(Visitor &v) override { v.visitBoolean(this); }
-
     private:
         int boolVal{0};
     };
@@ -170,8 +160,6 @@ namespace mlang {
 
         std::string toString() override { return "char"; }
 
-        void accept(Visitor &v) override { v.visitChar(this); }
-
     private:
         char value{0};
     };
@@ -181,7 +169,7 @@ namespace mlang {
      */
     class Identifier : public Expression {
     public:
-        Identifier(const std::string &name, YYLTYPE location) : name(name), location(location) {}
+        Identifier(std::string name, YYLTYPE location) : name(std::move(name)), location(std::move(location)) {}
 
         Identifier(const Identifier &id) : name(id.name), location(id.location) {}
 
@@ -192,8 +180,6 @@ namespace mlang {
         NodeType getType() override { return NodeType::IDENTIFIER; }
 
         std::string toString() override { return "identifier"; }
-
-        void accept(Visitor &v) override { v.visitIdentifier(this); }
 
         std::string getName() const { return name; }
 
@@ -223,8 +209,6 @@ namespace mlang {
         NodeType getType() override { return NodeType::EXPRESSION; }
 
         std::string toString() override { return "block"; }
-
-        void accept(Visitor &v) override { v.visitBlock(this); }
     };
 
     /**
@@ -241,8 +225,6 @@ namespace mlang {
         NodeType getType() override { return NodeType::EXPRESSION; }
 
         std::string toString() override { return "expression statement"; }
-
-        void accept(Visitor &v) override { v.visitExpressionStatement(this); }
 
     private:
         Expression *expression{nullptr};

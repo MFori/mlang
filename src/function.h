@@ -16,9 +16,9 @@ namespace mlang {
     class FunctionDeclaration : public Statement {
     public:
         FunctionDeclaration(Identifier *type, Identifier *id, VariableList *args, Block *block, YYLTYPE location)
-                : type(type), id(id), arguments(args), block(block), location(location) {}
+                : type(type), id(id), arguments(args), block(block), location(std::move(location)) {}
 
-        FunctionDeclaration(Identifier *id, VariableList *args, Block *block, YYLTYPE location)
+        FunctionDeclaration(Identifier *id, VariableList *args, Block *block, const YYLTYPE &location)
                 : type(new Identifier("Void", location)), id(id), arguments(args), block(block), location(location) {}
 
         ~FunctionDeclaration() override {
@@ -37,8 +37,6 @@ namespace mlang {
 
         std::string toString() override { return "function declaration"; }
 
-        void accept(Visitor &v) override { v.visitFunctionDeclaration(this); }
-
     private:
         Identifier *type{nullptr};
         Identifier *id{nullptr};
@@ -50,7 +48,7 @@ namespace mlang {
     class FunctionCall : public Statement {
     public:
         explicit FunctionCall(Identifier *id, ExpressionList *args, YYLTYPE location)
-                : id(id), args(args), location(location) {}
+                : id(id), args(args), location(std::move(location)) {}
 
         ~FunctionCall() override {
             for (auto i : *args) {
@@ -67,12 +65,7 @@ namespace mlang {
 
         std::string toString() override { return "function call"; }
 
-        void accept(Visitor &v) override { v.visitFunctionCall(this); }
-
-        ExpressionList *getArguments() { return args; }
-
     private:
-
         Identifier *id{nullptr};
         ExpressionList *args{nullptr};
         YYLTYPE location;

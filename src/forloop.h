@@ -15,7 +15,7 @@ namespace mlang {
     class ForLoop : public Statement {
     public:
         explicit ForLoop(Identifier *id, Range *range, Expression *step, Block *block, YYLTYPE location)
-                : ident(id), range(range), step(step), doBlock(block), location(location) {}
+                : ident(id), range(range), step(step), doBlock(block), location(std::move(location)) {}
 
         ~ForLoop() override {
             delete ident;
@@ -28,8 +28,6 @@ namespace mlang {
         NodeType getType() override { return NodeType::EXPRESSION; }
 
         std::string toString() override { return "for loop"; }
-
-        void accept(Visitor &v) override { v.visitForLoop(this); }
 
     private:
         Identifier *ident{nullptr};

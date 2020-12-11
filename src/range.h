@@ -13,8 +13,8 @@ namespace mlang {
 
     class Range : public Statement {
     public:
-        Range(Expression *lhs, int op, Expression *rhs, YYLTYPE location) : op(op), lhs(lhs), rhs(rhs),
-                                                                            location(location) {}
+        Range(Expression *lhs, int op, Expression *rhs, YYLTYPE location)
+                : op(op), lhs(lhs), rhs(rhs), location(std::move(location)) {}
 
         ~Range() override {
             delete lhs;
@@ -26,8 +26,6 @@ namespace mlang {
         NodeType getType() override { return NodeType::EXPRESSION; }
 
         std::string toString() override { return "range"; }
-
-        void accept(Visitor &v) override { v.visitRange(this); }
 
         int getOp() const { return op; }
 

@@ -13,7 +13,8 @@ namespace mlang {
 
     class UnaryOp : public Expression {
     public:
-        explicit UnaryOp(int op, Expression *lhs, Expression *rhs, YYLTYPE location) : op(op), rhs(rhs), lhs(lhs), location(location) {}
+        explicit UnaryOp(int op, Expression *lhs, Expression *rhs, YYLTYPE location)
+                : op(op), rhs(rhs), lhs(lhs), location(std::move(location)) {}
 
         ~UnaryOp() override { delete rhs; }
 
@@ -22,8 +23,6 @@ namespace mlang {
         NodeType getType() override { return NodeType::EXPRESSION; }
 
         std::string toString() override { return "unary op"; }
-
-        void accept(Visitor &v) override { v.visitUnaryOp(this); }
 
     private:
         llvm::Value *incDecCodeGen(CodeGenContext &context);

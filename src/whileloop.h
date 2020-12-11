@@ -14,7 +14,7 @@ namespace mlang {
     class WhileLoop : public Statement {
     public:
         explicit WhileLoop(Expression *cond, Block *doBlock, bool doFirst, YYLTYPE location)
-                : condition(cond), doBlock(doBlock), doFirst(doFirst), location(location) {}
+                : condition(cond), doBlock(doBlock), doFirst(doFirst), location(std::move(location)) {}
 
         ~WhileLoop() override {
             delete condition;
@@ -26,8 +26,6 @@ namespace mlang {
         NodeType getType() override { return NodeType::EXPRESSION; }
 
         std::string toString() override { return "while loop"; }
-
-        void accept(Visitor &v) override { v.visitWhileLoop(this); }
 
     private:
         Expression *condition{nullptr};

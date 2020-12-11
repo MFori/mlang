@@ -13,7 +13,7 @@ namespace mlang {
 
     class FreeMemory : public Statement {
     public:
-        explicit FreeMemory(Expression *expr, YYLTYPE location) : ptr(expr), location(location) {}
+        explicit FreeMemory(Expression *expr, YYLTYPE location) : ptr(expr), location(std::move(location)) {}
 
         ~FreeMemory() override { delete ptr; }
 
@@ -22,8 +22,6 @@ namespace mlang {
         NodeType getType() override { return NodeType::EXPRESSION; }
 
         std::string toString() override { return "free"; }
-
-        void accept(Visitor &v) override { v.visitFreeMemory(this); }
 
     private:
         Expression *ptr{nullptr};

@@ -7,8 +7,6 @@
 #ifndef MLANG_ARRAY_H
 #define MLANG_ARRAY_H
 
-#include <utility>
-
 #include "ast.h"
 
 namespace mlang {
@@ -30,8 +28,6 @@ namespace mlang {
         NodeType getType() override { return NodeType::ARRAY; }
 
         std::string toString() override { return "array"; }
-
-        void accept(Visitor &v) override { v.visitArray(this); }
 
         static void validateArrayBounds(llvm::Value *arrayPtr, llvm::Value *index, CodeGenContext &context);
 
@@ -58,8 +54,6 @@ namespace mlang {
 
         std::string toString() override { return "array access"; }
 
-        void accept(Visitor &v) override { v.visitArrayAccess(this); }
-
         Expression *getExpression() { return expr; }
 
         Expression *getIndex() { return index; }
@@ -69,6 +63,7 @@ namespace mlang {
         Expression *index{nullptr};
         YYLTYPE location;
     };
+
     class ArrayAssignment : public Expression {
     public:
         ArrayAssignment(Expression *lhs, Expression *index, Expression *rhs, YYLTYPE location)
@@ -85,8 +80,6 @@ namespace mlang {
         NodeType getType() override { return NodeType::ARRAY; }
 
         std::string toString() override { return "array assignment"; }
-
-        void accept(Visitor &v) override { v.visitArrayAssignment(this); }
 
     private:
         Expression *lhs{nullptr};

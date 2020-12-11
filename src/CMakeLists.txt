@@ -68,7 +68,6 @@ set(SOURCES_COMMON
 set(HEADER_COMMON
         codegen.h
         ast.h
-        visitor.h
         variable.h
         binaryop.h
         return.h

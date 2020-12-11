@@ -13,7 +13,8 @@ namespace mlang {
 
     class Return : public Statement {
     public:
-        explicit Return(YYLTYPE location, Expression *expr = nullptr) : returnExpression(expr), location(location) {}
+        explicit Return(YYLTYPE location, Expression *expr = nullptr)
+                : returnExpression(expr), location(std::move(location)) {}
 
         ~Return() override { delete returnExpression; }
 
@@ -22,8 +23,6 @@ namespace mlang {
         NodeType getType() override { return NodeType::EXPRESSION; }
 
         std::string toString() override { return "return"; }
-
-        void accept(Visitor &v) override { v.visitReturnStatement(this); }
 
     private:
         Expression *returnExpression{nullptr};

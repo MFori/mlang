@@ -13,15 +13,16 @@ namespace mlang {
     class VariableDeclaration : public Statement {
     public:
         VariableDeclaration(Identifier *type, Identifier *id, Expression *assignmentExpr, YYLTYPE location)
-                : type(type), id(id), assignmentExpr(assignmentExpr), location(location) {}
+                : type(type), id(id), assignmentExpr(assignmentExpr), location(std::move(location)) {}
 
         VariableDeclaration(Identifier *type, Identifier *id, YYLTYPE location)
-                : type(type), id(id), assignmentExpr(nullptr), location(location) {}
+                : type(type), id(id), assignmentExpr(nullptr), location(std::move(location)) {}
 
-        VariableDeclaration(Identifier *id, const std::string &type, Expression *assignmentExpr, YYLTYPE location)
+        VariableDeclaration(Identifier *id, const std::string &type, Expression *assignmentExpr,
+                            const YYLTYPE &location)
                 : type(new Identifier(type, location)), id(id), assignmentExpr(assignmentExpr), location(location) {}
 
-        VariableDeclaration(Identifier *id, const std::string &type, YYLTYPE location)
+        VariableDeclaration(Identifier *id, const std::string &type, const YYLTYPE &location)
                 : type(new Identifier(type, location)), id(id), assignmentExpr(nullptr), location(location) {}
 
         ~VariableDeclaration() override {
@@ -35,8 +36,6 @@ namespace mlang {
         NodeType getType() override { return NodeType::VARIABLE; }
 
         std::string toString() override { return "variable declaration"; }
-
-        void accept(Visitor &v) override { v.visitVariableDeclaration(this); }
 
         Identifier *getVariableType() const { return type; }
 

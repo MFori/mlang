@@ -7,8 +7,6 @@
 #ifndef MLANG_STR_H
 #define MLANG_STR_H
 
-#include <utility>
-
 #include "ast.h"
 
 namespace mlang {
@@ -24,8 +22,6 @@ namespace mlang {
         NodeType getType() override { return NodeType::STRING; }
 
         std::string toString() override { return "string"; }
-
-        void accept(Visitor &v) override { v.visitString(this); }
 
     private:
         std::string value;
@@ -48,8 +44,6 @@ namespace mlang {
         NodeType getType() override { return NodeType::EXPRESSION; }
 
         std::string toString() override { return "string join"; }
-
-        void accept(Visitor &v) override { v.visitStringJoin(this); }
 
     private:
         ExpressionList *args{nullptr};

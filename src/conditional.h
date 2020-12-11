@@ -14,10 +14,10 @@ namespace mlang {
     class Conditional : public Statement {
     public:
         explicit Conditional(Expression *condExpr, Expression *thenExpr, Expression *elseExpr, YYLTYPE location)
-                : condExpr(condExpr), thenExpr(thenExpr), elseExpr(elseExpr), location(location) {}
+                : condExpr(condExpr), thenExpr(thenExpr), elseExpr(elseExpr), location(std::move(location)) {}
 
         explicit Conditional(Expression *condExpr, Expression *thenExpr, YYLTYPE location)
-                : condExpr(condExpr), thenExpr(thenExpr), elseExpr(nullptr), location(location) {}
+                : condExpr(condExpr), thenExpr(thenExpr), elseExpr(nullptr), location(std::move(location)) {}
 
         ~Conditional() override {
             delete condExpr;
@@ -30,8 +30,6 @@ namespace mlang {
         NodeType getType() override { return NodeType::EXPRESSION; }
 
         std::string toString() override { return "conditional"; }
-
-        void accept(Visitor &v) override { v.visitConditional(this); }
 
     private:
         Expression *condExpr{nullptr};
