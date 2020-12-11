@@ -41,6 +41,54 @@ extern "C" DECLSPEC int read() {
     return getchar();
 }
 
+extern "C" DECLSPEC char *readLine() {
+    char *line = (char *) malloc(100);
+    char *linep = line;
+    line = line + sizeof(int64_t);
+    size_t lenmax = 100, len = lenmax;
+    size_t size = 0;
+
+    int c;
+
+    if (line == nullptr)
+        return nullptr;
+
+    for (;;) {
+        c = fgetc(stdin);
+        if (c == EOF)
+            break;
+
+        if (--len == 0) {
+            len = lenmax;
+            char *linen = (char *) realloc(linep, lenmax *= 2);
+
+            if (linen == nullptr) {
+                free(linep);
+                return nullptr;
+            }
+            line = linen + (line - linep);
+            linep = linen;
+        }
+
+        size++;
+        if ((*line++ = c) == '\n')
+            break;
+    }
+    *line = '\0';
+    size++;
+    *((int64_t *) (linep)) = size;
+
+    char *linen = (char *) realloc(linep, size + sizeof(int64_t));
+    if (linen == nullptr) {
+        free(linep);
+        return nullptr;
+    }
+    line = linen + (line - linep);
+    linep = linen;
+
+    return linep + sizeof(int64_t);
+}
+
 extern "C" DECLSPEC int64_t sizeOf(int64_t *ptr) {
     if (ptr == nullptr) {
         __mlang_error((int) RuntimeError::INVALID_SIZEOF_USAGE);
@@ -49,7 +97,7 @@ extern "C" DECLSPEC int64_t sizeOf(int64_t *ptr) {
 }
 
 extern "C" DECLSPEC int64_t len(char *ptr) {
-    int64_t size = sizeOf((int64_t*) ptr);
+    int64_t size = sizeOf((int64_t *) ptr);
     return strnlen(ptr, size);
 }
 
@@ -198,13 +246,13 @@ extern "C" DECLSPEC void *__mlang_castd(double val, int fTy, int tTy, void *spac
 }
 
 extern "C" DECLSPEC int64_t __mlang_scompare(const char *s1, const char *s2) {
-    size_t len1 =  ((int64_t*) s1)[-1];
-    size_t len2 =  ((int64_t*) s2)[-1];
+    size_t len1 = ((int64_t *) s1)[-1];
+    size_t len2 = ((int64_t *) s2)[-1];
 
     int cmp = std::strncmp(s1, s2, std::min(len1, len2));
 
-    if(cmp == 0 && len1 != len2) {
-        if(len1 > len2) {
+    if (cmp == 0 && len1 != len2) {
+        if (len1 > len2) {
             return 1;
         } else {
             return -1;

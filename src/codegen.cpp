@@ -172,6 +172,10 @@ namespace mlang {
         f = llvm::Function::Create(ft, llvm::Function::ExternalLinkage, MAKE_LLVM_EXTERNAL_NAME(read), getModule());
         buildins.push_back({f, (void *) read});
 
+        ft = llvm::FunctionType::get(llvm::Type::getInt8PtrTy(getGlobalContext()), false);
+        f = llvm::Function::Create(ft, llvm::Function::ExternalLinkage, MAKE_LLVM_EXTERNAL_NAME(readLine), getModule());
+        buildins.push_back({f, (void *) readLine});
+
         ft = llvm::FunctionType::get(llvm::Type::getInt64Ty(getGlobalContext()), argTypesInt64Ptr, false);
         f = llvm::Function::Create(ft, llvm::Function::ExternalLinkage, MAKE_LLVM_EXTERNAL_NAME(sizeOf), getModule());
         buildins.push_back({f, (void *) sizeOf});

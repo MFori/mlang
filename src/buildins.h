@@ -22,6 +22,8 @@ extern "C" DECLSPEC void fprintln(FILE *stream, char *str, va_list args);
 
 extern "C" DECLSPEC int read();
 
+extern "C" DECLSPEC char *readLine();
+
 extern "C" DECLSPEC int64_t sizeOf(int64_t *ptr);
 
 extern "C" DECLSPEC int64_t len(char *ptr);
