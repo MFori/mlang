@@ -5,6 +5,7 @@
  * Author: Martin Forejt
  */
 #include <iostream>
+#include <fstream>
 #include "llvm/ExecutionEngine/MCJIT.h"
 #include <llvm-c/Core.h>
 #include <llvm/IR/Verifier.h>
@@ -293,6 +294,10 @@ namespace mlang {
 
         delete ee;
         return v;
+    }
+
+    void CodeGenContext::saveCode(std::ofstream& out) {
+        out << LLVMPrintModuleToString((LLVMModuleRef) module);
     }
 
     std::string CodeGenContext::getType(const std::string &varName) {

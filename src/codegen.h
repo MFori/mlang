@@ -172,6 +172,8 @@ namespace mlang {
 
         llvm::GenericValue runCode();
 
+        void saveCode(std::ofstream& out);
+
         bool preProcessing(class Block &root);
 
         void setUpBuildIns();

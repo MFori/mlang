@@ -55,7 +55,6 @@ int parsing_error = 0;
 
 std::stack<std::string> fileNames;
 std::stack<int> lineNo;
-std::vector<std::string> libPaths;
 
 #define YY_USER_ACTION do { \
     if( yylloc.last_line < yylineno ) yycolumn = 1 ; \
@@ -94,12 +93,8 @@ import              BEGIN(incl);
                     if( pos == std::string::npos ) {
                         fileName += ".mlang";
                     }
-                    for( auto libpath : libPaths ) {
-                        yyin = fopen( (libpath + fileName).c_str() , "r" );
-                        if( yyin )
-                            break;
-                    }
-                    if ( ! yyin ) {
+                    yyin = fopen(fileName.c_str(), "r");
+                    if (! yyin) {
                        printf( "%s in %s line %d\n", (std::string("Failed to load import file ") + fileName).c_str(), fileNames.top().c_str(), yylineno );
                        parsing_error = 1;
                        yyterminate();

@@ -7,6 +7,7 @@
 
 #include <cstdio>
 #include <iostream>
+#include <fstream>
 #include <sstream>
 #include <string>
 #include <stack>
@@ -20,21 +21,47 @@ extern int yylex_destroy();
 extern FILE *yyin;
 extern mlang::Block *programBlock;
 extern std::stack<std::string> fileNames;
-extern std::vector<std::string> libPaths;
 extern int parsing_error;
 
 void help();
 
 int main(int argc, char **argv) {
-    libPaths.emplace_back("./");
-
-    std::string fileName = argv[1];
-    yyin = fopen(fileName.c_str(), "r+");
     bool debug = false;
+    bool run = false;
+    bool hasSrc = false;
+    std::string source;
+
+    for (int i = 1; i < argc; i++) {
+        std::string arg = argv[i];
+
+        if (arg == "-h" || arg == "--help") {
+            help();
+        } else if (arg == "-d" || arg == "--debug") {
+            debug = true;
+        } else if (arg == "-r" || arg == "--run") {
+            run = true;
+        } else {
+            if (!hasSrc) {
+                source = arg;
+                hasSrc = true;
+            } else {
+                std::cerr << "Only one source file is allowed." << std::endl;
+                return 1;
+            }
+        }
+    }
+
+    if (!hasSrc) {
+        std::cerr << "No source file provided." << std::endl;
+        return 1;
+    }
+
+    std::string fileName = source;
+    yyin = fopen(fileName.c_str(), "r+");
 
     if (yyin == nullptr) {
-        std::cout << "File " << fileName << "not found. Abort" << std::endl;
-        return -1;
+        std::cerr << "File " << fileName << "not found. Abort" << std::endl;
+        return 1;
     }
 
     fileNames.push("");
@@ -45,14 +72,20 @@ int main(int argc, char **argv) {
     }
 
     if (programBlock == nullptr) {
-        std::cout << "Parsing " << fileName << "failed. Abort" << std::endl;
+        std::cerr << "Parsing " << fileName << "failed. Abort" << std::endl;
     } else {
         std::ostringstream devNull;
         mlang::CodeGenContext context(std::cout, debug);
 
         if (context.preProcessing(*programBlock)) {
             if (context.generateCode(*programBlock)) {
-                context.runCode();
+                if(run) {
+                    context.runCode();
+                } else {
+                    std::ofstream out(fileName + ".ir");
+                    context.saveCode(out);
+                    out.close();
+                }
             }
         }
     }
@@ -60,6 +93,7 @@ int main(int argc, char **argv) {
     if (yyin != nullptr) {
         fclose(yyin);
     }
+
     delete programBlock;
     yylex_destroy();
     return 0;
@@ -67,10 +101,8 @@ int main(int argc, char **argv) {
 
 void help() {
     std::cout << "Usage:\n";
-    std::cout << "liq filename -h -d -v -q -i path1;path2\n";
-    std::cout << "\t-h this help text.\n";
+    std::cout << "mlang filename -h -d -r \n";
+    std::cout << "\t-h prints this help text.\n";
     std::cout << "\t-d debug code generation. Disables the code optimizer pass.\n";
-    std::cout << "\t-v be more verbose.\n";
-    std::cout << "\t-q be quiet.\n";
-    std::cout << "\t-i semicolon separated list of import paths where additional liquid files are located.\n";
+    std::cout << "\t-r run program (just in time compilation).\n";
 }
