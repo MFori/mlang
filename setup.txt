@@ -1,0 +1,23 @@
+1. download llvm 11
+
+2. build llvm and clang   (https://clang.llvm.org/get_started.html)
+  - mkdir make
+  - cd make
+  - cmake -DLLVM_ENABLE_PROJECTS=clang -G "Visual Studio 2019" -A x64 -Thost=x64 ..  
+  
+3. open llvm.sln
+  - build ALL_BUILD project (in release mode)
+  
+4. build mlang.exe  
+  
+5. build mlang source to ir       (make test.mlang.ir)
+  - mlange.exe test.mlang
+  
+5. build buildins.cpp
+  - clang++.exe -emit-llvm -c -o buildins.bc buildins.cpp                        ("C:\Program Files\LLVM\11.0.0\llvm\build\Release\bin\clang++.exe" -emit-llvm -c -o buildins.bc buildins.cpp)
+  
+6. build test.mlang.ir to executable
+  - clang++.exe -x ir -e__mlang_init_fun -o test2.exe test2.mlang.ir buildins.bc 
+  
+  
+// TODO !!!!!!!! custom target

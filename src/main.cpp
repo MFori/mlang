@@ -92,7 +92,7 @@ int main(int argc, char **argv) {
                         fileName.replace(index, 6, "");
                     }
 
-                    system((std::string("clang -emit-llvm -c -o buildins.bc ") + __FILE__ + "\\..\\buildins.cpp -Wno-everything").c_str());
+                    //system((std::string("clang -emit-llvm -c -o buildins.bc ") + __FILE__ + "\\..\\buildins.cpp -Wno-everything").c_str());
                     system(("clang -x ir -o " + fileName + ".exe " + irFileName + " buildins.bc -Wno-everything").c_str());
                     std::cout << "Executable " + fileName + ".exe generated.";
                 }
