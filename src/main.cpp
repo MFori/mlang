@@ -75,16 +75,26 @@ int main(int argc, char **argv) {
         std::cerr << "Parsing " << fileName << "failed. Abort" << std::endl;
     } else {
         std::ostringstream devNull;
-        mlang::CodeGenContext context(std::cout, debug);
+        mlang::CodeGenContext context(std::cout, debug, run);
 
         if (context.preProcessing(*programBlock)) {
             if (context.generateCode(*programBlock)) {
                 if(run) {
                     context.runCode();
                 } else {
-                    std::ofstream out(fileName + ".ir");
+                    std::string irFileName = fileName + ".ir";
+                    std::ofstream out(irFileName);
                     context.saveCode(out);
                     out.close();
+
+                    auto index = fileName.find(".mlang", 0);
+                    if (index != std::string::npos) {
+                        fileName.replace(index, 6, "");
+                    }
+
+                    system((std::string("clang -emit-llvm -c -o buildins.bc ") + __FILE__ + "\\..\\buildins.cpp -Wno-everything").c_str());
+                    system(("clang -x ir -o " + fileName + ".exe " + irFileName + " buildins.bc -Wno-everything").c_str());
+                    std::cout << "Executable " + fileName + ".exe generated.";
                 }
             }
         }

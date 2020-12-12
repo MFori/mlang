@@ -128,7 +128,7 @@ namespace mlang {
 
     class CodeGenContext {
     public:
-        explicit CodeGenContext(std::ostream &outs, bool debug);
+        explicit CodeGenContext(std::ostream &outs, bool debug, bool run);
 
         ~CodeGenContext() { llvm::llvm_shutdown(); }
 
@@ -184,6 +184,8 @@ namespace mlang {
 
         void setMainFunction(llvm::Function *function) { this->mainFunction = function; }
 
+        void initMainFunction();
+
         static bool isBreakingInstruction(llvm::Value *value);
 
         llvm::Value *
@@ -209,6 +211,7 @@ namespace mlang {
         void setCurrentBlock(llvm::BasicBlock *block) { codeBlocks.front()->setCodeBlock(block); }
 
         bool debug {false};
+        bool run {false};
         std::list<CodeGenBlock *> codeBlocks;
         llvm::Function *initFunction{nullptr};
         llvm::Function *mainFunction{nullptr};

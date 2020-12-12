@@ -16,7 +16,7 @@
 
 namespace mlang {
 
-    CodeGenContext::CodeGenContext(std::ostream &outs, bool debug) : outs(outs), debug(debug) {
+    CodeGenContext::CodeGenContext(std::ostream &outs, bool debug, bool run) : outs(outs), debug(debug), run(run) {
         llvm::InitializeNativeTarget();
         llvm::InitializeNativeTargetAsmParser();
         llvm::InitializeNativeTargetAsmPrinter();
@@ -231,7 +231,11 @@ namespace mlang {
         for (auto &fn : getModule()->getFunctionList()) {
             fpm.run(fn);
         }
-        fpm.run(*mainFunction);
+        fpm.run(*initFunction);
+    }
+
+    void CodeGenContext::initMainFunction() {
+        llvm::CallInst::Create(initFunction, "", currentBlock());
     }
 
     bool CodeGenContext::generateCode(Block &root) {
@@ -239,9 +243,8 @@ namespace mlang {
 
         std::vector<llvm::Type *> argTypes;
         llvm::FunctionType *ftype = llvm::FunctionType::get(llvm::Type::getVoidTy(getGlobalContext()), argTypes, false);
-        initFunction = llvm::Function::Create(ftype, llvm::GlobalValue::InternalLinkage, "__mlang_init_fun",
-                                              getModule());
-        llvm::BasicBlock *bblock = llvm::BasicBlock::Create(getGlobalContext(), "entry", initFunction, 0);
+        initFunction = llvm::Function::Create(ftype, llvm::GlobalValue::InternalLinkage, "__mlang_init_fun",getModule());
+        llvm::BasicBlock *bblock = llvm::BasicBlock::Create(getGlobalContext(), "entry", initFunction, nullptr);
         setUpBuildIns();
 
         newScope(bblock, ScopeType::GLOBAL_BLOCK);
@@ -255,6 +258,18 @@ namespace mlang {
             llvm::ReturnInst::Create(getGlobalContext(), nullptr, currentBlock());
         }
         endScope();
+
+        if(!run && mainFunction == nullptr) {
+            ftype = llvm::FunctionType::get(llvm::Type::getVoidTy(getGlobalContext()), argTypes, false);
+            mainFunction = llvm::Function::Create(ftype, llvm::GlobalValue::ExternalLinkage, "main",getModule());
+            bblock = llvm::BasicBlock::Create(getGlobalContext(), "entry", mainFunction, nullptr);
+            newScope(bblock, ScopeType::CODE_BLOCK);
+            initMainFunction();
+            if (currentBlock()->getTerminator() == nullptr) {
+                llvm::ReturnInst::Create(getGlobalContext(), nullptr, currentBlock());
+            }
+            endScope();
+        }
 
         std::string verifyOutputString;
         llvm::raw_string_ostream verifyOutputStream(verifyOutputString);
@@ -287,9 +302,11 @@ namespace mlang {
 
         ee->finalizeObject();
         std::vector<llvm::GenericValue> noargs;
-        llvm::GenericValue v = ee->runFunction(initFunction, noargs);
+        llvm::GenericValue v;
         if (mainFunction != nullptr) {
             v = ee->runFunction(mainFunction, noargs);
+        } else {
+            v = ee->runFunction(initFunction, noargs);
         }
 
         delete ee;

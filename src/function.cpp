@@ -53,8 +53,10 @@ namespace mlang {
             return nullptr;
         }
 
-        fun = llvm::Function::Create(ftype, llvm::GlobalValue::InternalLinkage, fname,
-                                     context.getModule());
+        bool main = fname == "main";
+        auto linkage = main ? llvm::GlobalValue::ExternalLinkage : llvm::GlobalValue::InternalLinkage;
+
+        fun = llvm::Function::Create(ftype, linkage, fname, context.getModule());
         llvm::BasicBlock *bblock = llvm::BasicBlock::Create(context.getGlobalContext(), "entry", fun, nullptr);
         context.newScope(bblock, ScopeType::FUNCTION_DECL);
 
@@ -73,8 +75,10 @@ namespace mlang {
             ++actualArgs;
         }
 
+        if (main) {
+            context.initMainFunction();
+        }
         auto blockValue = block->codeGen(context);
-
 
         if (blockValue == nullptr) {
             if (t->isVoidTy()) {
@@ -104,7 +108,7 @@ namespace mlang {
             }
         }
 
-        if (fname == "main") {
+        if (main) {
             context.setMainFunction(fun);
         }
 
