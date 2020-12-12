@@ -19,5 +19,4 @@
 6. build test.mlang.ir to executable
   - clang++.exe -x ir -e__mlang_init_fun -o test2.exe test2.mlang.ir buildins.bc 
   
-  
-// TODO !!!!!!!! custom target
+ 
