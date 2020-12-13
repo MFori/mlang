@@ -10,6 +10,16 @@ Simple programming language using LLVM, flex and bison.
       * [Hello World](#hello-world)
       * [Usage](#usage)
    * [Language Syntax](#language-syntax)
+      * [Identifiers](#identifiers)
+      * [Variables](#variables)
+      * [Data Types](#data-types)
+      * [Arrays](#arrays)
+      * [Functions](#functions)
+      * [Control Expressions](#control-expressions)
+      * [Entry Point](#entry-point)  
+      * [Comments](#comments)
+   * [Build-in Functions](#build-in-functions)
+   
 <!--te-->
 
 Installation
@@ -84,4 +94,51 @@ mlang.exe hello_world.mlang -h -d -r
 If run is disabled, LLVM-IR for the parsed file is outputed (hello_world.mlang.ir) and also executable (hello_world.exe) is generated.
 
 Language Syntax
+============
+
+Identifiers
+-----
+
+Variables
+-----
+
+Data Types
+-----
+### Int
+
+### Double
+
+### Char
+
+### Bool
+
+### String
+
+### Void
+
+Arrays
+-----
+
+Functions
+-----
+
+Control Expressions
+-----
+### If-else
+
+### While
+
+### Do-While
+
+### For
+
+### ForEach
+
+Entry Point
+-----
+
+Comments
+-----
+
+Build-in Functions
 ============
