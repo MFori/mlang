@@ -103,6 +103,8 @@ Identifiers
 
 Variables
 -----
+val x var
+scope
 
 Data Types
 -----
@@ -115,14 +117,19 @@ Data Types
 ### Bool
 
 ### String
+join
+stack x heap
+rm
 
 ### Void
 
 Arrays
 -----
+rm
 
 Functions
 -----
+return (optional)
 
 Control Expressions
 -----
@@ -133,6 +140,7 @@ Control Expressions
 ### Do-While
 
 ### For
+range
 
 ### ForEach
 
@@ -214,4 +222,14 @@ val str2 = String(20)
 l = len(str2) // 0
 val size = sizeOf(str2) // 20
 rm str2
+```
+
+### Cast functions
+There are cast functions available for every datatype:
+```
+toInt(...)
+toDouble(...)
+toBool(...)
+toChar(...)
+toString(...)
 ```
