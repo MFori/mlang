@@ -29,6 +29,13 @@ Getting Started
 
 Hello World
 -----
+hello_world.mlang
+```
+func main(): Int {
+  println("Hello world")
+  return 0
+}
+```
 
 Usage
 -----
