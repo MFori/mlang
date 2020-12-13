@@ -9,10 +9,12 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <filesystem>
 #include <string>
 #include <stack>
 #include "ast.h"
 #include "codegen.h"
+#include <Windows.h>
 
 extern int yyparse();
 
@@ -24,6 +26,8 @@ extern std::stack<std::string> fileNames;
 extern int parsing_error;
 
 void help();
+
+std::string getExecutablePath();
 
 int main(int argc, char **argv) {
     bool debug = false;
@@ -79,22 +83,27 @@ int main(int argc, char **argv) {
 
         if (context.preProcessing(*programBlock)) {
             if (context.generateCode(*programBlock)) {
-                if(run) {
+                if (run) {
                     context.runCode();
                 } else {
                     std::string irFileName = fileName + ".ir";
                     std::ofstream out(irFileName);
                     context.saveCode(out);
                     out.close();
+                    std::cout << "File with llvm ir (" + fileName + ") generated." << std::endl;
 
                     auto index = fileName.find(".mlang", 0);
                     if (index != std::string::npos) {
                         fileName.replace(index, 6, "");
                     }
 
+                    auto buildinsPath = getExecutablePath() + "\\..\\buildins.bc";
+
                     //system((std::string("clang -emit-llvm -c -o buildins.bc ") + __FILE__ + "\\..\\buildins.cpp -Wno-everything").c_str());
-                    system(("clang -x ir -o " + fileName + ".exe " + irFileName + " buildins.bc -Wno-everything").c_str());
-                    std::cout << "Executable " + fileName + ".exe generated.";
+                    int res = system(("clang -x ir -o " + fileName + ".exe " + irFileName + " " + buildinsPath + " -Wno-everything").c_str());
+                    if (!res) {
+                        std::cout << "Executable " + fileName + ".exe generated." << std::endl;
+                    }
                 }
             }
         }
@@ -107,6 +116,18 @@ int main(int argc, char **argv) {
     delete programBlock;
     yylex_destroy();
     return 0;
+}
+
+std::string getExecutablePath() {
+    wchar_t buffer[MAX_PATH];
+
+    HMODULE hModule = GetModuleHandle(nullptr);
+    if (hModule != nullptr) {
+        GetModuleFileName(hModule, (wchar_t *) buffer, MAX_PATH);
+    }
+
+    std::wstring ws(buffer);
+    return std::string(ws.begin(), ws.end());
 }
 
 void help() {
