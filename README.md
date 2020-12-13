@@ -146,7 +146,7 @@ range
 
 Entry Point
 -----
-In mlang any code can be outside of functions and is automatically executed on startup. However if you want use c-like ```main``` functions, there is possibility for that. Just create ```main``` function like below. If you have created ```main``` function and at the same time have some code outside of functions, at first the code outside is perfomed and after ```main``` function is executed.
+In mlang any code can be outside of functions and is automatically executed on startup. However if you want use c-like ```main``` function, there is possibility for that. Just create ```main``` function like below. If you have created ```main``` function and at the same time have some code outside of functions, at first the code outside is perfomed and after that ```main``` function is executed.
 ```
 println("Outside 1") // 1.
 
