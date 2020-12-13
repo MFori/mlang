@@ -40,13 +40,13 @@ func main(): Int {
 Usage
 -----
 ```
-mlang hello_world.mlang -h -d -r
+mlang.exe hello_world.mlang -h -d -r
 ```
 * **h help:** show help
 * **d debug:** disable code optimizer
 * **r run:** directly run code (using JIT) 
 
-If run is disabled, LLVM-IR for the parsed file is outputed (hello_world.mlang.ir) and also executable (hellow_world.exe) is generated.
+If run is disabled, LLVM-IR for the parsed file is outputed (hello_world.mlang.ir) and also executable (hello_world.exe) is generated.
 
 Language Syntax
 ============
