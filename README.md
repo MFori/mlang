@@ -17,6 +17,7 @@ Simple programming language using LLVM, flex and bison.
       * [Functions](#functions)
       * [Control Expressions](#control-expressions)
       * [Entry Point](#entry-point)  
+      * [Import](#import)
       * [Comments](#comments)
    * [Build-in Functions](#build-in-functions)
    
@@ -137,8 +138,16 @@ Control Expressions
 Entry Point
 -----
 
+Import
+-----
+
 Comments
 -----
+There is C-like comments support in mlang.
+### One Line
+One line comments starts with ```//```. All characters until end of line are ignored. 
+### Multi Line 
+Multi line comment starts with ```/*``` and ends with ```*/```. All characters between are ignored.
 
 Build-in Functions
 ============
