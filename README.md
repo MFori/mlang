@@ -174,3 +174,44 @@ So semicolons are optional.
 
 Build-in Functions
 ============
+### print
+Works like c's printf. Fist arguments is string with format, then goes arguments for that format.
+```
+val name = "Martin"
+val age = 23
+print("Name: %s, age: %d", name, age)
+```
+
+### println
+Same as ```print```, bud add new line after text.
+
+### read
+Reads one character from ```stdin```.
+```
+val ch = read()
+```
+
+### readLine
+Reads one line from ```stdin```.
+```
+val line = readLine()
+```
+
+### sizeOf
+Returns size of array or string.
+```
+val arr = IntArray(10)
+val size = sizeOf(arr) // 10
+```
+
+### len
+Returns length of string - number of characters until ```'\0'``` or end of string.
+```
+val str = "Hello World"
+var l = len(str) // 11
+
+val str2 = String(20)
+l = len(str2) // 0
+val size = sizeOf(str2) // 20
+rm str2
+```
