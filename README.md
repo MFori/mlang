@@ -19,6 +19,7 @@ Simple programming language using LLVM, flex and bison.
       * [Entry Point](#entry-point)  
       * [Import](#import)
       * [Comments](#comments)
+      * [Terminators](#terminators)
    * [Build-in Functions](#build-in-functions)
    
 <!--te-->
@@ -137,9 +138,26 @@ Control Expressions
 
 Entry Point
 -----
+In mlang any code can be outside of functions and is automatically executed on startup. However if you want use c-like ```main``` functions, there is possibility for that. Just create ```main``` function like below. If you have created ```main``` function and at the same time have some code outside of functions, at first the code outside is perfomed and after ```main``` function is executed.
+```
+println("Outside 1") // 1.
+
+func main() {
+  // is called automatically
+  println("Hello World") // 3.
+}
+
+println("Outside 2") // 2.
+```
 
 Import
 -----
+Importing other file is possible via the ```import``` keyword. Path is relative to current file.
+```
+import other-file.mlang
+
+import dir/another-file.mlang
+```
 
 Comments
 -----
@@ -148,6 +166,11 @@ There is C-like comments support in mlang.
 One line comments starts with ```//```. All characters until end of line are ignored. 
 ### Multi Line 
 Multi line comment starts with ```/*``` and ends with ```*/```. All characters between are ignored.
+
+Terminators
+-----
+Grammar uses semicolons as productions terminators, but lexer is automatically inserting them (like GoLang do).
+So semicolons are optional.
 
 Build-in Functions
 ============
