@@ -134,5 +134,5 @@ void help() {
     std::cout << "mlang filename -h -d -r \n";
     std::cout << "\t-h prints this help text.\n";
     std::cout << "\t-d debug code generation. Disables the code optimizer pass.\n";
-    std::cout << "\t-r run program (just in time compilation).\n";
+    std::cout << "\t-r run program (just in time compilation), otherwise LLVM-IR and executable is generated\n";
 }
