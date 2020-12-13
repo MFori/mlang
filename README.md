@@ -17,6 +17,9 @@ Installation
 
 Dependencies
 -----
+* LLVM 11
+* flex and bison
+* CMake 3.17
 
 Build
 -----
