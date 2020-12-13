@@ -29,10 +29,10 @@ Getting Started
 
 Hello World
 -----
-hello_world.mlang
+samples/hello_world.mlang
 ```
 func main(): Int {
-  println("Hello world")
+  println("Hello World")
   return 0
 }
 ```
