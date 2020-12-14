@@ -241,18 +241,21 @@ val a = b > 10 ? 1.5 : 5.1
 ```
 
 ### Boolean expression
+For ```Int```, ```Double```, ```Char``` and ```String```:
 ```
-if (true) {...}
-if (not true) {...}
-if (b1 and b2) {...}
-if (b1 or b2) {...}
 if (a == b) {...}
 if (a != b) {...}
 if (a > b) {...}
 if (a < b) {...}
 if (a >= b) {...}
 if (a <= b) {...}
-if (a == 2 and (b >= 4 or myBool)) {...}
+```
+For ```Bool```:
+```
+if (true) {...}
+if (not true) {...}
+if (b1 and b2) {...}
+if (b1 or b2) {...}
 ```
 
 ### Binary operator
