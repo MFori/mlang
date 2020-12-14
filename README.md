@@ -400,3 +400,4 @@ toBool(...)
 toChar(...)
 toString(...)
 ```
+Note: ```toString``` create String on stack, there is no need to free memory using ```rm``` keyword.
