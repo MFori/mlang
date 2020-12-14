@@ -21,8 +21,9 @@ namespace mlang {
 
         bool isDoubleTy = rhsValue->getType()->isFloatingPointTy();
         bool isBoolTy = rhsValue->getType()->isIntegerTy(1);
+        bool isArrayTy = rhsValue->getType()->isPointerTy();
 
-        if ((!isBoolTy && (op == TNOT)) || (isBoolTy && (op != TNOT))) {
+        if ((!isBoolTy && (op == TNOT)) || (isBoolTy && (op != TNOT)) || isArrayTy) {
             Node::printError(location, "unsupported operation");
             context.addError();
             return nullptr;
@@ -44,7 +45,7 @@ namespace mlang {
                 if (isDoubleTy) {
                     lhsValue = llvm::ConstantFP::get(llvm::Type::getDoubleTy(context.getGlobalContext()), 0.0);
                 } else {
-                    rhsValue = llvm::ConstantInt::get(llvm::Type::getInt64Ty(context.getGlobalContext()), 0, true);
+                    rhsValue = llvm::ConstantInt::get(rhsValue->getType(), 0, true);
                 }
                 break;
             default:
@@ -69,8 +70,9 @@ namespace mlang {
         if (isIdentifier && var != nullptr && var->getValue() != nullptr) {
             bool isDoubleTy = var->getType()->isFloatingPointTy();
             bool isIntTy = var->getType()->isIntegerTy(64);
+            bool isCharTy = var->getType()->isIntegerTy(8);
 
-            if (!isDoubleTy && !isIntTy) {
+            if (!isDoubleTy && !isIntTy && !isCharTy) {
                 Node::printError(location, "unsupported operation");
                 context.addError();
                 return nullptr;
@@ -79,8 +81,10 @@ namespace mlang {
             Expression *value2;
             if (isIntTy) {
                 value2 = new Integer(1);
-            } else {
+            } else if(isDoubleTy) {
                 value2 = new Double(1.0);
+            } else {
+                value2 = new Char(1);
             }
 
             auto assignment = new Assignment((Identifier *) expr,
@@ -113,7 +117,7 @@ namespace mlang {
 
             llvm::Value *value2;
             if (isIntTy) {
-                value2 = llvm::ConstantInt::get(llvm::Type::getInt64Ty(context.getGlobalContext()), 1, true);
+                value2 = llvm::ConstantInt::get(value->getType(), 1, true);
             } else {
                 value2 = llvm::ConstantFP::get(llvm::Type::getDoubleTy(context.getGlobalContext()), 1.0);
             }
