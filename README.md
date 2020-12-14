@@ -36,6 +36,10 @@ Dependencies
 
 Build
 -----
+**0. Setup LLVM**
+
+See [this guide](llvm-setup.md)
+
 **1. Clone this repository**
 ```
 git clone https://github.com/MFori/mlang.git
@@ -166,8 +170,6 @@ There is special expression for joining mutiple strings. To join string insert t
 val res = (. str1, " and ", str2 .)
 rm res
 ```
-
-### Void
 
 Arrays
 -----
