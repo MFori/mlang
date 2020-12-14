@@ -274,9 +274,39 @@ do {
 ```
 
 ### For
-range
+For loop works only with Int variable which is automatically created and initialized on start bound of [range](#range). Step size of optional (default is 1) and can be Int literal or Int expression.
+```
+for (var in range) { statements }
+for (var in range step step-size) { statements }
+```
+#### Range
+Range is specified by bounds (can be literals or expressions) and keyword ```to``` or ```until```.
+```
+for (i in 0 to 10) {...}  // i in [1, 10], 10 is included
+for (i in 0 until 10) {...}  // i in [0, 10), 10 is excluded
+```
+```
+val start = 0
+val end = 100
+val s = 2
+
+for (i in start to end step s) {
+  println(toString(i)) // prints 0, 2, 4, .., 100
+}
+```
 
 ### ForEach
+ForEach loops through array (or string). Loop variable is automatically created and typed to array element type.
+```
+for (var in array) { statements }
+```
+```
+val array = IntArray(20)
+
+for (i in array) {
+  println(toString(i))
+}
+```
 
 Entry Point
 -----
