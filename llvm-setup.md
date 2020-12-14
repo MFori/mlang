@@ -21,9 +21,10 @@ Note2: I recommend release mode, whichs build is significantly smaller then debu
 **4. Add global variables**
 
 ```
-LLVM_ROOT=path_to_llvm\build
-LLVM_DIR=path_to_llvm\build
+LLVM_ROOT=path_to_llvm\build\lib\cmake\llvm
+LLVM_DIR=path_to_llvm\build\lib\cmake\llvm
 ```
+Or similar path to dircetory containing ```LLVMConfig.cmake``` file.
 
 **5. Add Clang to path variable**
 ```
