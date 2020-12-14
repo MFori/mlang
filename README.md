@@ -15,6 +15,7 @@ Simple programming language using LLVM, flex and bison.
       * [Data Types](#data-types)
       * [Arrays](#arrays)
       * [Functions](#functions)
+      * [Expressions](#expressions)
       * [Control Expressions](#control-expressions)
       * [Entry Point](#entry-point)  
       * [Import](#import)
@@ -221,6 +222,64 @@ fun getInt(): Int {
 }
 ```
 
+Expressions
+-----
+### Assignment
+Assignemnt is via ```=``` symbol. Assignemnt results to expression so multiple assignemnt is possible.
+```
+var a = b = c = 10
+```
+
+### Ternary Operator
+C-like ternary operator.
+```
+bool-expression ? then : else
+```
+```
+val a = b > 10 ? 1.5 : 5.1
+```
+
+### Boolean expression
+```
+if (true) {...}
+if (not true) {...}
+if (b1 and b2) {...}
+if (b1 or b2) {...}
+if (a == b) {...}
+if (a != b) {...}
+if (a > b) {...}
+if (a < b) {...}
+if (a >= b) {...}
+if (a <= b) {...}
+if (a == 2 and (b >= 4 or myBool)) {...}
+```
+
+### Binary operator
+For ```Int```, ```Double``` and ```Char```:
+```
+a + b
+a - b
+a * b
+a / b
+```
+For ```Bool```:
+```
+a and b
+a or b
+```
+
+### Unary operator
+For ```Int```, ```Double``` and ```Char```:
+```
+i++   // return i and then increase i by one
+++i   // increase i by one and return i
+-i
+```
+For ```Bool```:
+```
+not b
+```
+
 Control Expressions
 -----
 ### If-else
@@ -231,22 +290,6 @@ if (bool-expression) {
 } else {
   statements
 }
-```
-What can be bool expression:
-```
-if (true) {...}
-if (not true) {...}
-if (a == 2) {...}
-if (a == 2 and (b >= 4 or myBool)) {...}
-```
-
-### Ternary Operator
-C-like ternary operator.
-```
-bool-expression ? then : else
-```
-```
-val a = b > 10 ? 1.5 : 5.1
 ```
 
 ### While
@@ -307,6 +350,16 @@ val array = IntArray(20)
 
 for (i in array) {
   println(toString(i))
+}
+```
+
+### Break
+```break``` keyword can be used inside loops (for, foreach, while, do-while) and jump right after loop.
+```
+for (i in 0 to 10) {
+  if (i > 5) {
+    break
+  }
 }
 ```
 
