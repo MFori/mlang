@@ -222,10 +222,56 @@ fun getInt(): Int {
 Control Expressions
 -----
 ### If-else
+Else is optional.
+```
+if (bool-expression) {
+  statements
+} else {
+  statements
+}
+```
+What can be bool expression:
+```
+if (true) {...}
+if (not true) {...}
+if (a == 2) {...}
+if (a == 2 and (b >= 4 or myBool)) {...}
+```
+
+### Ternary Operator
+C-like ternary operator.
+```
+bool-expression ? then : else
+```
+```
+val a = b > 10 ? 1.5 : 5.1
+```
 
 ### While
+```
+while (bool-expression) {
+  statements
+}
+```
+```
+var i = 10
+while (i > 0) {
+    println(toString(i))
+    i--
+}
+```
 
 ### Do-While
+```
+do {
+  statements
+} while (bool-expression)
+```
+```
+do {
+    i--
+} while (i > 0)
+```
 
 ### For
 range
