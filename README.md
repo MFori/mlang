@@ -153,9 +153,19 @@ val b2 = false
 ```
 
 ### String
-join
-stack x heap
-rm
+String is internally represented as char array and has all features like other [arrays](#arrays). String is enclosed in ```"``` or ```'```. A quote inside string must be eascaped by ```\```.
+
+String can be created with literal or by calling ```String(Int size)``` function. If second case string is created on heap and must be freed using ```rm``` keyword.
+```
+val str1 = "This is a \"string\"".
+val str2 = String(10)
+rm str2
+```
+There is special expression for joining mutiple strings. To join string insert them isnside ```(.``` and ```.)``` symbols separed by comma. The resulting stream is created on heap and must be freed.
+```
+val res = (. str1, " and ", str2 .)
+rm res
+```
 
 ### Void
 
