@@ -125,7 +125,7 @@ rm
 
 Arrays
 -----
-rm
+rm, validation
 
 Functions
 -----
