@@ -129,7 +129,7 @@ func someFunction(Int x) { // x is var and can be reassigned
 
 Data Types
 -----
-There is support for ```Int, Double, Char, Bool``` data types. Mlang is strongly typed with static type check language. You can use [buildin cast functions](#cast-functions).
+There is support for ```Int, Double, Char, Bool``` data types. Mlang is strongly typed language with static type check. You can use [buildin cast functions](#cast-functions).
 
 ### Int
 A 64 bit integer
