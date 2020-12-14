@@ -1,0 +1,5 @@
+val array = IntArray(20)
+
+for (i in array) {
+  println(toString(i))
+}

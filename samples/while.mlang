@@ -1,0 +1,5 @@
+var i = 10
+while (i > 0) {
+    println(toString(i))
+    i--
+}
