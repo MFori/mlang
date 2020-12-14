@@ -100,21 +100,57 @@ Language Syntax
 
 Identifiers
 -----
+Identifier can be any word including underscore and digits and must start with letter (```[a-zA-Z][a-zA-Z0-9_]*```).
+Identifiers are used for variable and function names and they are case sensitive.
 
 Variables
 -----
-val x var
-scope
+Variables can be declared with keywords ```var``` and ```val```.
+* **```var```** is used for mutable variables
+* **```val```** is used for constants
+
+When declaring, variable must be always initialized. Type of variable is automatically deducted from initializing value.
+
+Variable is only visible in its scope (program block) and can be shadowed by any variable with same name inside sub block.
+```
+val a = 1 // constant
+var b = 2 // reasiggneable
+
+func someFunction(Int x) { // x is var and can be reassigned
+  val b = x // shadows first b
+  x = 0
+}
+```
 
 Data Types
 -----
 ### Int
+A 64 bit integer
+```
+val myInt = 1
+```
 
 ### Double
+A 64 bit floating point real 
+```
+val myDouble = 1.5
+```
 
 ### Char
+An 8 bit character. There are two ways for creating char literals. First using ```@``` and required character or ```@@``` and ascii value of required character.
+```
+val ch1 = @A
+val ch2 = @@65
+if (ch1 == ch2) { // always true
+}
+```
 
 ### Bool
+A bool value, literals can be ```true``` and ```false```.
+```
+val b1 = true
+val b2 = false
+```
 
 ### String
 join
