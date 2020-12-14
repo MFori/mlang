@@ -45,14 +45,15 @@ See [this guide](llvm-setup.md)
 ```
 git clone https://github.com/MFori/mlang.git
 ```
-**2. Create build directory**
+**2. Go to build directory**
 ```
 cd mlang
-mkdir build
-```
-**3. Change to build directory and run cmake (tested with Visual Studio)**
-```
 cd build
+```
+Note: Step 3 and 4 can be skipped by running **build.bat** file.
+
+**3. Run cmake (tested with Visual Studio)**
+```
 cmake .. -G "Visual Studio 16 2019"
 ```
 **4. Build mlang**
