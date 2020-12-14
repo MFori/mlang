@@ -230,6 +230,7 @@ So semicolons are optional.
 
 Build-in Functions
 ============
+Note: for the functions to work is necessary that file ```buildins.bc``` (which is generated during build) is in same directory as ```mlang.exe```
 ### print
 Works like c's printf. Fist arguments is string with format, then goes arguments for that format.
 ```
