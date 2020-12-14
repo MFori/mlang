@@ -19,8 +19,6 @@ set(CMAKE_MODULE_PATH "${mlang_SOURCE_DIR}/cmake")
 find_package(FLEX)
 find_package(BISON)
 
-set(LLVM_ROOT "C:/Program Files/LLVM/11.0.0/llvm/build")
-set(LLVM_DIR "C:/Program Files/LLVM/11.0.0/llvm/build")
 set(LLVM_BUILD_TYPE Release)
 set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_CXX_FLAGS_RELEASE "/MT")
