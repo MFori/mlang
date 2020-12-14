@@ -170,10 +170,28 @@ There is special expression for joining mutiple strings. To join string insert t
 val res = (. str1, " and ", str2 .)
 rm res
 ```
+You can access and set Char at index like with any other array.
 
 Arrays
 -----
-rm, validation
+Arrays are available for all data types (except Char, but there is String). Array is created by calling appropriate function passing arrays size.
+```
+IntArray(10)
+DoubleArray(10)
+BooleanArray(10)
+String(10) 
+```
+To access (or assign) array element at index use ```[index]``` expression. Array size is internally stored asside with array items and during access index is validated against array bounds. To get array size you can use buildin function ```sizeOf(array)```.
+```
+val arr = IntArray(10)
+arr[0] = 1
+arr[10] = 1 // error out of bounds
+val i = arr[1]
+```
+All arrays are created on heap and must be freed with ```rm``` keyword.
+```
+rm arr
+```
 
 Functions
 -----
