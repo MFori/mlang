@@ -178,7 +178,7 @@ Arrays are available for all data types (except Char, but there is String). Arra
 ```
 IntArray(10)
 DoubleArray(10)
-BooleanArray(10)
+BoolArray(10)
 String(10) 
 ```
 To access (or assign) array element at index use ```[index]``` expression. Array size is internally stored asside with array items and during access index is validated against array bounds. To get array size you can use buildin function ```sizeOf(array)```.
@@ -195,7 +195,29 @@ rm arr
 
 Functions
 -----
-return (optional)
+Function is defined with keyword ```func``` followed with function name ([identifier](#identifiers)), parameters and return type.
+Body of function is inside ```{ }```. Parameters are specified by type and name (parameters are mutable, like var variables).
+```
+fun myFunction(Int param1, DoubleArray param2): Bool {
+  return true
+}
+```
+Primitive data types (```Int, Double, Bool, Char```) are passed by value, arrays (and string) are passed by reference.
+```
+fun processArray(IntArray arr) {
+  arr[0] = -1
+}
+
+val array = IntArray(10)
+processArray(arr)
+println(toString(arr[0])) // -1
+```
+Return statement is optional and then is returned last statement.
+```
+fun getInt(): Int {
+  1
+}
+```
 
 Control Expressions
 -----
