@@ -84,10 +84,10 @@ Hello World
 -----
 samples/hello_world.mlang
 ```
-func main(): Int {
+func helloWorld() {
   println("Hello World")
-  return 0
 }
+helloWorld()
 ```
 
 Usage
@@ -130,7 +130,7 @@ func someFunction(Int x) { // x is var and can be reassigned
 
 Data Types
 -----
-There is support for ```Int, Double, Char, Bool``` data types. Mlang is strongly typed language with static type check. You can use [buildin cast functions](#cast-functions).
+There is support for ```Int, Double, Char, Bool, String``` data types. Mlang is strongly typed language with static type check. You can use [buildin cast functions](#cast-functions).
 
 ### Int
 A 64 bit integer
@@ -161,7 +161,7 @@ val b2 = false
 ```
 
 ### String
-String is internally represented as char array and has all features like other [arrays](#arrays). String is enclosed in ```"``` or ```'```. A quote inside string must be eascaped by ```\```.
+String is internally represented as char array and has all features like other [arrays](#arrays). String is enclosed in ```"``` or ```'```. A quote inside string must be escaped by ```\```.
 
 String can be created with literal or by calling ```String(Int size)``` function. If second case string is created on heap and must be freed using ```rm``` keyword.
 ```
@@ -371,15 +371,16 @@ Entry Point
 -----
 In mlang any code can be outside of functions and is automatically executed on startup. However if you want use c-like ```main``` function, there is possibility for that. Just create ```main``` function like below. If you have created ```main``` function and at the same time have some code outside of functions, at first the code outside is perfomed and after that ```main``` function is executed.
 ```
-println("Outside 1") // 1.
+println("Outside 1") // called fist 
 
 func main() {
   // is called automatically
-  println("Hello World") // 3.
+  println("Hello World") // called third
 }
 
-println("Outside 2") // 2.
+println("Outside 2") // called second
 ```
+Note: Passing arguments to ```main``` function is currently not possible.
 
 Import
 -----
