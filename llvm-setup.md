@@ -14,14 +14,17 @@ cmake -DLLVM_ENABLE_PROJECTS=clang -G "Visual Studio 16 2019" -A x64 -Thost=x64 
 
 **3. Open llvm.sln and build ALL_BUILD project**
 
-Note I recommend release mode, whichs build is significantly smaller then debug.
+Note: If you have LLVM in directory Program Files etc., open Visual Studio as Administrator.
+
+Note2: I recommend release mode, whichs build is significantly smaller then debug.
 
 **4. Add global variables**
 
 ```
-LLVM_ROOT=path_to_llvm\build
-LLVM_DIR=path_to_llvm\build
+LLVM_ROOT=path_to_llvm\build\lib\cmake\llvm
+LLVM_DIR=path_to_llvm\build\lib\cmake\llvm
 ```
+Or similar path to dircetory containing ```LLVMConfig.cmake``` file.
 
 **5. Add Clang to path variable**
 ```
