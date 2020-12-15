@@ -92,16 +92,11 @@ if (MSVC)
     source_group(Source\ Files FILES ${SOURCE_COMMON})
 endif ()
 
-set(VER_MAJ 0)
-set(VER_MIN 3)
-set(VER_REV 1)
-
-
 FLEX_TARGET(Lexer lexer.l ${CMAKE_CURRENT_BINARY_DIR}/lexer.cpp)
 BISON_TARGET(Parser parser.y ${CMAKE_CURRENT_BINARY_DIR}/parser.cpp COMPILE_FLAGS --report=solved COMPILE_FLAGS --feature=fixit)
 ADD_FLEX_BISON_DEPENDENCY(Lexer Parser)
 
-add_custom_command(OUTPUT buildins.bc COMMAND clang -emit-llvm -c -o ${CMAKE_CURRENT_BINARY_DIR}/buildins.bc ${mlang_SOURCE_DIR}/buildins.cpp -Wno-everything)
+add_custom_command(OUTPUT buildins.bc COMMAND clang -emit-llvm -c -o ${CMAKE_CURRENT_BINARY_DIR}/$(Configuration)/buildins.bc ${mlang_SOURCE_DIR}/buildins.cpp -Wno-everything)
 add_custom_target(buildins.bc)
 
 add_executable(mlang ${SOURCES_COMMON} ${HEADER_COMMON} ${BISON_Parser_OUTPUTS} ${FLEX_Lexer_OUTPUTS} buildins.bc)
