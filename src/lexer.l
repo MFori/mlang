@@ -144,8 +144,10 @@ import              BEGIN(incl);
                        fileNames.pop();
                        yylineno = lineNo.top();
                        lineNo.pop();
+                       if(need_semicolon()) { RET(';'); }
                    } else {
-                        yyterminate();
+                       if(need_semicolon()) { RET(';'); }
+                       yyterminate();
                    }
                  }
 

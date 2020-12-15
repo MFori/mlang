@@ -1,4 +1,4 @@
-func main(): Int {
-    println("Hello World")
-    return 0
+func helloWorld() {
+  println("Hello World")
 }
+helloWorld()
