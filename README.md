@@ -192,7 +192,7 @@ To access (or assign) array element at index use ```[index]``` expression. Array
 ```
 val arr = IntArray(10)
 arr[0] = 1
-arr[10] = 1 // error out of bounds
+arr[10] = 1 // runtime error index out of range
 val i = arr[1]
 ```
 All arrays are created on heap and must be freed with ```rm``` keyword.
@@ -202,16 +202,16 @@ rm arr
 
 Functions
 -----
-Function is defined with keyword ```func``` followed with function name ([identifier](#identifiers)), parameters and return type.
+Functions are declared with keyword ```func``` followed with function name ([identifier](#identifiers)), parameters and return type.
 Body of function is inside ```{ }```. Parameters are specified by type and name (parameters are mutable, like var variables).
 ```
-fun myFunction(Int param1, DoubleArray param2): Bool {
+func myFunction(Int param1, DoubleArray param2): Bool {
   return true
 }
 ```
 Primitive data types (```Int, Double, Bool, Char```) are passed by value, arrays (and string) are passed by reference.
 ```
-fun processArray(IntArray arr) {
+func processArray(IntArray arr) {
   arr[0] = -1
 }
 
@@ -221,7 +221,7 @@ println(toString(arr[0])) // -1
 ```
 Return statement is optional and then is returned last statement.
 ```
-fun getInt(): Int {
+func getInt(): Int {
   1
 }
 ```
