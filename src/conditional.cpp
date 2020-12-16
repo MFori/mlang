@@ -33,7 +33,7 @@ namespace mlang {
         context.newScope(thenBlock, ScopeType::CODE_BLOCK);
         auto thenVal = thenExpr->codeGen(context);
 
-        if (thenVal == nullptr || !llvm::ReturnInst::classof(thenVal)) {
+        if (thenVal == nullptr || !mlang::CodeGenContext::isBreakingInstruction(thenVal)) {
             llvm::BranchInst::Create(mergeBlock, context.currentBlock());
             needMergeBlock = true;
         }
@@ -47,7 +47,7 @@ namespace mlang {
             elseVal = elseExpr->codeGen(context);
         }
 
-        if (elseVal == nullptr || !llvm::ReturnInst::classof(elseVal)) {
+        if (elseVal == nullptr || !mlang::CodeGenContext::isBreakingInstruction(elseVal)) {
             llvm::BranchInst::Create(mergeBlock, context.currentBlock());
             needMergeBlock = true;
         }
