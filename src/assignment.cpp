@@ -40,7 +40,6 @@ namespace mlang {
         llvm::Type *varType;
 
         if (var->getValue() == nullptr) {
-            /* In this case the type deductions takes place. This is an assignment with the var/val keyword. */
             bool global = context.getScopeType() == ScopeType::GLOBAL_BLOCK;
             llvm::Type *ty = value->getType();
 
@@ -70,7 +69,7 @@ namespace mlang {
 
             std::string typeName = context.getVarType(ident->getName());
             if (typeName == "val") {
-                Node::printError(location, "final val '" + ident->getName() + "' cannot be reassignet!\n");
+                Node::printError(location, "Final val '" + ident->getName() + "' cannot be reassign!\n");
                 context.addError();
                 return nullptr;
             }

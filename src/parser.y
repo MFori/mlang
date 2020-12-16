@@ -1,7 +1,5 @@
 %code requires {
-
-# define YYLTYPE_IS_DECLARED 1 /* alert the parser that we have our own definition */
-
+# define YYLTYPE_IS_DECLARED 1
 }
 
 %{
@@ -26,7 +24,7 @@
 
     #include <stdio.h>
     #include <stack>
-    mlang::Block *programBlock; /* the top level root node of our final AST */
+    mlang::Block *programBlock;
 
     extern int yylex();
     int yyerror(char const * s );
@@ -35,29 +33,28 @@
 
     extern std::stack<std::string> fileNames;
 
-    # define YYLLOC_DEFAULT(Current, Rhs, N)                                \
+    # define YYLLOC_DEFAULT(Current, Rhs, N)                            \
     do                                                                  \
       if (N)                                                            \
         {                                                               \
-          (Current).first_line   = YYRHSLOC (Rhs, 1).first_line;        \
+          (Current).first_line = YYRHSLOC (Rhs, 1).first_line;          \
           (Current).first_column = YYRHSLOC (Rhs, 1).first_column;      \
-          (Current).last_line    = YYRHSLOC (Rhs, N).last_line;         \
-          (Current).last_column  = YYRHSLOC (Rhs, N).last_column;       \
-          (Current).file_name = fileNames.top();            \
+          (Current).last_line = YYRHSLOC (Rhs, N).last_line;            \
+          (Current).last_column = YYRHSLOC (Rhs, N).last_column;        \
+          (Current).file_name = fileNames.top();                        \
         }                                                               \
       else                                                              \
         {                                                               \
-          (Current).first_line   = (Current).last_line   =              \
+          (Current).first_line = (Current).last_line   =                \
             YYRHSLOC (Rhs, 0).last_line;                                \
           (Current).first_column = (Current).last_column =              \
             YYRHSLOC (Rhs, 0).last_column;                              \
-          (Current).file_name = fileNames.top();            \
+          (Current).file_name = fileNames.top();                        \
         }                                                               \
     while (0)
 
 %}
 
-/* Represents the many different ways we can access our data */
 %union {
     mlang::Node *node;
     mlang::Block *block;
@@ -76,10 +73,7 @@
     int token;
 }
 
-/* Define our terminal symbols (tokens). This should
-   match our tokens.l lex file. We also define the node type
-   they represent.
- */
+/* terminal symbols (tokens) */
 %token <string> TIDENTIFIER TSTR
 %token <integer> TINTEGER
 %token <number> TDOUBLE
@@ -92,11 +86,7 @@
 %token <token> TIF TELSE TWHILE TDO TFOR TIN TUNTIL TTO TSTEP
 %token <token> TFUNDEF TRETURN TBREAK TFREE TVAR TVAL
 
-/* Define the type of node our nonterminal symbols represent.
-   The types refer to the %union declaration above. Ex: when
-   we call an ident (defined by union type ident) we are really
-   calling an (Identifier*). It makes the compiler happy.
- */
+/* nonterminal symbols */
 %type <expr> primary_expr expr postfix_expr assignment_expr unary_expr ternary_expr compare_expr or_expr and_expr binop_expr literals
 %type <ident> ident
 %type <varvec> func_decl_args
@@ -105,7 +95,7 @@
 %type <stmt> stmt lstmt expression_statement var_decl func_decl func_arg_decl conditional return break free while for
 %type <range> range
 
-/* Operator precedence for mathematical operators */
+/* Operator precedence */
 %left TINTEGER
 %left TPLUS TMINUS
 %left TMUL TDIV
@@ -119,9 +109,9 @@
 %left TINC TDEC
 
 %start program
-%debug
-%verbose
-%locations /* track locations: @n of component N; @$ of entire range */
+/* %debug */
+/* %verbose */
+%locations
 
 %%
 

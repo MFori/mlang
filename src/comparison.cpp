@@ -15,7 +15,7 @@ namespace mlang {
         llvm::Value *lhsVal = lhs->codeGen(context);
 
         if (lhsVal == nullptr || rhsVal == nullptr) {
-            Node::printError(location, "unsupported operation");
+            Node::printError(location, "Unsupported operation");
             context.addError();
             return nullptr;
         }
@@ -46,7 +46,7 @@ namespace mlang {
         }
 
         if (val == nullptr) {
-            Node::printError(location, "unsupported operation");
+            Node::printError(location, "Unsupported operation");
             context.addError();
         }
 
@@ -134,7 +134,7 @@ namespace mlang {
                                      context.currentBlock());
     }
 
-    llvm::Value *Comparison::stringCodeGen(llvm::Value *lhsValue, llvm::Value *rhsValue, CodeGenContext &context) {
+    llvm::Value *Comparison::stringCodeGen(llvm::Value *lhsValue, llvm::Value *rhsValue, CodeGenContext &context) const {
         auto intType = llvm::Type::getInt64Ty(context.getGlobalContext());
         auto ptrType = llvm::Type::getInt8PtrTy(context.getGlobalContext());
         llvm::FunctionCallee fun = (context.getModule()->getOrInsertFunction("__mlang_scompare", intType, ptrType, ptrType));

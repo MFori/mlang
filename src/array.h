@@ -11,11 +11,20 @@
 
 namespace mlang {
 
+    /**
+     * Array creation
+     */
     class Array : public Expression {
     public:
+        /**
+         * Create array with size by expression
+         */
         explicit Array(llvm::Type *type, Expression *size, YYLTYPE location)
                 : type(type), size(size), location(std::move(location)) {}
 
+        /**
+         * Create array with size by value
+         */
         explicit Array(llvm::Type *type, llvm::Value *count, YYLTYPE location)
                 : type(type), count(count), location(std::move(location)) {}
 
@@ -27,7 +36,7 @@ namespace mlang {
 
         NodeType getType() override { return NodeType::ARRAY; }
 
-        std::string toString() override { return "array"; }
+        std::string toString() override { return "Array creation"; }
 
         static void validateArrayBounds(llvm::Value *arrayPtr, llvm::Value *index, CodeGenContext &context);
 
@@ -38,6 +47,9 @@ namespace mlang {
         YYLTYPE location;
     };
 
+    /**
+     * Array access (get value at index)
+     */
     class ArrayAccess : public Expression {
     public:
         ArrayAccess(Expression *expr, Expression *index, YYLTYPE location)
@@ -52,7 +64,7 @@ namespace mlang {
 
         NodeType getType() override { return NodeType::ARRAY; }
 
-        std::string toString() override { return "array access"; }
+        std::string toString() override { return "Array access"; }
 
         Expression *getExpression() { return expr; }
 
@@ -64,6 +76,9 @@ namespace mlang {
         YYLTYPE location;
     };
 
+    /**
+     * Array assignment (set value at index)
+     */
     class ArrayAssignment : public Expression {
     public:
         ArrayAssignment(Expression *lhs, Expression *index, Expression *rhs, YYLTYPE location)
@@ -79,7 +94,7 @@ namespace mlang {
 
         NodeType getType() override { return NodeType::ARRAY; }
 
-        std::string toString() override { return "array assignment"; }
+        std::string toString() override { return "Array assignment"; }
 
     private:
         Expression *lhs{nullptr};

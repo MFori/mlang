@@ -86,8 +86,8 @@ number  {num1}|{num2}
                     }
 
 import              BEGIN(incl);
-<incl>[ \t]*        /* eat the whitespace */
-<incl>[^ \t\n\r]+   { /* got the include file name */
+<incl>[ \t]*        /* ignore whitespace */
+<incl>[^ \t\n\r]+   {
                     std::string fileName = yytext;
                     std::size_t pos = fileName.find(".mlang");
                     if( pos == std::string::npos ) {
@@ -95,7 +95,7 @@ import              BEGIN(incl);
                     }
                     yyin = fopen(fileName.c_str(), "r");
                     if (! yyin) {
-                       printf( "%s in %s line %d\n", (std::string("Failed to load import file ") + fileName).c_str(), fileNames.top().c_str(), yylineno );
+                       printf( "%s in %s line %d\n", (std::string("Failed to import file ") + fileName).c_str(), fileNames.top().c_str(), yylineno );
                        parsing_error = 1;
                        yyterminate();
                     } else {
@@ -111,8 +111,8 @@ import              BEGIN(incl);
 
 \/\*                BEGIN(comment);
 <comment>\*\/       BEGIN(normal);
-<comment>.          ;/* eat everything */
-<comment>\n         ;/* eat everything */
+<comment>.          ;/* ignore everything */
+<comment>\n         ;/* ignore everything */
 
 \"      g_str = ""; BEGIN(str);
 '       g_str = ""; BEGIN(qstr);

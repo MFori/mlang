@@ -11,6 +11,11 @@
 
 namespace mlang {
 
+    /**
+     * While / do-while loop
+     * while (cond) { doBlock } - doFirst = false
+     * do { doBlock } while (cond) - doFirst = true
+     */
     class WhileLoop : public Statement {
     public:
         explicit WhileLoop(Expression *cond, Block *doBlock, bool doFirst, YYLTYPE location)
@@ -25,7 +30,7 @@ namespace mlang {
 
         NodeType getType() override { return NodeType::EXPRESSION; }
 
-        std::string toString() override { return "while loop"; }
+        std::string toString() override { return doFirst ? "While loop" : "Do-While loop"; }
 
     private:
         Expression *condition{nullptr};

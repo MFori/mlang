@@ -11,6 +11,10 @@
 
 namespace mlang {
 
+    /**
+     * Ternary operator
+     * codExpr ? thenExpr : elseExpr
+     */
     class TernaryOp : public Expression {
     public:
         TernaryOp(Expression *condExpr, Expression *thenExpr, Expression *elseExpr, YYLTYPE location)
@@ -26,7 +30,7 @@ namespace mlang {
 
         NodeType getType() override { return NodeType::EXPRESSION; }
 
-        std::string toString() override { return "ternary operator"; }
+        std::string toString() override { return "Ternary operator"; }
 
     private:
         Expression *condExpr{nullptr};

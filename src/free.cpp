@@ -13,7 +13,7 @@ namespace mlang {
         llvm::Value *ptrValue = ptr->codeGen(context);
 
         if (ptrValue == nullptr) {
-            Node::printError(location, "invalid rm usage");
+            Node::printError(location, "Invalid rm usage");
             context.addError();
             return nullptr;
         }

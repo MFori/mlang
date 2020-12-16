@@ -12,6 +12,10 @@
 
 namespace mlang {
 
+    /**
+     * For loop node
+     * for (id in range step step) { block }
+     */
     class ForLoop : public Statement {
     public:
         explicit ForLoop(Identifier *id, Range *range, Expression *step, Block *block, YYLTYPE location)
@@ -27,7 +31,7 @@ namespace mlang {
 
         NodeType getType() override { return NodeType::EXPRESSION; }
 
-        std::string toString() override { return "for loop"; }
+        std::string toString() override { return "For loop"; }
 
     private:
         Identifier *ident{nullptr};

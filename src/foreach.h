@@ -11,6 +11,10 @@
 
 namespace mlang {
 
+    /**
+     * Foreach loop node
+     * for (id in expr) { block }
+     */
     class ForEach : public Statement {
     public:
         explicit ForEach(Identifier *id, Expression *expr, Block *block, YYLTYPE location)
@@ -25,7 +29,7 @@ namespace mlang {
 
         NodeType getType() override { return NodeType::EXPRESSION; }
 
-        std::string toString() override { return "foreach"; }
+        std::string toString() override { return "Foreach"; }
 
     private:
         Identifier *ident{nullptr};

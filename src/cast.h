@@ -11,6 +11,10 @@
 
 namespace mlang {
 
+    /**
+     * Cast functions
+     * (toInt(), toString(), ...)
+     */
     class Cast : public Expression {
     public:
         explicit Cast(llvm::Type *type, Expression *expr, YYLTYPE location)
@@ -24,7 +28,7 @@ namespace mlang {
 
         NodeType getType() override { return NodeType::EXPRESSION; }
 
-        std::string toString() override { return "cast"; }
+        std::string toString() override { return "Cast"; }
 
     private:
         llvm::Type *type;

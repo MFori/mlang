@@ -52,15 +52,24 @@ namespace mlang {
         IDENTIFIER
     };
 
+    /**
+     * AST node
+     */
     class Node {
     public:
         virtual ~Node() = default;
 
+        /**
+         * Generate code for this node
+         */
         virtual llvm::Value *codeGen(CodeGenContext &context) = 0;
 
+        /**
+         * Get node type
+         */
         virtual NodeType getType() = 0;
 
-        virtual std::string toString() { return "node"; }
+        virtual std::string toString() { return "Node"; }
 
         static void printError(const YYLTYPE& location, const std::string &error) {
             std::cerr
@@ -77,19 +86,28 @@ namespace mlang {
         }
     };
 
+    /**
+     * Expression AST node representation
+     */
     class Expression : public Node {
     public:
         ~Expression() override = default;
 
-        std::string toString() override { return "expression"; }
-    };
-
-    class Statement : public Expression {
-
+        std::string toString() override { return "Expression"; }
     };
 
     /**
-     * Integer ast node representation
+     * Statement AST node representation
+     */
+    class Statement : public Expression {
+    public:
+        ~Statement() override = default;
+
+        std::string toString() override { return "Statement"; }
+    };
+
+    /**
+     * Integer AST node representation
      */
     class Integer : public Expression {
     public:
@@ -101,14 +119,14 @@ namespace mlang {
 
         NodeType getType() override { return NodeType::INTEGER; }
 
-        std::string toString() override { return "integer"; }
+        std::string toString() override { return "Int"; }
 
     private:
         long long value{0};
     };
 
     /**
-     * Double ast node representation
+     * Double AST node representation
      */
     class Double : public Expression {
     public:
@@ -120,14 +138,14 @@ namespace mlang {
 
         NodeType getType() override { return NodeType::DOUBLE; }
 
-        std::string toString() override { return "double"; }
+        std::string toString() override { return "Double"; }
 
     private:
         double value{0.0};
     };
 
     /**
-     * Boolean ast node representation
+     * Boolean AST node representation
      */
     class Boolean : public Expression {
     public:
@@ -139,14 +157,14 @@ namespace mlang {
 
         NodeType getType() override { return NodeType::BOOLEAN; }
 
-        std::string toString() override { return "boolean"; }
+        std::string toString() override { return "Bool"; }
 
     private:
         int boolVal{0};
     };
 
     /**
-    * Char ast node representation
+    * Char AST node representation
     */
     class Char : public Expression {
     public:
@@ -158,14 +176,14 @@ namespace mlang {
 
         NodeType getType() override { return NodeType::CHAR; }
 
-        std::string toString() override { return "char"; }
+        std::string toString() override { return "Char"; }
 
     private:
         char value{0};
     };
 
     /**
-     * Identifier ast node representation
+     * Identifier AST node representation
      */
     class Identifier : public Expression {
     public:
@@ -179,7 +197,7 @@ namespace mlang {
 
         NodeType getType() override { return NodeType::IDENTIFIER; }
 
-        std::string toString() override { return "identifier"; }
+        std::string toString() override { return "Identifier"; }
 
         std::string getName() const { return name; }
 
@@ -189,7 +207,7 @@ namespace mlang {
     };
 
     /**
-     * Block ast node representation
+     * Block AST node representation
      */
     class Block : public Expression {
     public:
@@ -208,11 +226,11 @@ namespace mlang {
 
         NodeType getType() override { return NodeType::EXPRESSION; }
 
-        std::string toString() override { return "block"; }
+        std::string toString() override { return "Block"; }
     };
 
     /**
-     * Expression statement ast node representation
+     * Expression statement AST node representation
      */
     class ExpressionStatement : public Statement {
     public:
@@ -224,7 +242,7 @@ namespace mlang {
 
         NodeType getType() override { return NodeType::EXPRESSION; }
 
-        std::string toString() override { return "expression statement"; }
+        std::string toString() override { return "Expression statement"; }
 
     private:
         Expression *expression{nullptr};

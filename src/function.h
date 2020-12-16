@@ -13,11 +13,21 @@
 
 namespace mlang {
 
+    /**
+     * Function declaration node
+     * func id(args) type { block }
+     */
     class FunctionDeclaration : public Statement {
     public:
+        /**
+         * Function with return type
+         */
         FunctionDeclaration(Identifier *type, Identifier *id, VariableList *args, Block *block, YYLTYPE location)
                 : type(type), id(id), arguments(args), block(block), location(std::move(location)) {}
 
+        /**
+         * Function without return type
+         */
         FunctionDeclaration(Identifier *id, VariableList *args, Block *block, const YYLTYPE &location)
                 : type(new Identifier("Void", location)), id(id), arguments(args), block(block), location(location) {}
 
@@ -35,7 +45,7 @@ namespace mlang {
 
         NodeType getType() override { return NodeType::FUNCTION; }
 
-        std::string toString() override { return "function declaration"; }
+        std::string toString() override { return "Function declaration"; }
 
     private:
         Identifier *type{nullptr};
@@ -45,6 +55,10 @@ namespace mlang {
         YYLTYPE location;
     };
 
+    /**
+     * Function call
+     * id(args)
+     */
     class FunctionCall : public Statement {
     public:
         explicit FunctionCall(Identifier *id, ExpressionList *args, YYLTYPE location)
@@ -63,7 +77,7 @@ namespace mlang {
 
         NodeType getType() override { return NodeType::EXPRESSION; }
 
-        std::string toString() override { return "function call"; }
+        std::string toString() override { return "Function call"; }
 
     private:
         Identifier *id{nullptr};

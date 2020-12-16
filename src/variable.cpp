@@ -13,14 +13,14 @@ namespace mlang {
 
     llvm::Value *VariableDeclaration::codeGen(CodeGenContext &context) {
         if (context.findVariable(id->getName())) {
-            Node::printError(location, " variable '" + id->getName() + "' already exist\n");
+            Node::printError(location, "Variable '" + id->getName() + "' already exist");
             context.addError();
             return nullptr;
         }
 
         llvm::Type *ty = context.typeOf(*type);
         if (ty == nullptr) {
-            Node::printError(location, " undefined data type '" + type->getName() + "'\n");
+            Node::printError(location, "Undefined data type '" + type->getName());
             context.addError();
             return nullptr;
         }

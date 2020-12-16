@@ -11,6 +11,9 @@
 
 namespace mlang {
 
+    /**
+     * Create string from literal
+     */
     class String : public Expression {
     public:
         explicit String(std::string value) : value(std::move(value)) {}
@@ -21,12 +24,16 @@ namespace mlang {
 
         NodeType getType() override { return NodeType::STRING; }
 
-        std::string toString() override { return "string"; }
+        std::string toString() override { return "String literal"; }
 
     private:
         std::string value;
     };
 
+    /**
+     * String join node
+     * (. args .)
+     */
     class StringJoin : public Expression {
     public:
         StringJoin(ExpressionList *args, YYLTYPE location) : args(args), location(std::move(location)) {}
@@ -43,7 +50,7 @@ namespace mlang {
 
         NodeType getType() override { return NodeType::EXPRESSION; }
 
-        std::string toString() override { return "string join"; }
+        std::string toString() override { return "String join"; }
 
     private:
         ExpressionList *args{nullptr};

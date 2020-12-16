@@ -24,7 +24,7 @@ namespace mlang {
         bool isArrayTy = rhsValue->getType()->isPointerTy();
 
         if ((!isBoolTy && (op == TNOT)) || (isBoolTy && (op != TNOT)) || isArrayTy) {
-            Node::printError(location, "unsupported operation");
+            Node::printError(location, "Unsupported operation");
             context.addError();
             return nullptr;
         }
@@ -73,7 +73,7 @@ namespace mlang {
             bool isCharTy = var->getType()->isIntegerTy(8);
 
             if (!isDoubleTy && !isIntTy && !isCharTy) {
-                Node::printError(location, "unsupported operation");
+                Node::printError(location, "Unsupported operation");
                 context.addError();
                 return nullptr;
             }

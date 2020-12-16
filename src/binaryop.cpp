@@ -14,13 +14,13 @@ namespace mlang {
         llvm::Value *rhsValue = rhs->codeGen(context);
         llvm::Value *lhsValue = lhs->codeGen(context);
         if (rhsValue == nullptr || lhsValue == nullptr) {
-            Node::printError(location, "unsupported operation");
+            Node::printError(location, "Unsupported operation");
             context.addError();
             return nullptr;
         }
 
         if (rhsValue->getType() != lhsValue->getType()) {
-            Node::printError(location, "binary operator incompatible types");
+            Node::printError(location, "Binary operator incompatible types");
             context.addError();
             return nullptr;
         }
@@ -29,7 +29,6 @@ namespace mlang {
         bool isIntTy = rhsValue->getType()->isIntegerTy(64);
         bool isCharTy = rhsValue->getType()->isIntegerTy(8);
         bool isBoolTy = rhsValue->getType()->isIntegerTy(1);
-        bool isStringTy = rhsValue->getType() == llvm::Type::getInt8PtrTy(context.getGlobalContext());
 
         llvm::Value *val = nullptr;
         if (isDoubleTy) {
@@ -40,12 +39,10 @@ namespace mlang {
             val = charCodeGen(lhsValue, rhsValue, context);
         } else if (isBoolTy) {
             val = boolCodeGen(lhsValue, rhsValue, context);
-        } else if (isStringTy) {
-            val = stringCodeGen(lhsValue, rhsValue, context);
         }
 
         if (val == nullptr) {
-            Node::printError(location, "unsupported operation");
+            Node::printError(location, "Unsupported operation");
             context.addError();
         }
 
@@ -132,15 +129,6 @@ namespace mlang {
         }
 
         return llvm::BinaryOperator::Create(instr, lhsValue, rhsValue, "mathtmp", context.currentBlock());
-    }
-
-    llvm::Value *BinaryOp::stringCodeGen(llvm::Value *lhsValue, llvm::Value *rhsValue, CodeGenContext &context) {
-        if (op != TPLUS) {
-            return nullptr;
-        }
-
-        // TODO string concatenation
-        return nullptr;
     }
 
 }

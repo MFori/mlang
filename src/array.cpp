@@ -28,7 +28,6 @@ namespace mlang {
                                                                   context.currentBlock());
 
         new llvm::StoreInst(count, array, false, context.currentBlock());
-        //return elementPtr;
         return new llvm::BitCastInst(elementPtr, type->getPointerTo(), "array", context.currentBlock());
     }
 
@@ -82,7 +81,7 @@ namespace mlang {
             if (ident != nullptr) {
                 Node::printError(location, "variable '" + ident->getName() + "' is not array");
             } else {
-                Node::printError(location, "invalid array access");
+                Node::printError(location, "Invalid array access");
             }
             context.addError();
             return nullptr;
@@ -113,14 +112,14 @@ namespace mlang {
             if (ident != nullptr) {
                 Node::printError(location, "variable '" + ident->getName() + "' is not array");
             } else {
-                Node::printError(location, "invalid array assignment");
+                Node::printError(location, "Invalid array assignment");
             }
             context.addError();
             return nullptr;
         }
 
         if (value == nullptr || value->getType() != var->getType()->getPointerElementType()) {
-            Node::printError(location, "invalid assignment to array");
+            Node::printError(location, "Invalid assignment to array");
             context.addError();
             return nullptr;
         }

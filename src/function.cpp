@@ -11,7 +11,7 @@ namespace mlang {
 
     llvm::Value *FunctionDeclaration::codeGen(CodeGenContext &context) {
         if (context.getScopeType() != ScopeType::GLOBAL_BLOCK) {
-            Node::printError(location, " cannot declare function inside another\n");
+            Node::printError(location, "Cannot declare function inside another");
             context.addError();
             return nullptr;
         }
@@ -20,7 +20,7 @@ namespace mlang {
         for (auto varDecl : *arguments) {
             llvm::Type *ty = context.typeOf(*(varDecl->getVariableType()));
             if (ty == nullptr) {
-                Node::printError(location, " undefined data type: '" + varDecl->getVariableType()->getName() + "'\n");
+                Node::printError(location, "Undefined data type: '" + varDecl->getVariableType()->getName());
                 context.addError();
                 return nullptr;
             }
@@ -32,7 +32,7 @@ namespace mlang {
 
         llvm::Type *t = context.typeOf(*type);
         if (t == nullptr) {
-            Node::printError(location, " undefined data type: '" + type->getName() + "'\n");
+            Node::printError(location, "Undefined data type: '" + type->getName());
             context.addError();
             return nullptr;
         }
@@ -48,7 +48,7 @@ namespace mlang {
 
         llvm::Function *fun = context.getModule()->getFunction(fname);
         if (fun != nullptr) {
-            Node::printError(location, " function already exists: " + id->getName());
+            Node::printError(location, "Function already exists: " + id->getName());
             context.addError();
             return nullptr;
         }
@@ -126,7 +126,7 @@ namespace mlang {
 
         llvm::Function *function = context.getModule()->getFunction(functionName);
         if (function == nullptr) {
-            Node::printError(location, " no such function: " + id->getName());
+            Node::printError(location, "No such function: " + id->getName());
             context.addError();
             return nullptr;
         }
@@ -144,14 +144,14 @@ namespace mlang {
         auto fType = function->getFunctionType();
         if ((fType->getNumParams() != fargs.size() && !fType->isVarArg()) ||
             (fargs.size() < fType->getNumParams() && fType->isVarArg())) {
-            Node::printError(location, "invalid number of params.");
+            Node::printError(location, "Invalid number of params.");
             context.addError();
             return nullptr;
         }
 
         for (unsigned int i = 0; i < fType->getNumParams(); i++) {
             if (fType->getParamType(i) != fargs.at(i)->getType()) {
-                Node::printError(location, "invalid parameter type");
+                Node::printError(location, "Invalid parameter type");
                 context.addError();
                 return nullptr;
             }

@@ -6,7 +6,6 @@
  */
 #include "forloop.h"
 #include "codegen.h"
-#include "variable.h"
 #include "parser.hpp"
 
 namespace mlang {

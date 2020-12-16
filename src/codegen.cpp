@@ -6,9 +6,14 @@
  */
 #include <iostream>
 #include <fstream>
-#include "llvm/ExecutionEngine/MCJIT.h"
+
+#pragma warning(push, 0)
+
+#include <llvm/ExecutionEngine/MCJIT.h>
 #include <llvm-c/Core.h>
 #include <llvm/IR/Verifier.h>
+
+#pragma warning(pop)
 
 #include "codegen.h"
 
@@ -21,7 +26,6 @@ namespace mlang {
         llvm::InitializeNativeTargetAsmParser();
         llvm::InitializeNativeTargetAsmPrinter();
         module = new llvm::Module("mlang", llvmContext);
-        builder = new llvm::IRBuilder<>(llvmContext);
     }
 
     void CodeGenContext::newScope(llvm::BasicBlock *bb, ScopeType sc, llvm::BasicBlock *exitBB) {
@@ -100,14 +104,7 @@ namespace mlang {
                 return types[varName];
             }
         }
-        return nullptr;
-    }
-
-
-    bool CodeGenContext::preProcessing(Block &root) {
-
-        // TODO
-        return true;
+        return std::string("");
     }
 
     void CodeGenContext::setUpBuildIns() {
@@ -315,16 +312,6 @@ namespace mlang {
 
     void CodeGenContext::saveCode(std::ofstream& out) {
         out << LLVMPrintModuleToString((LLVMModuleRef) module);
-    }
-
-    std::string CodeGenContext::getType(const std::string &varName) {
-        for (auto &cb : codeBlocks) {
-            auto iter = cb->getTypeMap().find(varName);
-            if (iter != std::end(cb->getTypeMap())) {
-                return cb->getTypeMap()[varName];
-            }
-        }
-        return std::string("");
     }
 
     llvm::BasicBlock *CodeGenContext::getExitBlockFromCurrent() {

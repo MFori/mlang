@@ -11,6 +11,10 @@
 
 namespace mlang {
 
+    /**
+     * Break statement
+     * (keyword break)
+     */
     class Break : public Statement {
     public:
         explicit Break(YYLTYPE location) : location(std::move(location)) {}
@@ -21,7 +25,7 @@ namespace mlang {
 
         NodeType getType() override { return NodeType::EXPRESSION; }
 
-        std::string toString() override { return "break"; }
+        std::string toString() override { return "Break"; }
 
     private:
         YYLTYPE location;

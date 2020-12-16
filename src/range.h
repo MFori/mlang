@@ -11,6 +11,10 @@
 
 namespace mlang {
 
+    /**
+     * Range
+     * for (i in lhs op rhs)
+     */
     class Range : public Statement {
     public:
         Range(Expression *lhs, int op, Expression *rhs, YYLTYPE location)
@@ -25,7 +29,7 @@ namespace mlang {
 
         NodeType getType() override { return NodeType::EXPRESSION; }
 
-        std::string toString() override { return "range"; }
+        std::string toString() override { return "Range"; }
 
         int getOp() const { return op; }
 

@@ -80,29 +80,27 @@ int main(int argc, char **argv) {
         std::ostringstream devNull;
         mlang::CodeGenContext context(std::cout, debug, run);
 
-        if (context.preProcessing(*programBlock)) {
-            if (context.generateCode(*programBlock)) {
-                if (run) {
-                    context.runCode();
-                } else {
-                    std::string irFileName = fileName + ".ir";
-                    std::ofstream out(irFileName);
-                    context.saveCode(out);
-                    out.close();
-                    std::cout << "File with llvm ir (" + fileName + ") generated." << std::endl;
+        if (context.generateCode(*programBlock)) {
+            if (run) {
+                context.runCode();
+            } else {
+                std::string irFileName = fileName + ".ir";
+                std::ofstream out(irFileName);
+                context.saveCode(out);
+                out.close();
+                std::cout << "File with llvm ir (" + fileName + ") generated." << std::endl;
 
-                    auto index = fileName.find(".mlang", 0);
-                    if (index != std::string::npos) {
-                        fileName.replace(index, 6, "");
-                    }
+                auto index = fileName.find(".mlang", 0);
+                if (index != std::string::npos) {
+                    fileName.replace(index, 6, "");
+                }
 
-                    auto buildinsPath = getExecutablePath() + "\\..\\buildins.bc";
+                auto buildinsPath = getExecutablePath() + "\\..\\buildins.bc";
 
-                    //system((std::string("clang -emit-llvm -c -o buildins.bc ") + __FILE__ + "\\..\\buildins.cpp -Wno-everything").c_str());
-                    int res = system(("clang -x ir -o " + fileName + ".exe " + irFileName + " " + buildinsPath + " -Wno-everything").c_str());
-                    if (!res) {
-                        std::cout << "Executable " + fileName + ".exe generated." << std::endl;
-                    }
+                int res = system(("clang -x ir -o " + fileName + ".exe " + irFileName + " " + buildinsPath +
+                                  " -Wno-everything").c_str());
+                if (!res) {
+                    std::cout << "Executable " + fileName + ".exe generated." << std::endl;
                 }
             }
         }

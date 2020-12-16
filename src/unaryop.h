@@ -11,6 +11,12 @@
 
 namespace mlang {
 
+    /**
+     * Unary operator
+     * op rhs
+     * or
+     * lhs op
+     */
     class UnaryOp : public Expression {
     public:
         explicit UnaryOp(int op, Expression *lhs, Expression *rhs, YYLTYPE location)
@@ -22,7 +28,7 @@ namespace mlang {
 
         NodeType getType() override { return NodeType::EXPRESSION; }
 
-        std::string toString() override { return "unary op"; }
+        std::string toString() override { return "Unary op"; }
 
     private:
         llvm::Value *incDecCodeGen(CodeGenContext &context);

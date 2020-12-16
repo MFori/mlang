@@ -32,7 +32,7 @@ namespace mlang {
             return new llvm::LoadInst(var->getType(), var->getValue(), name, false, context.currentBlock());
         }
 
-        Node::printError(location, "undeclared variable " + name);
+        Node::printError(location, "Undeclared variable " + name);
         context.addError();
         return nullptr;
     }

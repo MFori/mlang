@@ -11,6 +11,9 @@
 
 namespace mlang {
 
+    /**
+     * Assignment (lhs = rhs)
+     */
     class Assignment : public Statement {
     public:
         explicit Assignment(Expression *lhs, Expression *rhs, YYLTYPE location)

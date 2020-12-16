@@ -53,7 +53,7 @@ namespace mlang {
 
     llvm::Value *StringJoin::codeGen(CodeGenContext &context) {
         if(args->size() < 2) {
-            Node::printError(location, " invalid join string number of arguments (at least 2)");
+            Node::printError(location, "Invalid join string number of arguments (at least 2)");
             context.addError();
             return nullptr;
         }
@@ -71,7 +71,7 @@ namespace mlang {
             }
 
             if (arg->getType() != strType) {
-                Node::printError(location, " invalid join string variable type ");
+                Node::printError(location, "Invalid join string variable type");
                 context.addError();
                 return nullptr;
             }

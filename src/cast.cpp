@@ -13,7 +13,7 @@ namespace mlang {
         llvm::Value *val = expr->codeGen(context);
 
         if (val == nullptr) {
-            Node::printError(location, "invalid cast expression");
+            Node::printError(location, "Invalid cast expression");
             context.addError();
             return nullptr;
         }
@@ -22,7 +22,7 @@ namespace mlang {
 
         if (valTy->isVoidTy() ||
             (valTy->isPointerTy() && valTy != llvm::Type::getInt8PtrTy(context.getGlobalContext()))) {
-            Node::printError(location, "unsupported cast expression");
+            Node::printError(location, "Unsupported cast expression");
             context.addError();
             return nullptr;
         }
@@ -64,7 +64,7 @@ namespace mlang {
 
             llvm::Value *space;
             if(type->isPointerTy()) {
-                space = new llvm::AllocaInst(llvm::ArrayType::get(llvm::Type::getInt8Ty(context.getGlobalContext()), 30), 0, "space", context.currentBlock());
+                space = new llvm::AllocaInst(llvm::ArrayType::get(llvm::Type::getInt8Ty(context.getGlobalContext()), 20), 0, "space", context.currentBlock());
                 space = llvm::CastInst::CreatePointerCast(space, llvm::Type::getInt8PtrTy(context.getGlobalContext()), "cast_tmp", context.currentBlock());
             } else {
                 space = new llvm::AllocaInst(type, 0, "space", context.currentBlock());

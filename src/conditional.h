@@ -11,11 +11,20 @@
 
 namespace mlang {
 
+    /**
+     * Conditional = if
+     */
     class Conditional : public Statement {
     public:
+        /**
+         * If with else branch
+         */
         explicit Conditional(Expression *condExpr, Expression *thenExpr, Expression *elseExpr, YYLTYPE location)
                 : condExpr(condExpr), thenExpr(thenExpr), elseExpr(elseExpr), location(std::move(location)) {}
 
+        /**
+         * If without else branch
+         */
         explicit Conditional(Expression *condExpr, Expression *thenExpr, YYLTYPE location)
                 : condExpr(condExpr), thenExpr(thenExpr), elseExpr(nullptr), location(std::move(location)) {}
 
@@ -29,7 +38,7 @@ namespace mlang {
 
         NodeType getType() override { return NodeType::EXPRESSION; }
 
-        std::string toString() override { return "conditional"; }
+        std::string toString() override { return "Conditional"; }
 
     private:
         Expression *condExpr{nullptr};

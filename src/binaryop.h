@@ -11,6 +11,10 @@
 
 namespace mlang {
 
+    /**
+     * Binary operator
+     * lhs op rhs
+     */
     class BinaryOp : public Expression {
     public:
         BinaryOp(Expression *lhs, int op, Expression *rhs, YYLTYPE location)
@@ -25,7 +29,7 @@ namespace mlang {
 
         NodeType getType() override { return NodeType::EXPRESSION; }
 
-        std::string toString() override { return "binaryop"; }
+        std::string toString() override { return "Binary operator"; }
 
         llvm::Value *doubleCodeGen(llvm::Value *lhsValue, llvm::Value *rhsValue, CodeGenContext &context) const;
 
@@ -34,8 +38,6 @@ namespace mlang {
         llvm::Value *charCodeGen(llvm::Value *lhsValue, llvm::Value *rhsValue, CodeGenContext &context) const;
 
         llvm::Value *boolCodeGen(llvm::Value *lhsValue, llvm::Value *rhsValue, CodeGenContext &context) const;
-
-        llvm::Value *stringCodeGen(llvm::Value *lhsValue, llvm::Value *rhsValue, CodeGenContext &context);
 
     private:
         int op{0};
