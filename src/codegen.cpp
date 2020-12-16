@@ -272,14 +272,15 @@ namespace mlang {
         llvm::raw_string_ostream verifyOutputStream(verifyOutputString);
         if (llvm::verifyModule(*getModule(), &verifyOutputStream)) {
             verifyOutputStream.flush();
+            if (debug) {
+                outs << LLVMPrintModuleToString((LLVMModuleRef) module);
+            }
             outs << "Module verification errors:\n" << verifyOutputString;
             return false;
         }
 
         if (!debug) {
             optimize();
-        } else {
-            outs << LLVMPrintModuleToString((LLVMModuleRef) module);
         }
 
         return true;
