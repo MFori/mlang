@@ -141,7 +141,10 @@ val myInt = 1
 ### Double
 A 64 bit floating point real 
 ```
-val myDouble = 1.5
+val myDouble1 = 1.5   // 1.5
+val myDouble2 = .1    // 0.1
+val myDouble3 = 1.e2  // 100.0
+val myDouble4 = .1e-1 // 0.01
 ```
 
 ### Char
