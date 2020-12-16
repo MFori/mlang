@@ -1,5 +1,12 @@
 val array = IntArray(20)
 
+array[0] = 1
+
+for(i in 1 until sizeOf(array)) {
+    array[i] = array[i - 1] * 2
+}
+
+
 for (i in array) {
   println(toString(i))
 }

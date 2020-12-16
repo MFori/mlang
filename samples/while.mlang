@@ -3,3 +3,14 @@ while (i > 0) {
     println(toString(i))
     i--
 }
+
+println("")
+var j = 0
+while (true) {
+    j++
+    if (j >= 2) {
+        println("leaving loop...")
+        break
+    }
+    println("j = %d", j)
+}

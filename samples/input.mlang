@@ -1,0 +1,4 @@
+println("Insert name:")
+val name = readLine()
+
+print("Hello, %s", name)

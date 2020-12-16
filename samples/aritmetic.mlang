@@ -1,0 +1,8 @@
+val a = -2
+val b = 3
+
+var c = a * b + 1
+c++
+c = c / 2
+
+print(toString(c))

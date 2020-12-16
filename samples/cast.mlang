@@ -1,0 +1,26 @@
+
+println("\ntoString(123) = %s", toString(123))
+println("toString(12.3) = %s", toString(12.3))
+println("toString(true) = %s", toString(true));
+println("toString(@A) = %s", toString(@A));
+
+println("\ntoInt(\"123\") = %d", toInt("123"));
+println("toDouble(\"12.3\") = %f", toDouble("12.3"));
+println("toBool(\"true\") = %d", toBool("true") ? 1 : 0);
+println("toChar(\"Hello world\") = %c", toChar("Hello world"))
+
+println("\ntoInt(@A) = %d", toInt(@A));
+println("toDouble(@A) = %f", toDouble(@A));
+println("toBool(@A) = %d", toBool(@A) ? 1 : 0);
+
+println("\ntoInt(true) = %d", toInt(true));
+println("toDouble(false) = %f", toDouble(false));
+println("toChar(true) = %c", toChar(true))
+
+println("\ntoInt(65.5) = %d", toInt(65.5));
+println("toBool(65.5) = %d", toBool(65.5) ? 1 : 0);
+println("toChar(65.5) = %c", toChar(65.5))
+
+println("\ntoDouble(65) = %f", toDouble(65));
+println("toBool(1) = %d", toBool(1) ? 1 : 0);
+println("toChar(65) = %c", toChar(65))

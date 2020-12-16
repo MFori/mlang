@@ -1,0 +1,5 @@
+func secondFunction() {
+    println("Second function called!")
+}
+
+println("second.mlang running")

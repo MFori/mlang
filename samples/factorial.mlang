@@ -1,0 +1,21 @@
+func factorial1(Int n): Int {
+    if (n == 0) {
+        return 1
+    }
+    return n * factorial1(n - 1)
+}
+
+func factorial2(Int n): Int {
+    var fact = 1
+
+    for (i in 1 to n) {
+        fact = fact * i
+    }
+
+    fact
+}
+
+val n = 5
+
+println("factorial1(%d) = %d", n, factorial1(n))
+println("factorial2(%d) = %d", n, factorial2(n))

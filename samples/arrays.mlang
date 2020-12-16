@@ -1,0 +1,15 @@
+func fillArray(IntArray arr) {
+    for (i in 0 until sizeOf(arr)) {
+        arr[i] = i
+    }
+}
+
+func printArray(IntArray arr) {
+    for(i in arr) {
+        println(toString(i))
+    }
+}
+
+val arr = IntArray(10)
+fillArray(arr)
+printArray(arr)

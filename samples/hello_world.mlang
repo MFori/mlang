@@ -1,4 +1,5 @@
 func helloWorld() {
-  println("Hello World")
+  print("Hello World")
 }
+
 helloWorld()

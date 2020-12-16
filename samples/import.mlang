@@ -1,0 +1,5 @@
+import second.mlang
+
+secondFunction()
+
+println("import.mlang running")
