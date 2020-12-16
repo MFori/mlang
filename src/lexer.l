@@ -38,6 +38,7 @@ int need_semicolon() {
      return last_token == TIDENTIFIER ||
      	last_token == TINTEGER ||
      	last_token == TCHAR ||
+     	last_token == TSTR ||
      	last_token == TDOUBLE ||
      	last_token == TBOOL ||
      	last_token == TRETURN ||
@@ -46,7 +47,8 @@ int need_semicolon() {
      	last_token == TINC ||
      	last_token == TDEC ||
      	last_token == TJOINC ||
-     	last_token == ')';
+     	last_token == ')' ||
+     	last_token == ']';
 }
 
 std::string g_str;
@@ -119,11 +121,11 @@ import              BEGIN(incl);
 
 <str>\" {   BEGIN(normal);
             yylval.string = new std::string(g_str);
-            return TSTR;
+            RET(TSTR);
         }
 <qstr>' {   BEGIN(normal);
             yylval.string = new std::string(g_str);
-            return TSTR;
+            RET(TSTR);
         }
 
 <str,qstr>\\n   g_str += "\n";
