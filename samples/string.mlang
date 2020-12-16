@@ -1,7 +1,7 @@
 val s1 = "Hello"
 val s2 = String(10)
 
-val world = "world!"
+val world = 'world!'
 for(i in 0 until sizeOf(world)) {
     s2[i] = world[i];
 }
