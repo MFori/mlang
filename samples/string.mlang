@@ -9,5 +9,6 @@ for(i in 0 until sizeOf(world)) {
 val join = (. s1, " ", s2 .)
 rm s2
 
-print(join)
+println(join)
+print("len = %d", len(join))
 rm join
