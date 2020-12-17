@@ -228,8 +228,7 @@ func_decl_args : %empty  { $$ = new mlang::VariableList(); }
           ;
 
 func_arg_decl : ident ident { $$ = new mlang::VariableDeclaration($1, $2, @$); }
-            | ident ident '=' expr { $$ = new mlang::VariableDeclaration($1, $2, $4, @$); }
-            ;
+              ;
 
 return : TRETURN { $$ = new mlang::Return(@$); }
        | TRETURN expr { $$ = new mlang::Return(@$, $2); }
